@@ -38,7 +38,7 @@ let ctx = null, paused = true, running = false, curPart = 0, curCh = 1;
 SP.CHAPTERS = [
   { n: 1, name: 'The Forgotten Base', parts: SP.PARTS },
   { n: 2, name: "The Jackal's Road", parts: SP.PARTS2 || [] },
-  { n: 3, name: 'The Leak', count: 7, soon: true }, { n: 4, name: 'Chapter 4', count: 14, soon: true }, { n: 5, name: 'Chapter 5', count: 17, soon: true }];
+  { n: 3, name: 'The Leak', parts: SP.PARTS3 || [] }, { n: 4, name: 'Iron Desert', parts: SP.PARTS4 || [] }, { n: 5, name: 'The Jackal', parts: SP.PARTS5 || [] }];
 SP.PARTS.endTitle = 'Houser is still out there'; SP.PARTS.endText = 'The laptop, the manifests and Elena Moreau made it out. Sgt. Houser did not. Chapter 2 starts with getting him back.';
 const chParts = ch => (SP.CHAPTERS[ch - 1] && SP.CHAPTERS[ch - 1].parts) || [];
 SP.state = 'menu';
