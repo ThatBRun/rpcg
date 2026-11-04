@@ -1,0 +1,27 @@
+/* BM27 v2.7.9 Tournament Center + Manual Bracket Rewrite */
+.v279-builder-block{display:grid;gap:12px;margin:10px 0 4px}
+.v279-manual-editor{border:1px solid rgba(148,163,184,.25);border-radius:16px;padding:14px;background:rgba(15,23,42,.36)}
+.v279-manual-editor.hidden{display:none!important}
+.v279-manual-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
+.v279-manual-actions{display:flex;gap:8px;flex-wrap:wrap}
+.v279-slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.v279-slot{display:grid;gap:5px;padding:9px;border-radius:12px;background:rgba(255,255,255,.035)}
+.v279-slot>span{font-size:.78rem;font-weight:800;letter-spacing:.02em;opacity:.82}
+.v279-tournament-item{padding:0;overflow:hidden}
+.v279-tournament-summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 20px}
+.v279-tournament-summary::-webkit-details-marker{display:none}
+.v279-tournament-summary h3,.v279-tournament-summary p{margin-top:0;margin-bottom:4px}
+.v279-summary-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.v279-chevron{font-size:1.35rem;transition:transform .18s ease}
+details[open] .v279-chevron{transform:rotate(180deg)}
+.v279-tournament-body{padding:0 20px 20px;border-top:1px solid rgba(148,163,184,.16)}
+.v279-format-note{margin:14px 0 10px;font-size:.86rem;opacity:.82}
+.v279-full-bracket{overflow-x:auto;padding-bottom:8px}
+.v279-placement-stage{min-width:230px}
+.v279-path-group{display:grid;gap:7px;margin:8px 0 14px;padding:9px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(148,163,184,.12)}
+.v279-path-title{font-size:.72rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase;opacity:.7}
+.v279-placeholder{opacity:.58;border-style:dashed}
+.v279-third-stage{margin-top:14px;max-width:330px}
+.v279-placements{margin-top:18px;padding-top:14px;border-top:1px solid rgba(148,163,184,.16)}
+.v279-placements h4{margin:0 0 10px}
+@media(max-width:720px){.v279-manual-head,.v279-tournament-summary{flex-direction:column;align-items:stretch}.v279-summary-right{justify-content:space-between}.v279-slot-grid{grid-template-columns:1fr}}

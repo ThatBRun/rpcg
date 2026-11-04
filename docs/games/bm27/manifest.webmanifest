@@ -1,0 +1,16 @@
+{
+  "id":"./",
+  "name":"MSHSAA Basketball Manager 27",
+  "short_name":"BM27",
+  "description":"Missouri high-school basketball management simulation.",
+  "start_url":"./index.html",
+  "scope":"./",
+  "display":"standalone",
+  "display_override":["window-controls-overlay","standalone"],
+  "background_color":"#080b12",
+  "theme_color":"#111827",
+  "icons":[
+    {"src":"assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

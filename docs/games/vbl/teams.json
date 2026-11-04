@@ -1,0 +1,114 @@
+[
+  {
+    "id": "los-angeles-oldtimers",
+    "name": "Los Angeles OldTimers",
+    "city": "Los Angeles",
+    "logo": "assets/los-angeles-oldtimers.png",
+    "dark": "#153249",
+    "accent": "#d9b66a"
+  },
+  {
+    "id": "louisville-mudcats",
+    "name": "Louisville Mudcats",
+    "city": "Louisville",
+    "logo": "assets/louisville-mudcats.png",
+    "dark": "#2c3e38",
+    "accent": "#d6af59"
+  },
+  {
+    "id": "nashville-nodes",
+    "name": "Nashville Nodes",
+    "city": "Nashville",
+    "logo": "assets/nashville-nodes.png",
+    "dark": "#073a45",
+    "accent": "#3dc0be"
+  },
+  {
+    "id": "new-york-yellers",
+    "name": "New York Yellers",
+    "city": "New York",
+    "logo": "assets/new-york-yellers.png",
+    "dark": "#2b2521",
+    "accent": "#e9a321"
+  },
+  {
+    "id": "san-diego-sails",
+    "name": "San Diego Sails",
+    "city": "San Diego",
+    "logo": "assets/san-diego-sails.png",
+    "dark": "#103651",
+    "accent": "#a6daee"
+  },
+  {
+    "id": "st-louis-hardhitters",
+    "name": "St. Louis HardHitters",
+    "city": "St. Louis",
+    "logo": "assets/st-louis-hardhitters.png",
+    "dark": "#152e40",
+    "accent": "#ed7854"
+  },
+  {
+    "id": "tampa-bay-gunpowder",
+    "name": "Tampa Bay Gunpowder",
+    "city": "Tampa Bay",
+    "logo": "assets/tampa-bay-gunpowder.png",
+    "dark": "#142c32",
+    "accent": "#dfa73e"
+  },
+  {
+    "id": "washington-firespikes",
+    "name": "Washington Firespikes",
+    "city": "Washington",
+    "logo": "assets/washington-firespikes.png",
+    "dark": "#28241d",
+    "accent": "#f6a637"
+  },
+  {
+    "id": "atlanta-grenades",
+    "name": "Atlanta Grenades",
+    "city": "Atlanta",
+    "logo": "assets/atlanta-grenades.png",
+    "dark": "#1e3940",
+    "accent": "#f47d44"
+  },
+  {
+    "id": "boston-bluebirds",
+    "name": "Boston Bluebirds",
+    "city": "Boston",
+    "logo": "assets/boston-bluebirds.png",
+    "dark": "#17375c",
+    "accent": "#f6c868"
+  },
+  {
+    "id": "indiana-farmers",
+    "name": "Indiana Farmers",
+    "city": "Indiana",
+    "logo": "assets/indiana-farmers.png",
+    "dark": "#153c27",
+    "accent": "#d8bc79"
+  },
+  {
+    "id": "iowa-huskies",
+    "name": "Iowa Huskies",
+    "city": "Iowa",
+    "logo": "assets/iowa-huskies.png",
+    "dark": "#191b12",
+    "accent": "#e9c52d"
+  },
+  {
+    "id": "kansas-city-americans",
+    "name": "Kansas City Americans",
+    "city": "Kansas City",
+    "logo": "assets/kansas-city-americans.png",
+    "dark": "#17334c",
+    "accent": "#dbac71"
+  },
+  {
+    "id": "las-vegas-olympians",
+    "name": "Las Vegas Olympians",
+    "city": "Las Vegas",
+    "logo": "assets/las-vegas-olympians.png",
+    "dark": "#263a20",
+    "accent": "#fdc34b"
+  }
+]

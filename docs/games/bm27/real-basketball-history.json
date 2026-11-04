@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2460,
+  "sport": "basketball",
+  "seasonRange": [
+    "2000-01",
+    "2024-25"
+  ],
+  "policy": {
+    "verifiedOnly": true,
+    "teamLevels": [
+      "Freshman",
+      "Sophomore",
+      "Junior Varsity",
+      "Varsity"
+    ],
+    "note": "Never invent missing historical players/coaches and label them real."
+  },
+  "sources": [
+    "MSHSAA official school basketball rosters",
+    "MaxPreps season/all-time basketball rosters"
+  ],
+  "verifiedExamples": {
+    "Marquette High School, Chesterfield MO": {
+      "2023-24": {
+        "headCoach": "Shane Matzen"
+      },
+      "2022-23": {
+        "headCoach": "Shane Matzen"
+      },
+      "2021-22": {
+        "headCoach": "Shane Matzen"
+      },
+      "2020-21": {
+        "headCoach": "Shane Matzen"
+      },
+      "2019-20": {
+        "headCoach": "Shane Matzen"
+      },
+      "2018-19": {
+        "headCoach": "Shane Matzen"
+      }
+    }
+  }
+}

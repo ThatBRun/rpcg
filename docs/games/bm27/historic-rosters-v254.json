@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 2731,
+  "policy": "REAL HISTORIC ROSTERS ONLY. Verified public player names are playable; missing school/season data is shown as unavailable and is never invented.",
+  "schools": {
+    "Marquette High School|Chesterfield, MO": {
+      "2023-24": {
+        "coach": "Shane Matzen",
+        "source": "MaxPreps",
+        "players": [
+          "Noah Malik",
+          "Luke Powell",
+          "Ethan Lenahan",
+          "Jack Ahlbrand",
+          "Gavin Marsh",
+          "Tyree Bonnett",
+          "Nicholas Vaccaro",
+          "Jack Prunty",
+          "Drew Hansen",
+          "Max Harris",
+          "Anthony Caldwell Jr.",
+          "Jay Holmes",
+          "Simon Kauppila",
+          "Gavin Lang",
+          "Samuel McCandless",
+          "Tyler Potthoff",
+          "Alex Noelker",
+          "Jimmy Renne",
+          "Brady Stultz",
+          "Anthony Rolando",
+          "Jack Williams",
+          "Carlos Bell",
+          "Ilyaas Harris",
+          "Brody Owen",
+          "Robbie Norman",
+          "Will Bernert",
+          "Isaiah Skinner",
+          "Ethan Jenkins",
+          "Nick Boyles",
+          "Alex Radovilsky",
+          "Jake Hansen",
+          "Ayden Lemons",
+          "Max Radovilsky",
+          "Clayton Davis",
+          "Cole Petch",
+          "Gabe Czapla",
+          "Mekel Newsome",
+          "Jason Montgomery",
+          "Jeremiah Jennings",
+          "Owen Marsh",
+          "Devon Barshow",
+          "Alex Danyluck",
+          "Jalen White",
+          "Kieran Burnett",
+          "Drew Sears",
+          "Kyle Potthoff",
+          "Parker Hoffman",
+          "Brandon Rolando",
+          "Alexander Komorech"
+        ]
+      },
+      "2022-23": {
+        "coach": "Shane Matzen",
+        "source": "MaxPreps",
+        "players": [
+          "Gavin Marsh",
+          "Jack Ahlbrand",
+          "Drew Sears",
+          "Gavin Lang",
+          "Owen Marsh",
+          "Carlos Bell",
+          "Ethan Jenkins",
+          "Noah Malik",
+          "Robbie Norman",
+          "Brady Stultz",
+          "Gabe Czapla",
+          "Anthony Rolando",
+          "Jake Hansen",
+          "Alex Radovilsky",
+          "Cole Petch",
+          "Nick Boyles",
+          "Ilyaas Harris",
+          "Anthony Caldwell Jr.",
+          "Simon Kauppila",
+          "Isaiah Skinner",
+          "Will Bernert",
+          "Clayton Davis",
+          "Alex Noelker",
+          "Kyle Potthoff",
+          "Jack Williams",
+          "Devon Barshow",
+          "Jalen White",
+          "Tyler Potthoff",
+          "Brody Owen",
+          "Max Radovilsky",
+          "Kieran Burnett",
+          "Jeremiah Jennings",
+          "Samuel McCandless",
+          "Jason Montgomery"
+        ]
+      },
+      "2021-22": {
+        "coach": "Shane Matzen",
+        "source": "MaxPreps",
+        "players": [
+          "Jack Ahlbrand",
+          "Gavin Marsh",
+          "Hunter Hacala"
+        ]
+      },
+      "2020-21": {
+        "coach": "Shane Matzen",
+        "source": "MaxPreps",
+        "players": [
+          "Hunter Hacala",
+          "Anthony Caldwell",
+          "Gavin Marsh",
+          "Jack Ahlbrand",
+          "Drew Young",
+          "Jason Holmes"
+        ]
+      },
+      "2025-26": {
+        "coach": "Not listed",
+        "source": "MaxPreps",
+        "sourceUrl": "https://www.maxpreps.com/mo/chesterfield/marquette-mustangs/basketball/roster/all-time/",
+        "players": [
+          "Jacob Villigram",
+          "Alexander Komorech",
+          "Ayden Lemons",
+          "Brody Owen",
+          "Parker Hoffman",
+          "Ethan Lenahan",
+          "Mirudul Soupramanien",
+          "Nicholas Vaccaro",
+          "Caden Lawrence",
+          "Jason Dudley",
+          "Alex Komorech",
+          "Kyle Runyon",
+          "Preston Loehr",
+          "Finn Lenahan",
+          "Mikey Bellamy",
+          "Sean Higgs",
+          "Jack Britt",
+          "Jordan Levison"
+        ],
+        "verifiedAt": "2026-09-28"
+      },
+      "2024-25": {
+        "coach": "Not listed",
+        "source": "MaxPreps",
+        "sourceUrl": "https://www.maxpreps.com/mo/chesterfield/marquette-mustangs/basketball/24-25/roster/",
+        "players": [
+          "Brady Stultz",
+          "Anthony Caldwell Jr.",
+          "Alex Noelker",
+          "Josh Merz",
+          "Cade Woodfin",
+          "Jimmy Renne",
+          "Samuel McCandless",
+          "Anthony Rolando",
+          "Gavin Marsh",
+          "Jack Ahlbrand",
+          "Max Harris",
+          "Jay Holmes",
+          "Gavin Lang",
+          "Milo Lombardi",
+          "Noah Malik"
+        ],
+        "verifiedAt": "2026-09-28"
+      }
+    },
+    "Vashon High School|St. Louis, MO": {
+      "2024-25": {
+        "coach": "Not listed",
+        "source": "MaxPreps",
+        "sourceUrl": "https://www.maxpreps.com/mo/st-louis/vashon-wolverines/basketball/roster/all-time/",
+        "players": [
+          "Makai Kates",
+          "Arvon Bonner",
+          "Dorea McCaskill",
+          "Cameryn James",
+          "Chaise Reese",
+          "Jimmy McKinney III",
+          "Trey Williams Jr.",
+          "Dehrio McCaskill",
+          "Jamon Martin",
+          "Khalil Crain",
+          "Leon Powell",
+          "Terron Garrett",
+          "Tyler Stockard",
+          "Demetrius Harrell Jr.",
+          "Armon Aaron",
+          "Deshawn Barber",
+          "Prince Edward Nichols"
+        ],
+        "verifiedAt": "2026-09-28"
+      }
+    },
+    "Chaminade College Prep|St. Louis, MO": {
+      "2025-26": {
+        "coach": "Not listed",
+        "source": "MaxPreps",
+        "sourceUrl": "https://www.maxpreps.com/mo/st-louis/chaminade-red-devils/basketball/roster/all-time/",
+        "players": [
+          "Jonny Jordan",
+          "Isaac Newman",
+          "Tricy Collins",
+          "August Banks",
+          "Vance Weber",
+          "Kevin Burroughs-Neeley",
+          "Elijah Trinidad-Boyd",
+          "Jesiah Buchanan",
+          "Elijah Poniewaz",
+          "Luke Jordan",
+          "Oskar Kuzman",
+          "Mohamed Kourouma",
+          "Ju Jiayun",
+          "Donovan Irving",
+          "Logan Chalmers"
+        ],
+        "verifiedAt": "2026-09-28"
+      }
+    },
+    "De Smet Jesuit High School|St. Louis, MO": {
+      "2024-25": {
+        "coach": "Not listed",
+        "source": "MaxPreps",
+        "sourceUrl": "https://www.maxpreps.com/mo/st-louis/de-smet-jesuit-spartans/basketball/roster/all-time/",
+        "players": [
+          "Nick Harper",
+          "Owen Duff",
+          "Nate Hatcher",
+          "August Wims",
+          "Ta'Shawn Henton",
+          "Liam Russo",
+          "Riley Massey",
+          "Bobby Dolan",
+          "Christian Ronken",
+          "Ridge Janes",
+          "Peter Fales",
+          "Will Foulk",
+          "Ian Thomas",
+          "Jordan Boyd",
+          "Braden Butler"
+        ],
+        "verifiedAt": "2026-09-28"
+      }
+    }
+  }
+}

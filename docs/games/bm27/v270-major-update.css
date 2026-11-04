@@ -1,0 +1,8 @@
+
+.v270GameCard{width:100%;display:flex;align-items:center;gap:14px;text-align:left}.v270GameCard span{display:flex;flex-direction:column;flex:1}.v270GameLogo{width:48px;height:48px;object-fit:contain}.v270CoachHero{display:flex;align-items:center;gap:18px;margin:15px 0}.v270CoachLogo{width:82px;height:82px;object-fit:contain}.v270Roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}.v270Roster span{padding:8px;border:1px solid #ffffff22;border-radius:8px}#v270Box{width:min(1100px,96vw);max-height:90vh;overflow:auto}.dyn270Exit{position:sticky;top:8px;z-index:9999;margin:8px;padding:12px 16px;font-weight:900}.v270ModeBadge,.v270DynTitle{display:block;margin:8px;padding:7px 10px;border:1px solid #ffffff2a;border-radius:10px;font-size:11px;font-weight:900;letter-spacing:.06em}#v270SyncLogos{width:100%;margin-top:10px}
+
+.v271Record{font-size:18px}.v271CoachGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.v270Roster span{display:flex;flex-direction:column}.v270Roster small,.v271ScheduleRow small{opacity:.72}.v271Schedule{display:flex;flex-direction:column;gap:8px}.v271ScheduleRow{display:flex;align-items:center;gap:10px;padding:9px;border:1px solid #ffffff20;border-radius:9px}.v271ScheduleRow span{display:flex;flex-direction:column}.v271TinyLogo{width:36px;height:36px;object-fit:contain}#v271OnlineLogos,#v271LogoManifest{width:100%;margin-top:8px}@media(max-width:800px){.v271CoachGrid{grid-template-columns:1fr}}
+
+#v272SyncEverything,#v270SyncLogos{width:100%;margin-top:9px}
+
+.scheduleOpponentLogo,.bmLogo,.schoolLogo,.nextGameLogo,.coachLogo{display:inline-block!important;width:42px;height:42px;object-fit:contain;vertical-align:middle;margin-right:10px;flex:0 0 auto}

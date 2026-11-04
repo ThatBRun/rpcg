@@ -1,0 +1,2 @@
+/* BM27 v2.7.30 — tournament history + lower-level result presentation */
+.v2730-results-dialog{width:min(720px,94vw);max-height:86vh;overflow:auto}.v2730-result{border-left:4px solid currentColor}.v2730-result h3{margin:.15rem 0}.v2730-tournament-history{margin-top:16px}.v2730-tournament-history>details{padding:10px 0;border-top:1px solid rgba(255,255,255,.09)}.v2730-tournament-history summary{cursor:pointer}.v2730-history-event{padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}.v2730-history-event:first-of-type{border-top:0}

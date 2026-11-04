@@ -1,0 +1,15 @@
+/* BM27 v2.7.61 — embedded layout helpers */
+html.bm27-embedded,
+html.bm27-embedded body {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+}
+html.bm27-embedded body {
+  margin: 0;
+  overscroll-behavior: contain;
+}
+html.bm27-embedded #installAppBtn,
+html.bm27-embedded #installAppHeaderBtn {
+  display: none !important;
+}

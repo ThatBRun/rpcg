@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>MSHSAA Basketball Manager 27</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <script src="embed-support.js?v=2761"></script>
+  <link rel="stylesheet" href="embed-support.css?v=2761">
+  <link rel="stylesheet" href="styles.css?v=2770">
+  <link rel="stylesheet" href="v238-real-deal.css?v=2770">
+  <link rel="stylesheet" href="v240-mode-slots-style.css?v=2770">
+  <link rel="stylesheet" href="v241-legacy-save-access.css?v=2770">
+  <link rel="stylesheet" href="v245-always-scroll.css?v=2770">
+<link rel="stylesheet" href="v246-hub-revamp.css?v=2770">
+<link rel="stylesheet" href="v247-dynasty.css?v=2770">
+<link rel="stylesheet" href="v248-ultimate-modes.css?v=2770">
+<link rel="stylesheet" href="v249-everything.css?v=2770">
+<link rel="stylesheet" href="v250-playnow.css?v=2770">
+<link rel="stylesheet" href="v251-upgrade.css?v=2770">
+<link rel="stylesheet" href="v252-actual-integration.css?v=2770">
+<link rel="stylesheet" href="v253-final-routing.css?v=2770">
+<link rel="stylesheet" href="v254-easy-view.css?v=2723">\n<link rel="stylesheet" href="v255-authentic-branding.css?v=2770">
+<link rel="stylesheet" href="v256-fixes.css?v=2770">
+<link rel="stylesheet" href="v257-season-branding.css?v=2770">
+<link rel="stylesheet" href="v270-major-update.css?v=2770">
+<link rel="stylesheet" href="v2713-lock-in-update.css?v=2722">
+<link rel="stylesheet" href="v2716-academics-college-news.css?v=2716">
+<link rel="stylesheet" href="v2745-dynasty-repair.css?v=2745">
+</head>
+<body>
+  <div id="bm2713Loading"><div class="bm2713-load-inner"><img class="bm2713-load-logo" src="assets/icon.svg" alt=""><div class="bm2713-load-kicker">RAMPACEGAMES PRESENTS</div><div class="bm2713-load-title">MSHSAA Basketball Manager 27</div><div class="bm2713-load-track"><span></span></div><div id="bm2713LoadStatus" class="bm2713-load-status">LOADING BM27…</div></div></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <section id="launcher" class="launcher">
+    <div class="brand-panel">
+      <img src="assets/icon.svg" class="brand-logo" alt="MSHSAA Basketball Manager 27 logo">
+      <p class="eyebrow">RAMPACEGAMES PRESENTS</p>
+      <h1>MSHSAA Basketball Manager <span>27</span></h1>
+      <p>Build a Missouri high-school basketball dynasty in a fictional, procedurally generated basketball universe.</p>
+      <div class="legal-note">Unofficial fan-made simulation. No school logos are included. Real Roster Mode uses public player names where verified; all ratings and simulated performance are fictional.</div>
+    </div>
+    <div class="save-panel">
+      <div class="save-heading"><div><p class="eyebrow">CAREER HUB</p><h2>Game Saves</h2></div><div class="row"><button class="secondary" data-open-updates>What’s New</button><button id="createSchoolBtn" class="secondary">Create School</button><button id="installAppBtn" class="secondary hidden" type="button">Install App</button><button id="newSaveBtn" class="primary">New Career</button></div></div>
+      <div class="account-box">
+        <div id="signedOutControls">
+          <div class="account-grid">
+            <label>Username<input id="accountUsername" maxlength="24" autocomplete="username" placeholder="Username"></label>
+            <label>Password<input id="accountPassword" type="password" minlength="6" autocomplete="current-password" placeholder="Password"></label>
+          </div>
+          <div class="account-actions"><button id="signInBtn" class="primary" type="button">Sign In</button><button id="signUpBtn" class="secondary" type="button">Create Account</button></div>
+        </div>
+        <div id="signedInControls" class="hidden row"><div>Signed in as <b id="signedInName"></b></div><button id="signOutBtn" class="secondary" type="button">Sign Out</button></div>
+        <p id="accountStatus" class="muted small">Checking cloud-save connection…</p>
+      </div>
+      <div id="saveList" class="save-list"></div>
+      <button id="syncDirectoryBtn" class="secondary wide">Sync 2025–26 School Assignments</button>
+      <button id="syncRealRostersBtn" class="secondary wide hidden">Sync Real Roster Pack</button>
+      <p id="syncStatus" class="muted small">Built-in offline directory is ready. Online sync is optional.</p>
+      <p id="rosterSyncStatus" class="muted small">Real roster pack is bundled with the game and can be refreshed by an admin.</p>
+    </div>
+  </section>
+
+  <div id="game" class="game hidden">
+    <aside id="sidebar">
+      <div class="side-brand"><img src="assets/icon.svg" alt=""><div><strong>MSHSAA BM 27</strong><span id="sideSchool"></span></div></div>
+      <nav>
+        <button class="nav active" data-page="dashboard">Dashboard</button>
+        <button class="nav" data-page="tryouts">Tryouts</button><button class="nav" data-page="roster">Roster</button><button class="nav" data-page="recruiting">College Recruiting</button><button class="nav" data-page="leagues">Summer & Fall</button>
+        <button class="nav" data-page="schedule">Schedule</button>
+        <button class="nav" data-page="tournaments">Tournaments</button>
+        <button class="nav" data-page="standings">Standings</button>
+        <button class="nav" data-page="rankings">Rankings</button>
+        <button class="nav" data-page="office">Coach Office</button>
+        <button class="nav" data-page="meetings">Meetings</button>
+        <button class="nav" data-page="history">History</button><button class="nav" data-page="program">Program Center</button>
+      </nav>
+      <button id="backToSaves" class="nav bottom">Exit to Saves</button>
+    </aside>
+
+    <main>
+      <header>
+        <button id="menuBtn" aria-label="Open menu">☰</button>
+        <div><p class="eyebrow">2026–27 SIMULATION</p><h2 id="pageTitle">Dashboard</h2></div>
+        <div class="header-actions"><span id="currentDate"></span><span id="saveStatusPill" class="cloud-pill">☁ Autosave</span><button id="manualSaveBtn" class="secondary">Save Game</button><button id="installAppHeaderBtn" class="secondary hidden" type="button">Install App</button><button class="secondary" data-open-updates>What’s New</button><button id="advanceBtn" class="primary">Advance Day</button></div>
+      </header>
+
+      <section id="dashboardPage" class="page active">
+        <div id="teamHero" class="team-hero"></div>
+        <div class="metrics" id="dashboardMetrics"></div>
+        <div class="dashboard-grid">
+          <article class="card"><div class="section-head"><h3>Next 5 Games</h3><button id="playNextBtn" class="primary small-btn">Play / Sim</button></div><div id="nextGame"></div></article>
+          <article class="card"><h3>Program News</h3><div id="newsFeed" class="stack"></div></article>
+        </div>
+      </section>
+
+      <section id="tryoutsPage" class="page"><div class="section-head"><div><p class="eyebrow">50 PLAYERS • BUILD FROM SCRATCH</p><h3>Team Tryouts</h3></div><span id="tryoutCount" class="tag">0 selected</span></div><p class="muted small">Choose 13–15 players from the 50 students who tried out. Overall, grade, position, potential and skills are visible. Your season cannot begin until the roster is finalized.</p><div id="tryoutActions" class="schedule-actions"><button id="aiPickRosterBtn" class="secondary">AI Pick Team</button><button id="clearRosterBtn" class="secondary">Clear Picks</button><button id="finalizeRosterBtn" class="primary">Finalize Varsity</button></div><div id="tryoutTable" class="table-wrap"></div></section>
+      <section id="recruitingPage" class="page"><div class="section-head"><div><p class="eyebrow">NCAA DIVISION I RECRUITING</p><h3>College Recruiting Center</h3></div><button id="inviteCollegeBtn" class="secondary">Invite College Scout</button></div><div id="recruitingSummary" class="metrics"></div><div class="office-grid"><article class="card"><h3>Senior Recruiting Board</h3><div id="seniorRecruiting" class="stack"></div></article><article class="card"><h3>Upcoming College Visits</h3><div id="collegeVisits" class="stack"></div></article></div></section>
+      <section id="leaguesPage" class="page"><div class="section-head"><div><p class="eyebrow">OFFSEASON DEVELOPMENT</p><h3>Summer & Fall Leagues</h3></div></div><div class="office-grid"><article class="card"><div class="section-head"><h3>Summer League</h3><span id="summerCount" class="tag">0/10</span></div><button class="secondary wide" data-league-ai="summer">AI Make Summer Schedule</button><button class="secondary wide" data-league-add="summer">Add Summer Game</button><div id="summerSchedule" class="stack"></div></article><article class="card"><div class="section-head"><h3>Fall League</h3><span id="fallCount" class="tag">0/10</span></div><button class="secondary wide" data-league-ai="fall">AI Make Fall Schedule</button><button class="secondary wide" data-league-add="fall">Add Fall Game</button><div id="fallSchedule" class="stack"></div></article></div></section>
+      <section id="rosterPage" class="page"><div class="section-head"><div><p class="eyebrow">PLAYER DEVELOPMENT</p><h3>Varsity Roster</h3></div><button id="autoLineupBtn" class="secondary">Auto Lineup</button></div><div id="rosterTable" class="table-wrap"></div></section>
+      <section id="schedulePage" class="page"><div class="section-head"><div><p class="eyebrow">MAXIMUM 26 GAMES</p><h3>Season Schedule</h3></div><div class="schedule-actions"><button id="aiScheduleBtn" class="secondary">AI Make Schedule</button><button id="addGameBtn" class="secondary">Add Game</button><button id="addTbdBtn" class="secondary">Add TBD</button><button id="addTournamentBtn" class="secondary">Add Tournament</button><button id="simWeekBtn" class="secondary">Sim 7 Days</button></div></div><p id="scheduleHelp" class="muted small">Before your first game, schedule any Missouri school from any class. Schedules lock after the season begins.</p><div id="scheduleList" class="stack"></div><div class="section-head" style="margin-top:24px"><div><p class="eyebrow">BRACKETS</p><h3>Entered Tournaments</h3></div></div><div id="tournamentList" class="stack"></div></section>
+      <section id="tournamentsPage" class="page">
+        <div class="section-head">
+          <div><p class="eyebrow">PRESEASON & IN-SEASON EVENTS</p><h3>Tournament Center</h3></div>
+          <div class="schedule-actions"><button id="createDistrictTournamentBtn" class="secondary hidden">Districts Start Automatically</button><button id="createStateTournamentBtn" class="secondary hidden">State Starts Automatically</button><button id="createTournamentHubBtn" class="primary">Create Custom Tournament</button></div>
+        </div>
+        <p class="muted small">Choose a premade event or build a custom 4-, 8-, 16-, or 32-team tournament. Every round is connected directly to your season schedule and updates as you advance.</p>
+        <div id="tournamentHubStatus" class="card tournament-callout"></div>
+        <div id="tournamentHubList" class="stack"></div>
+      </section>
+      <section id="standingsPage" class="page"><div class="section-head"><div><p class="eyebrow">CLASS & DISTRICT</p><h3>District Standings</h3></div></div><div id="standingsTable" class="table-wrap"></div></section>
+      <section id="rankingsPage" class="page"><div class="section-head"><div><p class="eyebrow">STATEWIDE</p><h3>Power Rankings</h3></div></div><div id="rankingsTable" class="table-wrap"></div></section>
+      <section id="officePage" class="page"><div class="office-grid"><article class="card"><h3>Practice Focus</h3><p class="muted">Choose the focus used when advancing days.</p><div id="practiceChoices" class="choice-grid"></div></article><article class="card"><h3>Program Settings</h3><label>Pace<select id="paceSelect"><option>Slow</option><option selected>Balanced</option><option>Fast</option></select></label><label>Defense<select id="defenseSelect"><option>Man</option><option>2-3 Zone</option><option>1-3-1 Zone</option><option>Full Court Press</option></select></label><button id="saveStrategyBtn" class="primary wide">Save Strategy</button></article></div></section>
+      <section id="meetingsPage" class="page"><div class="section-head"><div><p class="eyebrow">MYGM-STYLE PROGRAM MANAGEMENT</p><h3>Meetings & Decisions</h3></div><button id="newMeetingBtn" class="secondary">Generate Meeting</button></div><div id="programMetrics" class="metrics"></div><div id="meetingsList" class="stack"></div></section>
+      <section id="historyPage" class="page"><div class="section-head"><div><p class="eyebrow">PERMANENT SAVE HISTORY</p><h3>Program History</h3></div></div><div id="historyContent"></div></section>
+      <section id="programPage" class="page"><div class="section-head"><div><p class="eyebrow">COMPLETE PROGRAM CONTROL</p><h3>Program Center</h3></div></div><div id="programCenter"></div></section>
+    </main>
+  </div>
+
+
+  <dialog id="schoolCreatorDialog"><form method="dialog" id="schoolCreatorForm"><div class="modal-head"><div><p class="eyebrow">CUSTOM PROGRAM</p><h2>Create a School</h2></div><button value="cancel" class="icon-btn">×</button></div><div class="creator-grid"><label>School name<input id="customSchoolName" required maxlength="40" placeholder="West County High"></label><label>Mascot<input id="customSchoolMascot" required maxlength="30" placeholder="Wolves"></label><label>City<input id="customSchoolCity" maxlength="40" placeholder="St. Louis"></label><label>Class<select id="customSchoolClass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></label><label>District<input id="customSchoolDistrict" type="number" min="1" max="16" value="1"></label><label>Conference<input id="customSchoolConference" maxlength="40" placeholder="Independent"></label></div><div class="color-row"><label>Primary color<input id="customPrimary" type="color" value="#1d4ed8"></label><label>Secondary color<input id="customSecondary" type="color" value="#facc15"></label></div><div id="schoolPreview" class="school-preview"><strong>West County Wolves</strong><span>Class 6</span></div><p class="muted small">Custom schools are saved locally and included in your synced directory. They remain available after future deploys on this device.</p><button value="default" class="primary wide">Create School</button></form></dialog>
+  <dialog id="newSaveDialog">
+    <form method="dialog" id="newSaveForm">
+      <div class="modal-head"><div><p class="eyebrow">NEW CAREER</p><h2>Create Game Save</h2></div><button value="cancel" class="icon-btn">×</button></div>
+      <label>Save name<input id="saveName" maxlength="28" required placeholder="Brandon's Dynasty"></label>
+      <label>Choose school<select id="schoolSelect" required></select></label>
+      <label>Difficulty<select id="difficultySelect"><option>Freshman</option><option selected>Varsity</option><option>All-State</option></select></label>
+      <label>Career roster mode<select id="rosterModeSelect"><option value="generated">Generated Dynasty — 50-player tryouts</option><option value="real">Real Roster Mode — 2025–26 verified players</option></select></label>
+      <p class="muted small">Real Roster Mode skips tryouts and starts with a playable varsity roster immediately. Verified public 2025–26 player names are used where available; uncovered slots remain simulated rather than inventing real identities.</p>
+      <button value="default" class="primary wide">Start Career</button>
+    </form>
+  </dialog>
+
+
+  <dialog id="tournamentDialog"><form method="dialog" id="tournamentForm"><div class="modal-head"><div><p class="eyebrow">TOURNAMENT BUILDER</p><h2>Enter a Tournament</h2></div><button value="cancel" class="icon-btn">×</button></div><label>Premade tournament<select id="tournamentPreset"><option value="holiday">Holiday Classic</option><option value="showme">Show-Me Shootout</option><option value="district">District Preview Classic</option><option value="custom">Custom Tournament</option></select></label><label>Custom name<input id="tournamentName" maxlength="50" placeholder="Optional custom tournament name"></label><label>Bracket size<select id="tournamentSize"><option value="4">4 teams</option><option value="8">8 teams</option><option value="16">16 teams</option><option value="32">32 teams</option></select></label><label>Tournament format<select id="tournamentFormat"><option value="single">Single Elimination</option><option value="third">Single Elimination + 3rd Place Game</option><option value="placement">Full Consolation / Placement Bracket</option></select><small class="muted">Full placement keeps teams playing after a loss and determines every finishing place (3rd, 5th, 7th, and more on larger brackets).</small></label><label>Starting date<input id="tournamentStart" type="date" required></label><div class="section-head"><div><b>Choose participating schools</b><p class="muted small">Your school is automatically included. Pick the other teams or use Auto Fill.</p></div><button type="button" id="autoFillTournamentBtn" class="secondary">Auto Fill</button></div><input id="tournamentSchoolSearch" placeholder="Search schools"><div id="tournamentSchoolPicker" class="team-picker"></div><p id="tournamentSelectionCount" class="muted small">0 selected</p><p class="muted small">Tournament rounds are added directly to your season schedule. Future opponents unlock as you advance.</p><button value="default" class="primary wide">Create Bracket</button></form></dialog>
+  <dialog id="scheduleDialog"><form method="dialog" id="scheduleForm"><div class="modal-head"><div><p class="eyebrow">PRESEASON SCHEDULING</p><h2>Add Game</h2></div><button value="cancel" class="icon-btn">×</button></div><label>Opponent<select id="scheduleOpponent"></select></label><label>Date<input id="scheduleDate" type="date" required></label><label>Location<select id="scheduleLocation"><option value="home">Home</option><option value="away">Away</option><option value="neutral">Neutral</option></select></label><label>Game type<select id="scheduleType"><option>Regular Season</option><option>Showcase</option><option>Conference</option><option>Tournament</option></select></label><button value="default" class="primary wide">Add to Schedule</button></form></dialog>
+
+  <dialog id="gameDialog"><div id="gameResult"></div><button id="closeGameDialog" class="primary wide">Continue</button></dialog>
+
+  <dialog id="updatesDialog">
+    <div class="modal-head"><div><p class="eyebrow">GAME UPDATE CENTER</p><h2>What’s New</h2></div><button id="closeUpdatesBtn" class="icon-btn" type="button">×</button></div>
+    <div id="updatesContent" class="stack"></div>
+  </dialog>
+<dialog id="leagueDialog"><form method="dialog" id="leagueForm"><div class="modal-head"><div><p class="eyebrow">OFFSEASON SCHEDULE</p><h2>Add League Game</h2></div><button value="cancel" class="icon-btn">×</button></div><input type="hidden" id="leagueType"><label>Opponent<select id="leagueOpponent"></select></label><label>Date<input id="leagueDate" type="date" required></label><label>Location<select id="leagueLocation"><option value="home">Home</option><option value="away">Away</option><option value="neutral">Neutral</option></select></label><button value="default" class="primary wide">Add Game</button></form></dialog>
+
+  <script src="config.js?v=2728"></script>
+  <script src="bm27-supabase-direct.js?v=2761"></script>
+  <script src="colleges.js?v=2370"></script>
+  <script src="real-rosters.js?v=2370"></script>
+  <script src="app.js?v=2761"></script>
+  <script src="cloud.js?v=2761"></script>
+  <script src="season-engine.js?v=2742"></script>
+  <script src="pwa.js?v=2370"></script>
+  <script src="v2-program.js?v=2736"></script>
+  <script src="v22-update.js?v=2736"></script>
+  <script src="v221-modal-hotfix.js?v=2370"></script>
+  <script src="v226-tournament-history-hotfix.js?v=2370"></script>
+  <script src="v228-out-of-state-access-hotfix.js?v=2722"></script>
+  <script src="v229-tournament-any-school-hotfix.js?v=2370"></script>
+  <script src="v2210-live-all-games-hotfix.js?v=2370"></script>
+  <script src="v2211-placement-tournaments-hotfix.js?v=2370"></script>
+  <script src="v2212-march-madness-tournament-repair.js?v=2370"></script>
+  <script src="v2213-national-directory-startup-hotfix.js?v=2722"></script>
+  <script src="v2214-class56-eight-districts-hotfix.js?v=2370"></script>
+  <script src="v23-dynasty-expansion.js?v=2370"></script>
+  <script src="v231-national-autoload-manual-classes.js?v=2722"></script>
+  <script src="v232-class-districts-auto-bid.js?v=2370"></script>
+  <script src="v233-core-integration-repair.js?v=2370"></script>
+  <script src="v235-existing-save-senior-migration.js?v=2370"></script>
+  <script src="v236-tournament-format-core-repair.js?v=2711"></script>
+  <script src="v237-existing-save-tournament-migration.js?v=2370"></script>
+  <script src="v238-real-deal.js?v=2770"></script>
+  <script src="v240-mode-slots-style.js?v=2711"></script>
+  <script src="v241-legacy-save-access.js?v=2770"></script>
+  <script src="v242-save-system-recovery.js?v=2711"></script>
+  <script src="v243-authoritative-save-bridge.js?v=2770"></script>
+  <script src="v244-play-save-fix.js?v=2770"></script>
+<script src="v246-real-basketball-hub-jukebox.js?v=2722"></script>
+<script src="v247-dynasty-road-to-commitment.js?v=2770"></script>
+<script src="v249-dynasty-career.js?v=2770"></script>
+<script src="v252-school-marks.js?v=2770"></script>
+<script src="v255-authentic-branding.js?v=2722"></script>
+<script src="v255-branding-bridge.js?v=2770"></script>
+<script src="v253-playnow.js?v=2770"></script>
+<script src="v254-history.js?v=2731"></script>\n<script src="v254-history-button.js?v=2723"></script>\n<script src="v256-legacy.js?v=2770"></script>
+<script src="v257-season-branding.js?v=2722"></script>
+<script src="v270-major-update.js?v=2722"></script>
+<link rel="stylesheet" href="v279-tournament-rewrite.css?v=2710">
+<script src="v279-tournament-rewrite.js?v=2711"></script>
+<script src="v2713-lock-in-update.js?v=2731"></script>
+<script src="v2716-academics-college-news.js?v=2732"></script>
+<link rel="stylesheet" href="v2718-national-points-scheduling.css?v=2718">
+<script src="v2718-national-points-scheduling.js?v=2736"></script>
+<script src="v2719-districts-stats-boxscores.js?v=2719"></script>
+<script src="v2720-senior-graduation-hard-fix.js?v=2720"></script>
+<link rel="stylesheet" href="v2721-offseason-logo-sync.css?v=2722">
+<script src="v2721-offseason-logo-sync.js?v=2736"></script>
+<link rel="stylesheet" href="v2729-program-schedules-save-repair.css?v=2729">
+<script src="v2729-program-schedules-save-repair.js?v=2732"></script>
+<link rel="stylesheet" href="v2730-tournament-archive-program-results.css?v=2730">
+<script src="v2730-tournament-archive-program-results.js?v=2730"></script>
+<script src="v2731-real-historic-daily-program.js?v=2732"></script>
+<script src="v2732-owned-team-daily-resolver.js?v=2732"></script>
+
+
+
+<script src="v2736-final-phase-controller.js?v=2736"></script>
+<script src="v2737-phase-state-sync.js?v=2737"></script>
+<script src="v2738-central-social-population.js?v=2738"></script>
+<script src="v2739-junior-program-jingle-jam.js?v=2739"></script>
+<script src="v2740-stl-junior-cross-tier-scheduling.js?v=2740"></script>
+<script src="v2741-junior-game-adder-root-fix.js?v=2741"></script>
+<script src="v2742-custom-tournaments-junior-ai-district-byes.js?v=2742"></script>
+<script src="v2743-missouri-conferences.js?v=2756"></script>
+<script src="v2744-custom-school-conference-management.js?v=2747"></script>
+<script src="v2749-realistic-conference-randomizer.js?v=2750"></script>
+<script src="v2751-conference-and-invitations.js?v=2751"></script>
+<script src="v2752-interstate-international-tournaments.js?v=2752"></script>
+<script src="v2753-missouri-march-madness.js?v=2753"></script>
+<script src="v2754-balanced-conferences.js?v=2754"></script>
+<script src="v2755-conference-college-repair.js?v=2756"></script>
+<script src="v2757-authoritative-conferences.js?v=2757"></script>
+<script src="v2766-postseason-schedule.js?v=2768"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+(()=>{document.addEventListener('click',e=>{let b=e.target.closest?.('[data-mode]');if(!b)return;if(b.dataset.mode==='playnow'){e.preventDefault();e.stopImmediatePropagation();window.BM27PlayNow251.open()}else if(b.dataset.mode==='legacy'){e.preventDefault();e.stopImmediatePropagation();window.BM27Legacy251.open()}},true);})();

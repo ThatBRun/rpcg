@@ -1,0 +1,1 @@
+(()=>{function patch(){if(!window.BM27Branding255||!window.BM27Logos252)return;window.BM27Logos252.html=(name,cls='bmLogo')=>window.BM27Branding255.html(name,cls)}document.addEventListener('DOMContentLoaded',patch);patch();setTimeout(patch,0)})();

@@ -1,0 +1,618 @@
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Next Level Pick-Em</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0a0e26">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: stadium-at-night app shell — scoreboard header, game "tickets" down the field, tab bar at the bottom.
+   Single deliberate dark look (midnight blue and purple), set explicitly so it reads the same on any host. */
+:root {
+  color-scheme: dark;
+  --turf: #0a0e26;        /* page ground: midnight navy */
+  --turf-2: #121845;      /* raised surface */
+  --line: #262d6b;        /* rules */
+  --chalk: #eef0ff;       /* primary text */
+  --chalk-dim: #a3a9d6;   /* secondary text */
+  --led: #b794ff;         /* purple accent */
+  --led-dim: #3d2d73;
+  --blue: #5fa8ff;        /* blue accent */
+  --sel: #1d1850;         /* selected team */
+  --me: #18205a;          /* your leaderboard row */
+  --grad: linear-gradient(100deg, #4f8bff, #9b6bff);
+  --win: #4ade80;
+  --loss: #f87171;
+  --push: #93c5fd;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "Share Tech Mono", ui-monospace, Consolas, monospace;
+  --r: 10px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--turf);
+  color: var(--chalk);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--turf); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--led); outline-offset: 2px; }
+.app { display: flex; flex-direction: column; min-height: 100%; max-width: 560px; margin: 0 auto; }
+
+/* ---------- header (scoreboard) ---------- */
+header.board {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--turf);
+  border-bottom: 1px solid var(--line);
+  padding-block: 12px 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+}
+.brand { font-family: var(--display); font-weight: 900; font-size: 26px; line-height: .95; letter-spacing: .02em; text-transform: uppercase; }
+.brand span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.coins {
+  display: flex; align-items: center; gap: 6px;
+  background: #05061a; border: 1px solid var(--led-dim); border-radius: 6px;
+  padding: 4px 10px; font-family: var(--mono); font-size: 20px; color: var(--led);
+  text-shadow: 0 0 8px rgba(183,148,255,.55); font-variant-numeric: tabular-nums;
+}
+.coins svg { width: 16px; height: 16px; }
+.subline { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--chalk-dim); letter-spacing: .06em; text-transform: uppercase; }
+.subline b { color: var(--chalk); font-family: var(--mono); font-weight: 400; letter-spacing: 0; }
+.demo-flag { color: var(--led); }
+
+main {
+  flex: 1;
+  padding-block: 14px 96px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+}
+h2 { font-family: var(--display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: .03em; margin: 0; text-wrap: balance; }
+.muted { color: var(--chalk-dim); }
+.small { font-size: 13px; }
+
+/* ---------- filter chips ---------- */
+.search { width: 100%; background: var(--turf-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 16px; }
+.recs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 0 14px 10px; font-family: var(--mono); }
+.recs span:last-child { text-align: right; }
+.recs a { color: var(--blue); font-family: var(--body); text-decoration: none; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chip {
+  flex: none; border: 1px solid var(--line); background: transparent; border-radius: 999px;
+  padding: 6px 14px; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--chalk-dim);
+}
+.chip[aria-pressed="true"] { background: var(--chalk); color: var(--turf); border-color: var(--chalk); }
+
+/* ---------- game ticket ---------- */
+.game { background: var(--turf-2); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.game-top { display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px 0; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--chalk-dim); }
+.game-top .sport { color: var(--blue); font-weight: 700; }
+.sides { display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch; gap: 8px; padding: 10px 14px 12px; }
+.vs { align-self: center; font-family: var(--display); font-weight: 800; color: var(--chalk-dim); font-size: 14px; }
+.side {
+  min-width: 0; text-align: left; background: var(--turf); border: 1.5px solid var(--line); border-radius: 8px;
+  padding: 10px; display: flex; flex-direction: column; gap: 2px; transition: border-color .15s, background .15s;
+}
+.side:hover:not(:disabled) { border-color: var(--chalk-dim); }
+.side[aria-pressed="true"] { border-color: var(--led); background: var(--sel); }
+.side:disabled { cursor: default; opacity: .85; }
+.side .where { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--chalk-dim); }
+.side .team { font-family: var(--display); font-weight: 800; font-size: 20px; line-height: 1.05; text-transform: uppercase; overflow-wrap: anywhere; }
+.side .mult { font-family: var(--mono); color: var(--blue); font-size: 14px; }
+.side.won { border-color: var(--win); }
+.score { font-family: var(--mono); font-size: 22px; color: var(--chalk); }
+
+.slip { border-top: 1px dashed var(--line); padding: 12px 14px; display: grid; gap: 10px; }
+.slip-row { display: flex; align-items: center; gap: 12px; }
+.slip-row input[type=range] { flex: 1; accent-color: var(--led); min-width: 0; }
+.stake { font-family: var(--mono); font-size: 18px; color: var(--led); min-width: 60px; text-align: right; font-variant-numeric: tabular-nums; }
+.quick { display: flex; gap: 6px; }
+.quick button { flex: 1; border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 4px 0; font-family: var(--mono); font-size: 13px; color: var(--chalk-dim); }
+.btn {
+  border: 0; border-radius: 8px; padding: 12px 16px; font-family: var(--display); font-weight: 800; font-size: 18px;
+  text-transform: uppercase; letter-spacing: .05em; background: var(--grad); color: #fff;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--chalk); border: 1px solid var(--line); }
+.status { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.st-open { background: #10301f; color: var(--win); }
+.st-locked { background: #2a1f5c; color: var(--led); }
+.st-won { background: #10301f; color: var(--win); }
+.st-lost { background: #3a1616; color: var(--loss); }
+.st-push { background: #142a55; color: var(--push); }
+.your-pick { padding: 0 14px 12px; font-size: 13px; color: var(--chalk-dim); }
+.your-pick b { color: var(--chalk); }
+
+.empty { text-align: center; padding: 40px 12px; border: 1px dashed var(--line); border-radius: var(--r); color: var(--chalk-dim); }
+.empty strong { display: block; font-family: var(--display); font-size: 22px; text-transform: uppercase; color: var(--chalk); margin-bottom: 4px; }
+
+/* ---------- leaderboard ---------- */
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--turf-2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 8px; border-radius: 6px; font-weight: 600; color: var(--chalk-dim); }
+.seg button[aria-pressed="true"] { background: var(--turf); color: var(--chalk); }
+.lb { list-style: none; margin: 0; padding: 0; display: grid; }
+.lb li { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+.lb .rk { font-family: var(--display); font-weight: 900; font-size: 22px; color: var(--chalk-dim); text-align: center; }
+.lb li:nth-child(1) .rk { color: var(--led); }
+.lb .who { min-width: 0; }
+.lb .name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb .val { font-family: var(--mono); font-size: 17px; color: var(--led); font-variant-numeric: tabular-nums; }
+.lb li.me { background: var(--me); border-radius: 6px; }
+
+/* ---------- profile ---------- */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.stat { background: var(--turf-2); padding: 12px 14px; }
+.stat .k { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--chalk-dim); }
+.stat .v { font-family: var(--mono); font-size: 24px; font-variant-numeric: tabular-nums; }
+.panel { background: var(--turf-2); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; }
+.rules { margin: 0; padding-left: 18px; color: var(--chalk-dim); display: grid; gap: 4px; }
+
+/* ---------- auth ---------- */
+.auth { max-width: 420px; width: 100%; margin: 0 auto; display: grid; gap: 14px; padding-top: 8px; }
+.auth h1 { font-family: var(--display); font-weight: 900; font-size: 52px; line-height: .9; margin: 0; text-transform: uppercase; text-wrap: balance; }
+.auth h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+label { display: grid; gap: 4px; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--chalk-dim); }
+input[type=text], input[type=email], input[type=password] {
+  background: var(--turf-2); border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; font-size: 16px; text-transform: none; letter-spacing: 0;
+}
+.link { background: none; border: 0; color: var(--led); padding: 0; text-decoration: underline; }
+.err { color: var(--loss); font-size: 14px; min-height: 1em; }
+
+/* ---------- tab bar ---------- */
+nav.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: var(--turf); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+nav.tabs button { background: none; border: 0; padding: 10px 0 12px; display: grid; justify-items: center; gap: 3px; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--chalk-dim); }
+nav.tabs button svg { width: 22px; height: 22px; }
+nav.tabs button[aria-current="page"] { color: var(--led); }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+  background: var(--chalk); color: var(--turf); font-weight: 700; padding: 10px 16px; border-radius: 8px; max-width: calc(100% - 32px);
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app" id="app"></div>
+<nav class="tabs" id="tabs" hidden><div class="in">
+  <button data-tab="board" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M3 12h18"/></svg>Games</button>
+  <button data-tab="picks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>My Picks</button>
+  <button data-tab="leaders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Leaders</button>
+  <button data-tab="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profile</button>
+</div></nav>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script>
+/* =====================================================================
+   NEXT LEVEL PICK-EM
+   Paste your Supabase project URL and anon (public) key below.
+   Leave them blank to run in DEMO MODE (sample games saved in this browser).
+   ===================================================================== */
+const SUPABASE_URL = "https://swvdfvxxptagvexsxifz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_WyY1-DMXg5nbK_tKdZnhhQ_03K_x5sS";
+
+const COIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5L12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>';
+const LIVE = !!(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase);
+
+/* ---------------- helpers ---------------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => Number(n || 0).toLocaleString("en-US");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+function when(iso) {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/Chicago" });
+  const t = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
+  return `${day} ${t} CT`;
+}
+function nextListing() {
+  const d = new Date(); d.setUTCMinutes(0, 0, 0);
+  d.setUTCHours(d.getUTCHours() + (d.getUTCHours() % 2 === 0 ? 2 : 1));
+  const mins = Math.max(0, Math.round((d - Date.now()) / 60000));
+  return `${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, "0")}m`;
+}
+let toastTimer, searchTimer;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2600);
+}
+function todayCT() { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); }
+
+/* =====================================================================
+   DATA LAYER — same methods for live Supabase and demo mode
+   ===================================================================== */
+function liveApi() {
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const uid = async () => (await sb.auth.getUser()).data.user?.id;
+  const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
+  return {
+    async session() { return (await sb.auth.getSession()).data.session; },
+    onAuth(cb) { sb.auth.onAuthStateChange(() => cb()); },
+    async signUp(email, password, username, school) {
+      ok(await sb.auth.signUp({ email, password, options: { data: { username, school } } }));
+      const s = await this.session();
+      if (!s) throw new Error("Check your email to confirm your account, then sign in.");
+    },
+    async signIn(email, password) { ok(await sb.auth.signInWithPassword({ email, password })); },
+    async signOut() { await sb.auth.signOut(); },
+    async profile() { return ok(await sb.from("profiles").select("*").eq("id", await uid()).single()); },
+    async games() {
+      const since = new Date(Date.now() - 2 * 86400000).toISOString();
+      return ok(await sb.from("games").select("*").in("status", ["listed", "locked", "final"])
+        .gte("starts_at", since).order("starts_at"));
+    },
+    async picks() { return ok(await sb.from("picks").select("*, game:games(*)").order("created_at", { ascending: false }).limit(100)); },
+    async placePick(gameId, side, stake) { return ok(await sb.rpc("place_pick", { p_game_id: gameId, p_side: side, p_stake: stake })); },
+    async claimBonus() { return ok(await sb.rpc("claim_daily_bonus")); },
+    async leaders(scope) {
+      if (scope === "week") return ok(await sb.rpc("weekly_leaderboard")).map((r) => ({ ...r, value: r.net_coins }));
+      return ok(await sb.from("leaderboard").select("*").limit(100)).map((r) => ({ ...r, value: r.coins }));
+    },
+    async updateProfile(username, school) { ok(await sb.rpc("update_profile", { p_username: username, p_school: school })); },
+  };
+}
+
+/* ---- demo mode: everything lives in this browser ---- */
+function demoApi() {
+  const KEY = "nlp_demo_v2";
+  const H = 3600000;
+  function seed() {
+    const t = Date.now();
+    const g = (id, sport, cls, away, home, hrs, am, hm, status, as, hs) => ({
+      id, sport, class: cls, away_team: away, home_team: home, starts_at: new Date(t + hrs * H).toISOString(),
+      away_mult: am, home_mult: hm, status: status || "listed", away_score: as ?? null, home_score: hs ?? null,
+      winner: as == null ? null : as > hs ? "away" : hs > as ? "home" : "tie",
+    });
+    return {
+      user: null,
+      profile: null,
+      picks: [],
+      games: [
+        g(1, "Football", "Class 6 Quarterfinal", "De Smet", "CBC", 26, 2.40, 1.55),
+        g(2, "Football", "Class 5 Quarterfinal", "Liberty North", "Rockhurst", 27, 1.70, 2.10),
+        g(3, "Football", "Class 4 Quarterfinal", "Smithville", "Webb City", 26.5, 3.10, 1.35),
+        g(4, "Girls Volleyball", "Class 5 State", "Lafayette", "Marquette", 4, 1.90, 1.90),
+        g(5, "Girls Basketball", "Jamboree", "Francis Howell", "Fort Zumwalt North", 30, 1.85, 1.95),
+        g(6, "Boys Soccer", "Class 3", "Kickapoo", "Rock Bridge", 6, 2.25, 1.62),
+        g(7, "Football", "Class 2 District", "Blair Oaks", "Lamar", -26, 1.60, 2.30, "final", 35, 21),
+      ],
+      bots: [
+        { username: "TigerTailgate", school: "Rock Bridge", coins: 2840, wins: 9 },
+        { username: "CadetNation", school: "CBC", coins: 2210, wins: 7 },
+        { username: "OzarkPicks", school: "Kickapoo", coins: 1650, wins: 5 },
+        { username: "STLsideline", school: "De Smet", coins: 1190, wins: 3 },
+      ],
+    };
+  }
+  const RECS = { 1: ["9-2", "10-1"], 2: ["10-1", "8-3"], 3: ["7-4", "11-0"], 4: ["31-6", "33-4"], 5: ["2-0", "1-1"], 6: ["14-6", "17-3"], 7: ["9-2", "6-5"] };
+  function withRecords(st) {
+    for (const g of st.games) {
+      const r = RECS[g.id]; if (r && !g.away_record) { g.away_record = r[0]; g.home_record = r[1]; }
+      if (!g.source_url) g.source_url = "https://www.mshsaa.org/";
+    }
+    return st;
+  }
+  let s = withRecords(store.get(KEY, null) || seed());
+  const save = () => store.set(KEY, s);
+  function settle(game, as, hs) {
+    game.status = "final"; game.away_score = as; game.home_score = hs;
+    game.winner = as > hs ? "away" : hs > as ? "home" : "tie";
+    for (const p of s.picks.filter((p) => p.game_id === game.id && !p.result)) {
+      if (game.winner === "tie") { p.result = "push"; p.payout = p.stake; s.profile.coins += p.stake; }
+      else if (p.side === game.winner) {
+        p.result = "won"; p.payout = Math.round(p.stake * p.multiplier);
+        s.profile.coins += p.payout; s.profile.picks_won++; s.profile.streak++;
+        s.profile.best_streak = Math.max(s.profile.best_streak, s.profile.streak);
+      } else { p.result = "lost"; p.payout = 0; s.profile.streak = 0; }
+    }
+  }
+  return {
+    demo: true,
+    async session() { return s.user; },
+    onAuth() {},
+    async signUp(email, password, username, school) {
+      if (!username || username.length < 3) throw new Error("Username needs at least 3 characters.");
+      s.user = { email }; s.profile = { username, school, coins: 1000, picks_made: 0, picks_won: 0, streak: 0, best_streak: 0, last_bonus: null };
+      save();
+    },
+    async signIn(email) {
+      if (!s.profile) throw new Error("No demo account yet. Create one first.");
+      s.user = { email }; save();
+    },
+    async signOut() { s.user = null; save(); },
+    async profile() { return s.profile; },
+    async games() {
+      for (const g of s.games) if (g.status === "listed" && new Date(g.starts_at) <= new Date()) g.status = "locked";
+      save(); return [...s.games].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+    },
+    async picks() { return s.picks.map((p) => ({ ...p, game: s.games.find((g) => g.id === p.game_id) })).reverse(); },
+    async placePick(gameId, side, stake) {
+      const g = s.games.find((x) => x.id === gameId);
+      if (!g || g.status !== "listed") throw new Error("This game is closed for picks");
+      if (s.picks.some((p) => p.game_id === gameId)) throw new Error("You already picked this game");
+      if (s.profile.coins < stake) throw new Error("Not enough coins");
+      s.profile.coins -= stake; s.profile.picks_made++;
+      s.picks.push({ id: Date.now(), game_id: gameId, side, stake, multiplier: side === "home" ? g.home_mult : g.away_mult, result: null, payout: null, created_at: new Date().toISOString() });
+      save();
+    },
+    async claimBonus() {
+      if (s.profile.last_bonus === todayCT()) return { claimed: false };
+      s.profile.coins += 100; s.profile.last_bonus = todayCT(); save(); return { claimed: true };
+    },
+    async leaders(scope) {
+      const me = { username: s.profile.username, school: s.profile.school, coins: s.profile.coins, wins: s.profile.picks_won, me: true };
+      const all = [...s.bots, me];
+      const rows = scope === "week"
+        ? all.map((r) => ({ ...r, value: r.me ? s.picks.reduce((n, p) => n + (p.payout ?? 0) - p.stake, 0) : Math.round((r.coins - 1000) * 0.4) }))
+        : all.map((r) => ({ ...r, value: r.coins }));
+      return rows.sort((a, b) => b.value - a.value);
+    },
+    async updateProfile(username, school) { s.profile.username = username; s.profile.school = school; save(); },
+    // demo-only: pretend the 2-hour job found a final score for one of your picks
+    async simulateResult() {
+      const open = s.picks.map((p) => s.games.find((g) => g.id === p.game_id)).find((g) => g && g.status !== "final");
+      if (!open) throw new Error("Make a pick first, then simulate its result.");
+      const homeWins = Math.random() < 1 / open.home_mult / (1 / open.home_mult + 1 / open.away_mult);
+      const a = 7 + Math.floor(Math.random() * 28), b = a + 3 + Math.floor(Math.random() * 14);
+      settle(open, homeWins ? a : b, homeWins ? b : a); save();
+      return open;
+    },
+    async reset() { s = withRecords(seed()); save(); },
+  };
+}
+
+const api = LIVE ? liveApi() : demoApi();
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+const state = { tab: "board", sport: "All", q: "", limit: 30, lbScope: "all", draft: {}, profile: null };
+
+function header() {
+  const p = state.profile;
+  return `<header class="board">
+    <div class="brand">Next Level<br><span>Pick-Em</span></div>
+    <div class="coins" aria-label="Coin balance">${COIN_SVG}<span id="bal">${fmt(p?.coins)}</span></div>
+    <div class="subline"><span>Missouri HS · ${api.demo ? '<span class="demo-flag">Demo slate</span>' : "Live"}</span><span>Next games in <b id="cd">${nextListing()}</b></span></div>
+  </header>`;
+}
+
+async function render() {
+  const app = $("#app");
+  const session = await api.session();
+  if (!session) { $("#tabs").hidden = true; app.innerHTML = authView(); bindAuth(); return; }
+  $("#tabs").hidden = false;
+  try { state.profile = await api.profile(); } catch (e) { toast(e.message); }
+  document.querySelectorAll("#tabs button").forEach((b) => { if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  const views = { board: boardView, picks: picksView, leaders: leadersView, me: meView };
+  app.innerHTML = header() + `<main id="main"><div class="muted small">Loading…</div></main>`;
+  $("#main").innerHTML = await views[state.tab]();
+  bindView();
+}
+
+/* ---------- auth ---------- */
+function authView(mode = "signup") {
+  const up = mode === "signup";
+  return `<main><form class="auth" id="authForm" data-mode="${mode}" novalidate>
+    <h1>Next Level <span>Pick-Em</span></h1>
+    <p class="muted">Pick Missouri high school games, stack coins, climb the board. ${up ? "New accounts start with 1,000 coins." : ""}</p>
+    ${api.demo ? '<p class="small demo-flag">Demo mode: no Supabase keys yet, so your account is saved in this browser only.</p>' : ""}
+    ${up ? `<label for="username">Username<input id="username" type="text" autocomplete="username" maxlength="20" required></label>
+    <label for="school">Your school (optional)<input id="school" type="text" placeholder="e.g. Francis Howell" maxlength="40"></label>` : ""}
+    <label for="email">Email<input id="email" type="email" autocomplete="email" required></label>
+    <label for="password">Password<input id="password" type="password" autocomplete="${up ? "new-password" : "current-password"}" minlength="6" required></label>
+    <div class="err" id="authErr"></div>
+    <button class="btn" type="submit">${up ? "Create account" : "Sign in"}</button>
+    <p class="small muted">${up ? "Already have an account?" : "New here?"} <button type="button" class="link" id="swap">${up ? "Sign in" : "Create an account"}</button></p>
+  </form></main>`;
+}
+function bindAuth() {
+  const f = $("#authForm");
+  $("#swap").onclick = () => { $("#app").innerHTML = authView(f.dataset.mode === "signup" ? "signin" : "signup"); bindAuth(); };
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $("#email").value.trim(), pw = $("#password").value;
+    const err = $("#authErr"); err.textContent = "";
+    if (!email || pw.length < 6) { err.textContent = "Enter your email and a password of at least 6 characters."; return; }
+    try {
+      if (f.dataset.mode === "signup") await api.signUp(email, pw, $("#username").value.trim(), $("#school").value.trim());
+      else await api.signIn(email, pw);
+      state.tab = "board"; render();
+    } catch (x) { err.textContent = x.message; }
+  };
+}
+
+/* ---------- games board ---------- */
+async function boardView() {
+  const [games, picks] = await Promise.all([api.games(), api.picks()]);
+  const mine = Object.fromEntries(picks.map((p) => [p.game_id, p]));
+  const open = games.filter((g) => g.status === "listed" || g.status === "locked");
+  const sports = ["All", ...new Set(open.map((g) => g.sport))];
+  if (!sports.includes(state.sport)) state.sport = "All";
+  const q = state.q.trim().toLowerCase();
+  const matches = open.filter((g) => (state.sport === "All" || g.sport === state.sport) &&
+    (!q || `${g.home_team} ${g.away_team} ${g.class || ""}`.toLowerCase().includes(q)));
+  const shown = matches.slice(0, state.limit);
+  const bonusReady = state.profile && state.profile.last_bonus !== todayCT();
+  return `
+    ${bonusReady ? `<div class="panel" style="grid-template-columns:1fr auto;align-items:center"><div><b>Daily bonus ready</b><div class="small muted">Claim 100 free coins once a day.</div></div><button class="btn" id="bonus">+100</button></div>` : ""}
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h2>Tonight's board</h2><span class="small muted">${fmt(open.length)} games</span></div>
+    <input type="search" id="q" class="search" placeholder="Search a school…" value="${esc(state.q)}" aria-label="Search a school" autocomplete="off">
+    <div class="chips" role="group" aria-label="Filter by sport">${sports.map((s) => `<button class="chip" data-sport="${esc(s)}" aria-pressed="${s === state.sport}">${esc(s)}</button>`).join("")}</div>
+    <div id="gameList" style="display:grid;gap:14px">${shown.length ? shown.map((g) => gameCard(g, mine[g.id])).join("") :
+      q ? `<div class="empty"><strong>No match</strong>No listed game has "${esc(state.q)}". Games are listed up to a day ahead.</div>` :
+      `<div class="empty"><strong>No games listed yet</strong>New games drop every 2 hours, read straight from MSHSAA schedules and brackets.</div>`}</div>
+    ${matches.length > shown.length ? `<button class="btn ghost" id="more">Show more (${fmt(matches.length - shown.length)} left)</button>` : ""}`;
+}
+
+function gameCard(g, pick) {
+  const locked = g.status !== "listed";
+  const sel = pick ? pick.side : state.draft[g.id]?.side;
+  const side = (k) => {
+    const team = k === "home" ? g.home_team : g.away_team;
+    const mult = k === "home" ? g.home_mult : g.away_mult;
+    return `<button class="side" data-game="${g.id}" data-side="${k}" aria-pressed="${sel === k}" ${locked || pick ? "disabled" : ""}>
+      <span class="where">${k === "home" ? "Home" : "Away"}</span>
+      <span class="team">${esc(team)}</span>
+      <span class="mult">${Number(mult).toFixed(2)}×</span></button>`;
+  };
+  const d = state.draft[g.id];
+  const max = Math.min(500, state.profile?.coins ?? 0);
+  const stake = Math.min(d?.stake ?? 50, Math.max(10, max));
+  const mult = d ? (d.side === "home" ? g.home_mult : g.away_mult) : 0;
+  return `<article class="game">
+    <div class="game-top"><span><span class="sport">${esc(g.sport)}</span>${g.class ? " · " + esc(g.class) : ""}</span>
+      <span>${locked ? '<span class="status st-locked">Locked</span>' : when(g.starts_at)}</span></div>
+    <div class="sides">${side("away")}<span class="vs">AT</span>${side("home")}</div>
+    ${g.home_record || g.away_record ? `<div class="recs small muted"><span>${esc(g.away_record || "")}</span><span>${g.source_url ? `<a href="${esc(g.source_url)}" target="_blank" rel="noopener">MSHSAA ↗</a>` : ""}</span><span>${esc(g.home_record || "")}</span></div>` : ""}
+    ${pick ? `<div class="your-pick">Your pick: <b>${esc(pick.side === "home" ? g.home_team : g.away_team)}</b> · ${fmt(pick.stake)} coins to win <b>${fmt(Math.round(pick.stake * pick.multiplier))}</b></div>` : ""}
+    ${d && !pick && !locked ? `<div class="slip">
+      <div class="slip-row"><label for="stake-${g.id}" class="small" style="flex:none">Stake</label>
+        <input type="range" id="stake-${g.id}" data-stake="${g.id}" min="10" max="${Math.max(10, max)}" step="10" value="${stake}">
+        <span class="stake" id="sv-${g.id}">${stake}</span></div>
+      <div class="quick">${[25, 50, 100, 250].map((v) => `<button data-quick="${g.id}" data-v="${v}" ${v > max ? "disabled" : ""}>${v}</button>`).join("")}</div>
+      <button class="btn" data-lock="${g.id}" ${max < 10 ? "disabled" : ""}>Lock in · win <span id="win-${g.id}">${fmt(Math.round(stake * mult))}</span></button>
+    </div>` : ""}
+  </article>`;
+}
+
+/* ---------- my picks ---------- */
+async function picksView() {
+  const picks = await api.picks();
+  if (!picks.length) return `<h2>My picks</h2><div class="empty"><strong>No picks yet</strong>Head to Games and tap a team to make your first pick.</div>`;
+  const open = picks.filter((p) => !p.result), done = picks.filter((p) => p.result);
+  const row = (p) => {
+    const g = p.game || {};
+    const team = p.side === "home" ? g.home_team : g.away_team;
+    const badge = p.result ? `<span class="status st-${p.result}">${p.result}</span>` : `<span class="status ${g.status === "listed" ? "st-open" : "st-locked"}">${g.status === "listed" ? "Open" : "Live"}</span>`;
+    const score = g.status === "final" ? `<div class="score">${g.away_score}–${g.home_score}</div>` : "";
+    const delta = p.result === "won" ? `<span style="color:var(--win)">+${fmt(p.payout)}</span>` : p.result === "lost" ? `<span style="color:var(--loss)">−${fmt(p.stake)}</span>` : p.result === "push" ? "refunded" : `to win ${fmt(Math.round(p.stake * p.multiplier))}`;
+    return `<article class="game"><div class="game-top"><span><span class="sport">${esc(g.sport)}</span> · ${g.starts_at ? when(g.starts_at) : ""}</span>${badge}</div>
+      <div style="padding:8px 14px 12px;display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <div style="min-width:0"><div class="small muted">${esc(g.away_team)} at ${esc(g.home_team)}</div>
+        <div style="font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase">${esc(team)} · ${Number(p.multiplier).toFixed(2)}×</div>
+        <div class="small muted">${fmt(p.stake)} coins · ${delta}</div></div>${score}</div></article>`;
+  };
+  return `<h2>My picks</h2>
+    ${open.length ? `<div class="small muted">Open (${open.length})</div>${open.map(row).join("")}` : ""}
+    ${done.length ? `<div class="small muted">Settled (${done.length})</div>${done.map(row).join("")}` : ""}`;
+}
+
+/* ---------- leaderboard ---------- */
+async function leadersView() {
+  const rows = await api.leaders(state.lbScope);
+  const myName = state.profile?.username;
+  return `<h2>Leaderboard</h2>
+    <div class="seg" role="group"><button data-scope="all" aria-pressed="${state.lbScope === "all"}">All-time coins</button><button data-scope="week" aria-pressed="${state.lbScope === "week"}">This week</button></div>
+    ${api.demo ? '<div class="small demo-flag">Demo board with sample players.</div>' : ""}
+    ${rows.length ? `<ol class="lb">${rows.map((r, i) => `<li class="${r.username === myName ? "me" : ""}">
+      <span class="rk">${i + 1}</span>
+      <span class="who"><div class="name">${esc(r.username)}</div><div class="small muted">${esc(r.school || "—")}</div></span>
+      <span class="val">${state.lbScope === "week" && r.value > 0 ? "+" : ""}${fmt(r.value)}</span></li>`).join("")}</ol>`
+      : `<div class="empty"><strong>No picks this week</strong>The weekly board resets every Monday.</div>`}`;
+}
+
+/* ---------- profile ---------- */
+async function meView() {
+  const p = state.profile || {};
+  const pct = p.picks_made ? Math.round((100 * p.picks_won) / p.picks_made) : 0;
+  return `<h2>${esc(p.username)}</h2>
+    <div class="small muted">${esc(p.school || "No school set")}</div>
+    <div class="stats">
+      <div class="stat"><div class="k">Coins</div><div class="v" style="color:var(--led)">${fmt(p.coins)}</div></div>
+      <div class="stat"><div class="k">Win rate</div><div class="v">${pct}%</div></div>
+      <div class="stat"><div class="k">Picks won</div><div class="v">${fmt(p.picks_won)} / ${fmt(p.picks_made)}</div></div>
+      <div class="stat"><div class="k">Streak · best</div><div class="v">${fmt(p.streak)} · ${fmt(p.best_streak)}</div></div>
+    </div>
+    <form class="panel" id="profForm">
+      <b>Edit profile</b>
+      <label for="pu">Username<input id="pu" type="text" value="${esc(p.username)}" maxlength="20"></label>
+      <label for="ps">School<input id="ps" type="text" value="${esc(p.school || "")}" maxlength="40"></label>
+      <button class="btn ghost" type="submit">Save</button>
+    </form>
+    <div class="panel"><b>How coins work</b>
+      <ul class="rules">
+        <li>New accounts get 1,000 coins, plus 100 free every day.</li>
+        <li>Stake 10–500 coins on one team per game.</li>
+        <li>Win and you get stake × the multiplier. Underdogs pay more.</li>
+        <li>Ties and cancelled games refund your stake.</li>
+        <li>Coins are for fun only and have no cash value.</li>
+      </ul></div>
+    ${api.demo ? `<div class="panel"><b>Demo tools</b><div class="small muted">These stand in for the 2-hour score check in the real app.</div>
+      <button class="btn ghost" id="sim">Finish one of my games</button><button class="btn ghost" id="reset">Reset demo</button></div>` : ""}
+    <button class="btn ghost" id="out">Sign out</button>`;
+}
+
+/* ---------- events ---------- */
+function bindView() {
+  const main = $("#main");
+  main.onclick = async (e) => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.sport) { state.sport = t.dataset.sport; state.limit = 30; return render(); }
+    if (t.id === "more") { state.limit += 30; return render(); }
+    if (t.dataset.side && !t.disabled) {
+      const id = +t.dataset.game;
+      state.draft = state.draft[id]?.side === t.dataset.side ? {} : { [id]: { side: t.dataset.side, stake: state.draft[id]?.stake ?? 50 } };
+      return render();
+    }
+    if (t.dataset.quick) { setStake(+t.dataset.quick, +t.dataset.v); return; }
+    if (t.dataset.lock) {
+      const id = +t.dataset.lock, d = state.draft[id];
+      t.disabled = true;
+      try { await api.placePick(id, d.side, d.stake ?? 50); state.draft = {}; toast("Pick locked in"); render(); }
+      catch (x) { toast(x.message); t.disabled = false; }
+      return;
+    }
+    if (t.id === "bonus") { const r = await api.claimBonus().catch((x) => toast(x.message)); if (r?.claimed) toast("+100 coins added"); return render(); }
+    if (t.dataset.scope) { state.lbScope = t.dataset.scope; return render(); }
+    if (t.id === "out") { await api.signOut(); state.tab = "board"; return render(); }
+    if (t.id === "sim") { try { const g = await api.simulateResult(); toast(`Final: ${g.away_team} ${g.away_score}, ${g.home_team} ${g.home_score}`); render(); } catch (x) { toast(x.message); } return; }
+    if (t.id === "reset") { await api.reset(); state.draft = {}; return render(); }
+  };
+  main.oninput = (e) => {
+    if (e.target.dataset.stake) setStake(+e.target.dataset.stake, +e.target.value);
+    if (e.target.id === "q") {
+      state.q = e.target.value; state.limit = 30;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(async () => { const pos = e.target.selectionStart; await render(); const q = $("#q"); if (q) { q.focus(); q.setSelectionRange(pos, pos); } }, 250);
+    }
+  };
+  const pf = $("#profForm");
+  if (pf) pf.onsubmit = async (e) => {
+    e.preventDefault();
+    const u = $("#pu").value.trim();
+    if (u.length < 3) return toast("Username needs at least 3 characters.");
+    try { await api.updateProfile(u, $("#ps").value.trim()); toast("Profile saved"); render(); } catch (x) { toast(x.message); }
+  };
+}
+async function setStake(id, v) {
+  const d = state.draft[id]; if (!d) return;
+  const max = Math.min(500, state.profile?.coins ?? 0);
+  d.stake = Math.max(10, Math.min(v, max));
+  const games = await api.games(); const g = games.find((x) => x.id === id);
+  const mult = d.side === "home" ? g.home_mult : g.away_mult;
+  const r = $(`#stake-${id}`); if (r) r.value = d.stake;
+  $(`#sv-${id}`).textContent = d.stake;
+  $(`#win-${id}`).textContent = fmt(Math.round(d.stake * mult));
+}
+
+document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => { state.tab = b.dataset.tab; state.draft = {}; render(); window.scrollTo(0, 0); }));
+setInterval(() => { const c = $("#cd"); if (c) c.textContent = nextListing(); }, 30000);
+api.onAuth(() => render());
+render();
+</script>

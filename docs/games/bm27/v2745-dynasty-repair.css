@@ -1,0 +1,3 @@
+/* BM27 2.7.45 Dynasty gameplay guardrails and responsive polish */
+#dyn249 .dy-progression{padding:16px 20px;margin:12px 0 20px;border:1px solid rgba(225,235,255,.2);border-radius:14px;background:linear-gradient(110deg,rgba(23,48,85,.88),rgba(10,24,45,.88));color:#f2f6ff;line-height:1.7}
+#dyn249 .dy-progression small{color:#b9cee9}#dyn249 button:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.8)}#dyn249 .dy-actions{display:flex;flex-wrap:wrap;gap:10px}#dyn249 .dy-attrs{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px}@media(max-width:650px){#dyn249 .dy-hero{flex-direction:column}#dyn249 .dy-row{display:flex;flex-wrap:wrap}}

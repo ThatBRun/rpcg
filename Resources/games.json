@@ -1,0 +1,99 @@
+{
+  "storeName": "RamPace Games",
+  "tagline": "Every RamPaceCorp game, in one place.",
+  "games": [
+    {
+      "id": "bm27",
+      "title": "MSHSAA Basketball Manager 27",
+      "shortName": "BM27",
+      "subtitle": "Run a Missouri high school program",
+      "description": "Take over a Missouri high school basketball program and build a dynasty. Recruit and develop players, play out the regular season, chase your conference title, and fight through districts and MSHSAA Madness for the state championship. Real schools, real rosters, box scores, stats and cloud saves.",
+      "genre": "Sports",
+      "version": "2.7.68",
+      "launch": "web",
+      "url": "games/bm27/index.html",
+      "iconURL": "icons/bm27.png",
+      "colors": [
+        "#1E7A4A",
+        "#0B1F14"
+      ],
+      "featured": true,
+      "updated": "Oct 2026"
+    },
+    {
+      "id": "backrooms-unsighted",
+      "title": "Backrooms Unsighted",
+      "shortName": "Backrooms",
+      "subtitle": "Don't lose your way.",
+      "description": "Wake up in the endless yellow halls of the Backrooms. Explore the maze, keep your nerve, and find a way out before something finds you. A first-person horror game built in Unity.",
+      "genre": "Horror",
+      "version": "1.0",
+      "launch": "web",
+      "url": "games/backrooms-unsighted/index.html",
+      "iconURL": "icons/backrooms-unsighted.png",
+      "colors": [
+        "#8A7F2E",
+        "#1A170A"
+      ],
+      "featured": true,
+      "landscape": true,
+      "updated": "Jun 2026"
+    },
+    {
+      "id": "survival-protocol",
+      "title": "Survival Protocol",
+      "shortName": "Survival",
+      "subtitle": "Chapter 1: Algeria",
+      "description": "A story-driven military shooter. You are Jake Sarton, fighting alongside Sgt. Houser through the first chapter of a campaign set in Algeria.",
+      "genre": "Shooter",
+      "version": "0.1",
+      "status": "Early Access",
+      "launch": "web",
+      "url": "games/survival-protocol/index.html",
+      "iconURL": "icons/survival-protocol.png",
+      "colors": [
+        "#F2B33D",
+        "#2A1E08"
+      ],
+      "featured": true,
+      "landscape": true,
+      "updated": "Nov 2026"
+    },
+    {
+      "id": "next-level-pickem",
+      "title": "Next Level Pick-Em",
+      "shortName": "Pick-Em",
+      "subtitle": "Pick Missouri high school winners",
+      "description": "Pick the winners of real Missouri high school games, stake your coins, and climb the leaderboard. Football, basketball, soccer, volleyball, baseball, softball and more, with schedules and final scores straight from MSHSAA. Underdog picks pay up to 5x.",
+      "genre": "Sports",
+      "version": "1.0",
+      "launch": "web",
+      "url": "games/next-level-pickem/index.html",
+      "iconURL": "icons/next-level-pickem.png",
+      "colors": [
+        "#3CF29A",
+        "#0B172B"
+      ],
+      "featured": false,
+      "updated": "Nov 2026"
+    },
+    {
+      "id": "vbl",
+      "title": "VBL Volleyball League",
+      "shortName": "VBL",
+      "subtitle": "Teams, schedules, standings, playoffs",
+      "description": "The home of the Volleyball League. Follow all 14 teams, from the St. Louis HardHitters to the San Diego Sails, with rosters, schedules, standings and the road through the playoffs.",
+      "genre": "Sports",
+      "version": "1.0",
+      "launch": "web",
+      "url": "games/vbl/index.html",
+      "iconURL": "icons/vbl.png",
+      "colors": [
+        "#D7304B",
+        "#1F3561"
+      ],
+      "featured": false,
+      "updated": "Oct 2026"
+    }
+  ]
+}

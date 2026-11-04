@@ -1,0 +1,8 @@
+/* BM27 v2.7.18 */
+.v2718-national-points{margin-top:20px}
+.v2718-national-points .metrics{margin:14px 0}
+.v2718-points-feed{display:grid;gap:8px;margin-top:10px}
+.v2718-full-rankings{margin-top:24px}
+.v2718-full-rankings .ranking-pagination{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:12px 0}
+.v2718-full-rankings td,.v2718-full-rankings th{white-space:nowrap}
+@media(max-width:700px){.v2718-full-rankings .ranking-pagination{justify-content:center}.v2718-national-points .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
