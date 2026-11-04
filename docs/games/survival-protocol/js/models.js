@@ -98,6 +98,8 @@ Mods.soldier = function (o = {}) {
   const boots = SP.flat(us ? 0x9a8463 : 0x2a2622, 0.85), glove = SP.flat(us ? 0x3a3530 : 0x2a2420, 0.8), dark = SP.flat(0x1a1a1a, 0.6);
   const root = new T.Group(); root.rotation.order = 'YXZ';
   const body = new T.Group(); root.add(body);
+  if (!SP.blobMat) { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(0, 0, 64, 64); SP.blobMat = new T.MeshBasicMaterial({ map: new T.CanvasTexture(c), transparent: true, depthWrite: false }); }
+  const blob = new T.Mesh(new T.PlaneGeometry(1.1, 1.1), SP.blobMat); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; blob.renderOrder = 1; root.add(blob);
   const hips = new T.Group(); hips.position.y = 0.98; body.add(hips);
   M(geo.box(0.34, 0.2, 0.22), pants, 0, 0, 0, hips);
   if (us || r() < 0.6) M(geo.box(0.36, 0.05, 0.24), dark, 0, 0.09, 0, hips, false); // belt

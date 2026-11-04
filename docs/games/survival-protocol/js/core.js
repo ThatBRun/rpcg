@@ -220,17 +220,24 @@ SP.Post = class {
         s+=texture2D(t,vUv+dir*1.3846).rgb*.316216; s+=texture2D(t,vUv-dir*1.3846).rgb*.316216; s+=texture2D(t,vUv+dir*3.2308).rgb*.070270; s+=texture2D(t,vUv-dir*3.2308).rgb*.070270; gl_FragColor=vec4(s,1.); }` });
     this.U = { tScene: { value: null }, tBloom: { value: null }, res: { value: new T.Vector2(1, 1) }, time: { value: 0 }, exposure: { value: 1 }, bloom: { value: 0.55 },
       grain: { value: 0.06 }, vignette: { value: 0.45 }, ca: { value: 0.0018 }, damage: { value: 0 }, blur: { value: 0 }, sat: { value: 1.05 }, contrast: { value: 1.08 },
-      warm: { value: 1 }, letterbox: { value: 0 }, flash: { value: 0 }, night: { value: 0 }, fade: { value: 0 } };
+      warm: { value: 1 }, letterbox: { value: 0 }, flash: { value: 0 }, night: { value: 0 }, fade: { value: 0 },
+      sunPos: { value: new T.Vector2(0.5, 0.5) }, sunVis: { value: 0 }, sunCol: { value: new T.Color(1, 0.8, 0.6) }, rays: { value: 0.55 }, dirt: { value: 0.5 }, sharp: { value: 0.35 }, haze: { value: 0 } };
     this.final = new T.ShaderMaterial({ uniforms: this.U, vertexShader: FSQ_VS, depthTest: false, depthWrite: false, fragmentShader: `
-      uniform sampler2D tScene,tBloom; uniform vec2 res; uniform float time,exposure,bloom,grain,vignette,ca,damage,blur,sat,contrast,warm,letterbox,flash,night,fade; varying vec2 vUv;
+      uniform sampler2D tScene,tBloom; uniform vec2 res; uniform float time,exposure,bloom,grain,vignette,ca,damage,blur,sat,contrast,warm,letterbox,flash,night,fade,sunVis,rays,dirt,sharp,haze; uniform vec2 sunPos; uniform vec3 sunCol; varying vec2 vUv;
       float h(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
+      float vn(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y); }
       vec3 aces(vec3 x){ return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.); }
       vec3 samp(vec2 uv){ vec2 d=uv-.5; float r=dot(d,d); vec2 o=d*ca*(1.+r*4.);
         return vec3(texture2D(tScene,uv+o).r, texture2D(tScene,uv).g, texture2D(tScene,uv-o).b); }
       void main(){
-        vec2 uv=vUv; vec3 c=samp(uv);
+        vec2 uv=vUv;
+        if(haze>0.){ float hz=smoothstep(.62,.45,uv.y)*smoothstep(.25,.45,uv.y); uv.x+=(vn(vec2(uv.x*60.,uv.y*140.-time*3.))-.5)*.0025*haze*hz; uv.y+=(vn(vec2(uv.x*50.+9.,uv.y*120.-time*2.))-.5)*.0018*haze*hz; }
+        vec3 c=samp(uv);
+        if(sharp>0.){ vec2 px=1./res; vec3 nb=texture2D(tScene,uv+vec2(px.x,0.)).rgb+texture2D(tScene,uv-vec2(px.x,0.)).rgb+texture2D(tScene,uv+vec2(0.,px.y)).rgb+texture2D(tScene,uv-vec2(0.,px.y)).rgb; c=max(c+(c-nb*.25)*sharp,vec3(0.)); }
         if(blur>0.001){ vec3 acc=c; float n=1.; for(int i=0;i<12;i++){ float a=float(i)*2.39996; float rr=sqrt(float(i)+.5)/3.6; vec2 o=vec2(cos(a),sin(a))*rr*blur*14./res; acc+=samp(uv+o); n+=1.; } c=acc/n; }
-        c+=texture2D(tBloom,uv).rgb*bloom;
+        vec3 bl=texture2D(tBloom,uv).rgb; c+=bl*bloom;
+        if(sunVis>0.01){ vec2 dlt=(uv-sunPos)/24.; vec2 q=uv; float dec=1.; vec3 acc=vec3(0.); for(int i=0;i<24;i++){ q-=dlt; acc+=texture2D(tBloom,q).rgb*dec; dec*=.93; } c+=acc/24.*rays*sunVis*sunCol*2.2; }
+        float ld=vn(uv*vec2(7.,4.)+3.)*.6+vn(uv*vec2(19.,11.))*.4; ld=smoothstep(.45,.8,ld); c+=bl*ld*dirt*1.4;
         c*=exposure;
         c=aces(c);
         c=pow(c,vec3(1./2.2));

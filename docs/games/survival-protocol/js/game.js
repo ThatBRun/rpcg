@@ -181,7 +181,7 @@ class Player {
   eyePos() { return V3(this.pos.x, this.pos.y + this.eye, this.pos.z); }
   update(dt) {
     const W = SP.W; const [mx, my] = I.consume();
-    const sens = (SP.sens || 1) * 0.0022 * (this.adsT > 0.5 ? 0.6 : 1) * (this.binoc ? 0.25 : 1);
+    const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; const sens = (SP.sens || 1) * 0.0022 * (this.adsT > 0.5 ? (zw ? 0.22 : 0.6) : 1) * (this.binoc ? 0.25 : 1);
     if (this.mode !== 'locked') { this.yaw -= mx * sens; this.pitch -= my * sens; } if (this.camAnim) { this.yaw = SP.damp(this.yaw, this.camAnim.yaw, this.camAnim.k || 2, dt); this.pitch = SP.damp(this.pitch, this.camAnim.pitch, this.camAnim.k || 2, dt); }
     this.pitch = clamp(this.pitch, -1.48, 1.48);
     if (this.lookLimit) { const L = this.lookLimit; let d = angDiff(L.yaw, this.yaw); d = clamp(d, -L.yawR, L.yawR); this.yaw = L.yaw + d; this.pitch = clamp(this.pitch, L.pMin, L.pMax); }
@@ -265,7 +265,7 @@ class Player {
     cam.position.set(this.pos.x, this.pos.y + this.eye + bobY - this.land - this.kick, this.pos.z);
     const nx = (SP.vnoise(t * 22, 1.3) - 0.5) * sh * 0.09, ny = (SP.vnoise(t * 22, 7.1) - 0.5) * sh * 0.09, nz = (SP.vnoise(t * 22, 3.7) - 0.5) * sh * 0.05;
     cam.rotation.set(this.pitch + this.recoil + ny, this.yaw + this.recoilYaw + nx, bobX * 0.4 + nz + (this.tilt || 0));
-    let fov = lerp(74, 56, this.adsT) + this.sprintT * 6; if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
+    let fov = lerp(74, 56, this.adsT) + this.sprintT * 6; const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; if (zw && this.mode !== 'turret') fov = lerp(fov, zw, clamp((this.adsT - 0.55) * 2.5, 0, 1)); if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
     this.fovS = damp(this.fovS || fov, fov, 12, dt); cam.fov = this.fovS; cam.updateProjectionMatrix();
     SP.listener = { pos: cam.position, yaw: this.yaw };
     // vignette damage
@@ -369,7 +369,7 @@ class Unit {
     G.tracer(from, end, this.team === 'foe' ? [9, 3.2, 1.2] : [8, 5.5, 2.2]);
     if (hit) { if (isP) P.hurt((this.weapon === 'shotgun' ? rand(30, 45) : rand(9, 14)), from); else tg.damage(this.team === 'ally' ? 45 : 25, from, false, this.team); }
     else { if (isP && dist < 70 && Math.random() < 0.45) A.whiz(); const wh = SP.W.ray(from, dir, 200); if (wh && Math.random() < 0.5) G.impact(wh.point, wh.surf); }
-    this.firedAt = G.time;
+    this.firedAt = G.time; if (this.team === 'foe') G.lastEnemyShot = G.time;
   }
   muzzle() { const g = this.rig.gun; if (!g) return this.eye; this.rig.root.updateMatrixWorld(true); return g.localToWorld(g.userData.muzzle.clone()); }
   steer(target, spd, dt) {
@@ -420,6 +420,10 @@ class Unit {
     } else if (this.behavior === 'patrol' && this.path) {
       if (this.aware) { this.behavior = this.onAlertBehavior || 'assault'; }
       else { const wp = this.path[this.pi]; if (this.waitT > 0) { this.waitT -= dt; this.speed = damp(this.speed, 0, 8, dt); } else if (this.steer(wp, this.walkSpeed, dt)) { this.pi = (this.pi + 1) % this.path.length; this.waitT = rand(1.5, 3.5); } else moving = true; }
+    } else if (this.behavior === 'wander') {
+      const panic = (G.lastEnemyShot && G.time - G.lastEnemyShot < 8) || (G.lastShot && G.time - G.lastShot < 8 && SP.P && SP.P.pos.distanceTo(this.pos) < 60);
+      if (panic) { if (!this.fleeTo) { const P = SP.P; const away = this.pos.clone().sub(P ? P.pos : V3()).setY(0); if (away.lengthSq() < 0.01) away.set(1, 0, 0); away.normalize().multiplyScalar(45); this.fleeTo = this.pos.clone().add(away); this.hands = Math.random() < 0.4 ? 'up' : null; } if (this.steer(this.fleeTo, 5.2, dt)) this.fleeTo = this.pos.clone().add(V3(rand(-30, 30), 0, rand(-30, 30))); moving = true; }
+      else { this.hands = null; if (!this.wgoal) this.wgoal = this.home.clone().add(V3(rand(-this.wr, this.wr), 0, rand(-this.wr, this.wr))); if (this.steer(this.wgoal, this.walkSpeed, dt)) { this.wpause = (this.wpause || rand(1, 5)) - dt; if (this.wpause <= 0) { this.wgoal = null; this.wpause = 0; } } else moving = true; }
     } else if (this.behavior === 'hold') {
       this.speed = damp(this.speed, 0, 8, dt); if (tg) { const tp = this.targetPos(tg); this.facePoint(tp.x, tp.z, 6, dt); if (!this.holdFire) this.fireLogic(dt, tg, false); } else if (this.lookAt) this.facePoint(this.lookAt.x, this.lookAt.z, 2, dt);
     } else { this.speed = damp(this.speed, 0, 8, dt); if (this.lookAt) this.facePoint(this.lookAt.x, this.lookAt.z, 2, dt); else if (tg && this.team !== 'civ') { const tp = this.targetPos(tg); this.facePoint(tp.x, tp.z, 6, dt); if (!this.holdFire) this.fireLogic(dt, tg, false); } }

@@ -7,7 +7,7 @@ const Maps = SP.Maps = {};
 
 /* ===================== environments ===================== */
 const ENV = {
-  dusk: { sunEl: 9, sunAz: 235, sunCol: 0xffb47a, sunI: 3.4, zenith: 0x4a6a95, horizon: 0xf0b07c, ground: 0x6e4c34, cloud: 0.42, cloudCol: 0xf2c6a0, hemiS: 0xffd2a8, hemiG: 0x6a4630, hemiI: 0.35, fog: 0xd8a47a, fogD: 0.0026, exp: 1.0, night: 0, env: 0.9 },
+  dusk: { sunEl: 9, sunAz: 235, sunCol: 0xffb47a, sunI: 3.4, zenith: 0x4a6a95, horizon: 0xf0b07c, ground: 0x6e4c34, cloud: 0.42, cloudCol: 0xf2c6a0, hemiS: 0xffd2a8, hemiG: 0x6a4630, hemiI: 0.35, fog: 0xd8a47a, fogD: 0.0026, exp: 1.0, night: 0, env: 0.9, haze: 1 },
   dusk2: { sunEl: 5, sunAz: 245, sunCol: 0xff9a5a, sunI: 2.8, zenith: 0x3b557e, horizon: 0xe99a68, ground: 0x5e3f2c, cloud: 0.5, cloudCol: 0xe8a880, hemiS: 0xffc298, hemiG: 0x5a3a28, hemiI: 0.32, fog: 0xc98a62, fogD: 0.003, exp: 1.08, night: 0, env: 0.85 },
   night: { sunEl: 38, sunAz: 140, sunCol: 0x8fa8d8, sunI: 0.42, zenith: 0x060a16, horizon: 0x1a2235, ground: 0x0b0c10, cloud: 0.25, cloudCol: 0x2a3348, hemiS: 0x40507a, hemiG: 0x1a1612, hemiI: 0.22, fog: 0x141b29, fogD: 0.0026, exp: 1.4, night: 1, env: 0.55, moon: true },
   interior: { sunEl: 60, sunAz: 100, sunCol: 0x000000, sunI: 0.0, zenith: 0x0, horizon: 0x0, ground: 0x0, cloud: 0, cloudCol: 0, hemiS: 0x8a8378, hemiG: 0x2a2620, hemiI: 0.2, fog: 0x0e0d0c, fogD: 0.012, exp: 1.25, night: 0, env: 0.35, indoor: true },
@@ -15,7 +15,7 @@ const ENV = {
 };
 SP.ENV = ENV;
 SP.setEnv = function (scene, key, over = {}) {
-  const e = Object.assign({}, ENV[key], over); SP.envCfg = e; SP.night = !!e.moon || key === 'tunnel';
+  const e = Object.assign({}, ENV[key], over); SP.envCfg = e; SP.night = !!e.moon || key === 'tunnel' || key === 'cave';
   const az = e.sunAz * Math.PI / 180, el = e.sunEl * Math.PI / 180; const dir = V3(Math.sin(az) * Math.cos(el), Math.sin(el), -Math.cos(az) * Math.cos(el)).normalize(); SP.sunDir = dir;
   // sky
   const sm = SP.SkyMat(); const U = sm.uniforms; U.sunDir.value.copy(dir); U.zenith.value = SP.lin(e.zenith); U.horizon.value = SP.lin(e.horizon); U.ground.value = SP.lin(e.ground); U.sunCol.value = SP.lin(e.sunCol).multiplyScalar(e.moon ? 0.4 : 1.6); U.cloud.value = e.cloud; U.cloudCol.value = SP.lin(e.cloudCol); U.night.value = e.night; U.moonDir.value.copy(dir); U.haze.value = e.moon ? 0.3 : 1;
@@ -31,11 +31,12 @@ SP.setEnv = function (scene, key, over = {}) {
   Object.values(SP.matCache).forEach(m => { m.envMapIntensity = e.env; });
   // sun
   const sun = new T.DirectionalLight(SP.lin(e.sunCol), e.sunI); sun.castShadow = e.sunI > 0.05; const sc = sun.shadow.camera; const R = 55; sc.left = -R; sc.right = R; sc.top = R; sc.bottom = -R; sc.near = 1; sc.far = 400;
-  sun.shadow.mapSize.set(SP.shadowRes || 2048, SP.shadowRes || 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04; scene.add(sun, sun.target); SP.sun = sun;
+  sun.shadow.mapSize.set(SP.shadowRes || 2048, SP.shadowRes || 2048); sun.shadow.bias = -0.0003; sun.shadow.radius = 2; sun.shadow.normalBias = 0.04; scene.add(sun, sun.target); SP.sun = sun;
   const hemi = new T.HemisphereLight(SP.lin(e.hemiS), SP.lin(e.hemiG), e.hemiI); scene.add(hemi); SP.hemi = hemi;
   SP.vmHemi.color.copy(hemi.color); SP.vmHemi.groundColor.copy(hemi.groundColor); SP.vmHemi.intensity = e.hemiI + (e.indoor ? 0.3 : 0.15);
   scene.fog = new T.FogExp2(SP.lin(e.fog), e.fogD); scene.background = SP.lin(e.fog);
-  SP.post.U.exposure.value = e.exp; SP.post.U.night.value = e.night; SP.baseExposure = e.exp;
+  SP.post.U.exposure.value = e.exp; SP.post.U.night.value = e.night; SP.baseExposure = e.exp; SP.post.U.haze.value = e.haze || 0; SP.post.U.sunCol.value = SP.lin(e.sunCol);
+  if (!e.indoor) SP.addMotes(scene, e.moon ? 0x8fa0c0 : 0xffd9a8, e.moon ? 0.25 : 0.6);
   A.setReverb(e.indoor ? 0.6 : 0.25);
 };
 const A = SP.Audio;
@@ -124,7 +125,7 @@ function floodlight(W, x, z, aimX, aimZ, real, color = 0xffc98a) {
   if (real) { const s = new T.SpotLight(SP.lin(color), 22, 55, 0.75, 0.6, 2); s.position.set(x, base + 7, z); s.target.position.set(aimX, base, aimZ); W.scene.add(s, s.target); s.castShadow = false; }
 }
 function pointLamp(W, x, y, z, color = 0xffc88a, i = 3, dist = 12, shadow = false) { const l = new T.PointLight(SP.lin(color), i, dist, 2); l.position.set(x, y, z); l.castShadow = shadow; if (shadow) { l.shadow.mapSize.set(512, 512); l.shadow.bias = -0.002; } W.scene.add(l); M(geo.sph(0.08, 8, 6), SP.flat(0xffffff, 0.3, 0, { emissive: color, ei: 20 }), x, y, z, W.scene, false); return l; }
-function rock(W, x, z, s) { const g = new T.DodecahedronGeometry(1, 1); const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const k = 0.8 + SP.vnoise(p.getX(i) * 2 + x, p.getZ(i) * 2 + z) * 0.4; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); } g.computeVertexNormals(); const m = new T.Mesh(SP.worldUV(g, 2), SP.mat('rock', { roughness: 0.95 })); m.scale.set(s, s * rand(0.5, 0.8), s * rand(0.8, 1.2)); m.position.set(x, W.heightAt(x, z) + s * 0.2, z); m.rotation.y = rand(0, 6); m.castShadow = m.receiveShadow = true; W.scene.add(m); if (s > 0.8) W.colliderFrom(m, 'hard', s * 0.2); return m; }
+function rock(W, x, z, s) { const g = new T.DodecahedronGeometry(1, 1); const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const k = 0.8 + SP.vnoise(p.getX(i) * 2 + x, p.getZ(i) * 2 + z) * 0.4; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); } g.computeVertexNormals(); const m = new T.Mesh(SP.worldUV(g, 2), SP.mat('rock', { roughness: 0.95 })); m.scale.set(s, s * rand(0.5, 0.8), s * rand(0.8, 1.2)); m.position.set(x, Math.min(W.heightAt(x, z), W.heightAt(x + s * 0.8, z), W.heightAt(x - s * 0.8, z), W.heightAt(x, z + s * 0.8), W.heightAt(x, z - s * 0.8)) + s * 0.05, z); m.rotation.y = rand(0, 6); m.castShadow = m.receiveShadow = true; W.scene.add(m); if (s > 0.8) W.colliderFrom(m, 'hard', s * 0.2); return m; }
 function bushes(W, n, area, avoid) {
   const c = document.createElement('canvas'); c.width = c.height = 128; const k = c.getContext('2d'); k.strokeStyle = '#6b5a3c'; for (let i = 0; i < 70; i++) { k.lineWidth = rand(1, 2.5); k.strokeStyle = SP.pick(['#6b5a3c', '#7f6d47', '#5a4a30', '#8a7a52']); k.beginPath(); k.moveTo(64, 128); const a = rand(-1.3, 1.3); const l = rand(30, 110); k.quadraticCurveTo(64 + Math.sin(a) * l * 0.5, 128 - l * 0.6, 64 + Math.sin(a) * l, 128 - Math.cos(a) * l); k.stroke(); }
   const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; const mat = new T.MeshStandardMaterial({ map: t, alphaTest: 0.35, side: T.DoubleSide, roughness: 1 });
@@ -371,4 +372,21 @@ Maps.interior = function (W) {
   SP.alarmLights = [V3(-2, 8.5, -21), V3(-40, 2.8, -22.5), V3(-68, 3.0, -22)].map(p => { const l = new T.PointLight(SP.lin(0xff1a10), 0, 18, 2); l.position.copy(p); W.scene.add(l); return l; });
   return { start: V3(0, 0, -8.5) };
 };
+})();
+/* floating dust motes around the camera (catch the light) */
+(function () {
+  const T = THREE;
+  SP.addMotes = function (scene, color, op) {
+    const n = 420, g = new T.BufferGeometry(), p = new Float32Array(n * 3); for (let i = 0; i < n; i++) { p[i * 3] = (Math.random() - 0.5) * 24; p[i * 3 + 1] = Math.random() * 6; p[i * 3 + 2] = (Math.random() - 0.5) * 24; }
+    g.setAttribute('position', new T.BufferAttribute(p, 3));
+    const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'); const gr = x.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = gr; x.fillRect(0, 0, 32, 32);
+    const m = new T.PointsMaterial({ size: 0.05, map: new T.CanvasTexture(c), transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, color: SP.lin(color).multiplyScalar(2.5) });
+    const pts = new T.Points(g, m); pts.frustumCulled = false; scene.add(pts); SP.motes = pts;
+  };
+  SP.updateMotes = function (dt) {
+    const m = SP.motes; if (!m || !SP.camera) return; const c = SP.camera.position; const p = m.geometry.attributes.position; const t = performance.now() / 1000;
+    for (let i = 0; i < p.count; i++) { let x = p.getX(i), y = p.getY(i), z = p.getZ(i); x += Math.sin(t * 0.3 + i) * dt * 0.15 + dt * 0.2; y += Math.cos(t * 0.4 + i * 1.7) * dt * 0.08; z += Math.sin(t * 0.25 + i * 0.7) * dt * 0.12;
+      if (x - c.x > 12) x -= 24; if (x - c.x < -12) x += 24; if (z - c.z > 12) z -= 24; if (z - c.z < -12) z += 24; if (y - c.y > 4) y -= 7; if (y - c.y < -3) y += 7; p.setXYZ(i, x, y, z); }
+    p.needsUpdate = true;
+  };
 })();

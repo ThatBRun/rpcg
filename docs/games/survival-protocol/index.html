@@ -73,6 +73,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 #binoc .ret{position:absolute;left:50%;top:50%;width:min(44vmin,400px);height:1px;background:rgba(150,230,150,.5);transform:translate(-50%,-50%)}
 #binoc .ret2{position:absolute;left:50%;top:50%;height:min(30vmin,280px);width:1px;background:rgba(150,230,150,.5);transform:translate(-50%,-50%)}
 #binoc .rd{position:absolute;left:50%;bottom:20%;transform:translateX(-50%);font-family:var(--mono);color:rgba(150,230,150,.8);font-size:14px;letter-spacing:.1em}
+#scope{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 0 33vmin,rgba(0,0,0,.6) 33.3vmin,#000 34vmin)}
+#scope .sr{position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.85)}#scope .sv{position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(0,0,0,.85)}
+#scope .sd{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#e0412e;box-shadow:0 0 4px #e0412e}
 #intro{position:fixed;left:max(28px,env(safe-area-inset-left,0px));top:30%;display:grid;gap:4px;font-family:var(--mono);font-size:15px;letter-spacing:.08em;text-shadow:0 1px 3px #000;transition:opacity .9s}
 #intro .h{font-family:var(--hud);font-size:26px;font-weight:700;letter-spacing:.12em;color:var(--amber)}
 #intro.out{opacity:0}
@@ -110,6 +113,36 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 .cta:hover{background:#ffc75a}
 #chapterend{display:grid;place-items:center;background:#000;text-align:center}
 #chapterend .stack{justify-items:center}
+/* chapter tabs */
+#chaptabs{display:flex;flex-wrap:wrap;gap:6px;max-width:min(860px,calc(100vw - 32px))}
+.ctab{display:grid;gap:0;text-align:left;background:none;border:1px solid var(--line);color:var(--dim);padding:6px 12px;cursor:pointer}
+.ctab span{font-family:var(--mono);font-size:12px;color:var(--amber)} .ctab b{font-size:16px;font-weight:600}
+.ctab.on{border-color:var(--amber);color:var(--ink)} .ctab.soon{opacity:.55}
+/* platform picker */
+#platform .opts{display:flex;gap:14px;flex-wrap:wrap}
+.plat{display:grid;gap:6px;justify-items:start;text-align:left;width:min(250px,100%);background:rgba(14,14,13,.85);border:1px solid var(--line);color:var(--ink);padding:18px 20px;cursor:pointer}
+.plat b{font-size:30px;font-weight:700;letter-spacing:.06em;text-transform:uppercase} .plat span{font-size:14px;color:var(--dim);line-height:1.35}
+.plat:hover,.plat:focus-visible{border-color:var(--amber)} .plat.guess::after{content:"Detected";font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.2em}
+/* touch controls */
+#touch{position:fixed;inset:0;z-index:5;touch-action:none;-webkit-user-select:none;user-select:none}
+#t-stick{position:absolute;left:0;bottom:0;width:42%;height:70%}
+#t-look{position:absolute;right:0;top:0;width:58%;height:100%}
+#t-base{position:fixed;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid rgba(236,230,218,.35);background:rgba(10,10,9,.18);pointer-events:none}
+#t-knob{position:absolute;left:50%;top:50%;width:52px;height:52px;border-radius:50%;background:rgba(236,230,218,.45);transform:translate(-50%,-50%)}
+.tb{position:absolute;border-radius:50%;border:2px solid rgba(236,230,218,.45);background:rgba(10,10,9,.35);color:var(--ink);font-family:var(--hud);font-weight:700;font-size:13px;letter-spacing:.08em;display:grid;place-items:center;touch-action:none}
+.tb.on{background:rgba(242,179,61,.45)} .tb.lit{border-color:var(--amber);color:var(--amber)}
+#t-fire{width:84px;height:84px;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(104px + env(safe-area-inset-bottom,0px));font-size:15px;border-color:rgba(224,65,46,.8)}
+#t-aim{width:62px;height:62px;right:calc(122px + env(safe-area-inset-right,0px));bottom:calc(136px + env(safe-area-inset-bottom,0px))}
+#t-jump{width:54px;height:54px;right:calc(44px + env(safe-area-inset-right,0px));bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+#t-crouch{width:54px;height:54px;right:calc(126px + env(safe-area-inset-right,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+#t-reload{width:50px;height:50px;right:calc(202px + env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+#t-use{width:58px;height:58px;right:calc(270px + env(safe-area-inset-right,0px));bottom:calc(124px + env(safe-area-inset-bottom,0px))}
+#t-swap{width:50px;height:50px;right:calc(202px + env(safe-area-inset-right,0px));bottom:calc(160px + env(safe-area-inset-bottom,0px))}
+#t-light{width:44px;height:44px;right:calc(30px + env(safe-area-inset-right,0px));top:calc(70px + env(safe-area-inset-top,0px))}
+#t-pause{width:44px;height:44px;right:calc(84px + env(safe-area-inset-right,0px));top:calc(70px + env(safe-area-inset-top,0px))}
+body.mobile .keys{display:none}
+body.mobile #ammo{bottom:calc(14px + env(safe-area-inset-bottom,0px));right:calc(14px + env(safe-area-inset-right,0px))}
+body.mobile #amag{font-size:30px}
 @media (max-width:560px){#amag{font-size:36px}#sub{font-size:17px}.mb{font-size:24px}#intro{font-size:12px}#intro .h{font-size:20px}}
 @media (prefers-reduced-motion:reduce){#obj.new .v,#feed div{animation:none}}
 </style>
@@ -127,6 +160,7 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
   <div id="fname" hidden></div>
   <div id="intro" hidden></div>
 </div>
+<div id="scope" hidden><div class="sr"></div><div class="sv"></div><div class="sd"></div></div>
 <div id="binoc" hidden><div class="ret"></div><div class="ret2"></div><div class="rd">x 8.0 · CLICK TO TAG</div></div>
 <div id="cross" hidden><i></i><i></i><i></i><i></i></div>
 <div id="hitm"></div>
@@ -142,9 +176,9 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 
 <div id="title" class="ov screen" hidden>
   <div class="stack">
-    <span class="eyebrow">CHAPTER 1 · THE FORGOTTEN BASE</span>
+    <span class="eyebrow">CHAPTERS 1–2 · THE FORGOTTEN BASE · THE JACKAL'S ROAD</span>
     <h1>Survival Protocol</h1>
-    <p class="lede">Algeria. A base that went dark years ago, a hostage nobody can name, and a squad dropped half a mile out. You are Pvt. Jake Sarton.</p>
+    <p class="lede">Algeria. A base that went dark years ago, a hostage nobody can name, and a squad dropped half a mile out. You are Pvt. Jake Sarton. Chapter 2 is out now.</p>
     <div class="menu">
       <button class="mb" id="btn-cont" type="button">Continue</button>
       <button class="mb" id="btn-new" type="button">New game</button>
@@ -161,8 +195,9 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 
 <div id="chapters" class="ov screen" hidden>
   <div class="stack" style="width:auto">
-    <span class="eyebrow">CHAPTER 1 · 20 PARTS</span>
+    <span class="eyebrow" id="chapname">CHAPTER 1</span>
     <h2>Choose a part</h2>
+    <div id="chaptabs"></div>
     <div id="partgrid"></div>
     <div class="menu"><button class="mb" id="chap-back" type="button">Back</button></div>
   </div>
@@ -189,6 +224,7 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
     <div class="set">
       <label for="s-sens">Mouse sensitivity<input id="s-sens" type="range" min="0.3" max="2.5" step="0.05" value="1"></label>
       <label for="s-q">Graphics quality<select id="s-q"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low (faster)</option></select></label>
+      <label for="s-p">Playing on<select id="s-p"><option value="pc">PC (keyboard and mouse)</option><option value="mobile">Mobile (touch controls)</option></select></label>
       <label for="s-d">Difficulty<select id="s-d"><option value="easy">Recruit</option><option value="normal">Regular</option><option value="hard">Veteran</option></select></label>
     </div>
     <div class="menu"><button class="mb" id="s-done" type="button">Done</button></div>
@@ -206,11 +242,29 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 
 <div id="end" class="ov screen" hidden>
   <div class="stack">
-    <span class="eyebrow">END OF CHAPTER 1</span>
-    <h2>Houser is still out there</h2>
-    <p class="lede">The laptop, the manifests and Elena Moreau made it out. Sgt. Houser did not. Chapter 2 starts with getting him back.</p>
+    <span class="eyebrow" id="endeyebrow">END OF CHAPTER 1</span>
+    <h2 id="endtitle">Houser is still out there</h2>
+    <p class="lede" id="endtext"></p>
     <div class="menu"><button class="mb" id="e-again" type="button">Play again</button><button class="mb" id="e-parts" type="button">Choose a part</button></div>
   </div>
+</div>
+
+<div id="platform" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">SURVIVAL PROTOCOL</span>
+    <h2>Where are you playing?</h2>
+    <p class="lede">This sets up the controls. You can change it later in Settings.</p>
+    <div class="opts">
+      <button class="plat" id="plat-pc" type="button"><b>PC</b><span>Keyboard and mouse. Highest graphics.</span></button>
+      <button class="plat" id="plat-mob" type="button"><b>Mobile</b><span>Phone or tablet. On-screen joystick and buttons, lighter graphics.</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="touch" hidden>
+  <div id="t-stick"></div><div id="t-look"></div><div id="t-base" hidden><div id="t-knob"></div></div>
+  <div class="tb" id="t-fire">FIRE</div><div class="tb" id="t-aim">AIM</div><div class="tb" id="t-jump">JUMP</div><div class="tb" id="t-crouch">DUCK</div>
+  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div>
 </div>
 
 <div id="chapterend" class="ov" hidden><div class="stack"><span class="eyebrow">END OF CHAPTER 1</span><h1>Left Behind</h1></div></div>
@@ -231,6 +285,9 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 <script src="js/maps.js"></script>
 <script src="js/parts.js"></script>
 <script src="js/parts2.js"></script>
+<script src="js/maps2.js"></script>
+<script src="js/parts3.js"></script>
+<script src="js/touch.js"></script>
 <script src="js/main.js"></script>
 <script>
 (function(){ const s=document.getElementById('compass-strip'); const L={0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'};
