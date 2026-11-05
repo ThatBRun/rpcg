@@ -44,14 +44,14 @@ const chParts = ch => (SP.CHAPTERS[ch - 1] && SP.CHAPTERS[ch - 1].parts) || [];
 SP.state = 'menu';
 function teardown() {
   if (ctx) { ctx.dead = true; ctx.timers.forEach(t => t.rej(ABORT)); ctx.timers = []; ctx.untils.forEach(u => u.rej(ABORT)); ctx.untils = []; }
-  A.stopAll(); G.clearMarkers(); G.hud.hideSub(); G.hud.prompt(null); G.hud.timer(null); G.hud.objective(null);
+  if (SP.Wheel) SP.Wheel.close(false); A.stopAll(); G.clearMarkers(); G.hud.hideSub(); G.hud.prompt(null); G.hud.timer(null); G.hud.objective(null);
   if (SP.scene) { const keep = new Set(Object.values(SP.GC)); SP.scene.traverse(o => { if ((o.isMesh || o.isLine) && o.geometry && !keep.has(o.geometry)) o.geometry.dispose(); }); }
   G.units = []; G.vehicles = []; G.fx = []; G.interact = []; G.destructibles = []; G.projectiles = []; G.fires = []; G.tracers = []; G.lights = []; G.lightPool = []; G.trauma = 0;
   camera.children.slice().forEach(ch => camera.remove(ch)); SP.alarmOn = false; SP.aggro = 1;
   SP.fireLights = []; SP.labLights = null; SP.alarmLights = null; SP.cabin = null; SP.envRT && SP.envRT.dispose();
   ['onAlert', 'onUnitDeath', 'onTick'].forEach(k => SP[k] = null);
   SP.post.U.letterbox.value = 0; SP.post.U.blur.value = 0; SP.post.U.flash.value = 0; SP.post.U.damage.value = 0;
-  $('#binoc').hidden = true; $('#lockoverlay').hidden = true; $('#fname').hidden = true;
+  $('#binoc').hidden = true; $('#boss').hidden = true; $('#lockoverlay').hidden = true; $('#fname').hidden = true;
 }
 function makeCtx(part) {
   const c = { part, dead: false, timers: [], untils: [], squad: {}, foes: [] };
@@ -80,7 +80,8 @@ SP.loadPart = async function (n, ch) {
   scene.add(camera);
   const P = SP.P = new SP.Player(); P.pos.copy(info.start || V3()); P.yaw = 0; P.pitch = 0;
   SP.vmScene.remove(...SP.vmScene.children.filter(o => o.isMesh)); if (SP.VM.group) { SP.vmCam.remove(SP.VM.group); SP.VM.group = null; SP.VM.gun = null; }
-  (part.loadout || ['m4']).forEach(w => P.give(w)); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
+  SP.Progress.beforeLoad(part); (part.loadout || ['m4']).forEach(w => P.give(w)); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
+  SP.Progress.afterLoadout(P, part); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
   ctx = makeCtx(part); SP.ctx = ctx;
   SP.fade = 1; SP.fadeTarget = 0; SP.fadeRate = 0.8; SP.lbTarget = 0; SP.blurTarget = 0;
   if (part.setup) part.setup(ctx, W, P);
@@ -99,8 +100,9 @@ function introCard(part, n, ch) {
 }
 async function partComplete(part) {
   const list = chParts(curCh); const n = list.indexOf(part) + 1; const key = curCh + '-' + n; if (!SP.save.dk.includes(key)) SP.save.dk.push(key); SP.save.done = SP.save.dk.filter(k => k.startsWith('1-')).map(k => +k.split('-')[1]); SP.persist();
+  const rewards = SP.Progress.onPartComplete(curCh, n, n >= list.length);
   running = false; SP.fadeTarget = 1; SP.fadeRate = 1; await new Promise(r => setTimeout(r, 1100));
-  if (n >= list.length) { const ch = curCh; teardown(); I.unlock(); showEnd(ch); return; }
+  if (n >= list.length) { const ch = curCh; teardown(); I.unlock(); showEnd(ch, rewards); return; }
   SP.loadPart(n + 1, curCh);
 }
 SP.onPlayerDeath = function () {
@@ -119,7 +121,7 @@ SP.onLockChange = (locked) => {
 };
 SP.onLockFail = () => { if (SP.state !== 'play') return; paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
 SP.onKey = (code) => { if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
-function showScreen(id) { ['title', 'chapters', 'pause', 'dead', 'end', 'settings', 'platform'].forEach(s => { $('#' + s).hidden = s !== id; }); if (id) $('#lockoverlay').hidden = true; }
+function showScreen(id) { ['title', 'chapters', 'pause', 'dead', 'end', 'settings', 'platform', 'armory'].forEach(s => { $('#' + s).hidden = s !== id; }); if (id) $('#lockoverlay').hidden = true; }
 SP.showScreen = showScreen;
 
 /* ---------- menus ---------- */
@@ -132,7 +134,8 @@ function buildChapters(ch) {
   if (C.soon) { const d = document.createElement('p'); d.className = 'lede'; d.textContent = C.count + ' parts. In production. Finish Chapter 2 to see where the story goes next.'; g.append(d); return; }
   C.parts.forEach((p, i) => { const n = i + 1; const b = document.createElement('button'); b.className = 'part' + (SP.isDone(C.n, n) ? ' done' : ''); b.type = 'button'; b.innerHTML = `<span class="pn">${String(n).padStart(2, '0')}</span><span class="pt"></span><span class="pa"></span>`; b.querySelector('.pt').textContent = p.name; b.querySelector('.pa').textContent = p.act; b.addEventListener('click', () => { A.init(); SP.loadPart(n, C.n); }); g.append(b); });
 }
-function showEnd(ch) {
+function showEnd(ch, rewards) {
+  $('#endreward').textContent = (rewards || []).join('   ·   '); $('#endreward').hidden = !(rewards && rewards.length);
   const C = SP.CHAPTERS[ch - 1], next = SP.CHAPTERS[ch];
   $('#endeyebrow').textContent = 'END OF CHAPTER ' + ch; $('#endtitle').textContent = (C.endTitle || C.parts.endTitle) || 'Chapter complete'; $('#endtext').textContent = C.parts.endText || '';
   const go = $('#e-again'); if (next && !next.soon) { go.textContent = 'Continue to Chapter ' + next.n; go.onclick = () => SP.loadPart(1, next.n); } else { go.textContent = 'Play Chapter ' + ch + ' again'; go.onclick = () => SP.loadPart(1, ch); }
@@ -151,11 +154,15 @@ $('#p-quit').addEventListener('click', () => { teardown(); $('#cross').hidden = 
 $('#d-retry').addEventListener('click', () => { $('#deadtitle').textContent = 'You were killed'; SP.loadPart(curPart, curCh); });
 $('#d-parts').addEventListener('click', () => { $('#deadtitle').textContent = 'You were killed'; buildChapters(); showScreen('chapters'); });
 $('#e-parts').addEventListener('click', () => { buildChapters(); showScreen('chapters'); });
+$('#btn-armory').addEventListener('click', () => SP.Progress.openArmory('title'));
+$('#p-armory').addEventListener('click', () => SP.Progress.openArmory('pause'));
+$('#e-armory').addEventListener('click', () => SP.Progress.openArmory('end'));
+$('#d-armory').addEventListener('click', () => SP.Progress.openArmory('dead'));
 function openSettings() { $('#s-sens').value = SP.settings.sens; $('#s-q').value = SP.settings.quality; $('#s-d').value = SP.settings.difficulty; $('#s-p').value = SP.settings.platform || 'pc'; showScreen('settings'); }
 $('#s-done').addEventListener('click', () => { SP.settings.sens = +$('#s-sens').value; SP.settings.quality = $('#s-q').value; SP.settings.difficulty = $('#s-d').value; SP.settings.platform = $('#s-p').value; SP.Touch.enable(SP.settings.platform === 'mobile'); applySettings(); showScreen(SP.setFrom === 'pause' ? 'pause' : 'title'); });
 $('#btn-cont').hidden = !(SP.save.last > 1 || SP.save.dk.length || SP.save.lastCh > 1);
-function choosePlatform(p) { SP.settings.platform = p; if (p === 'mobile') SP.settings.quality = 'low'; SP.Touch.enable(p === 'mobile'); applySettings(); A.init(); showScreen('title'); }
-$('#plat-pc').addEventListener('click', () => choosePlatform('pc')); $('#plat-mob').addEventListener('click', () => choosePlatform('mobile'));
+function choosePlatform(p) { SP.settings.platform = p; if (p === 'mobile') SP.settings.quality = 'low'; if (p === 'chromebook') SP.settings.quality = 'medium'; SP.Touch.enable(p === 'mobile'); applySettings(); A.init(); showScreen('title'); }
+$('#plat-pc').addEventListener('click', () => choosePlatform('pc')); $('#plat-cb').addEventListener('click', () => choosePlatform('chromebook')); $('#plat-mob').addEventListener('click', () => choosePlatform('mobile'));
 
 /* ---------- main loop ---------- */
 let last = performance.now(); SP.fade = 1; SP.fadeTarget = 0; SP.fadeRate = 1; SP.lbTarget = 0; SP.blurTarget = 0;
@@ -171,9 +178,9 @@ function frame(now) {
   if (SP.state !== 'play' || !SP.scene) { $('#touch').hidden = true; return; }
   if (paused) $('#touch').hidden = true;
   if (!paused) {
-    G.time += dt; const P = SP.P;
+    const rdt = dt; dt *= SP.Progress.worldScale(); G.time += dt; const P = SP.P;
     if (SP.W.surfaceFn) P.surfaceUnder = SP.W.surfaceFn(P.pos.x, P.pos.z);
-    P.update(dt);
+    P.update(rdt * SP.Progress.playerScale());
     for (const u of G.units) u.update(dt);
     for (const v of G.vehicles) v.update(dt);
     G.updateProjectiles(dt); G.updateFx(dt); G.updateFires(dt); G.updateInteract(dt);
@@ -182,7 +189,8 @@ function frame(now) {
       for (let i = ctx.untils.length - 1; i >= 0; i--) { const u = ctx.untils[i]; u.t -= dt; let ok = false; try { ok = u.fn(); } catch (e) { } if (ok || u.t <= 0) { ctx.untils.splice(i, 1); u.res(ok); } }
       if (SP.onTick) SP.onTick(dt);
     }
-    SP.updateSun(); SP.VM.update(dt); G.updateMarkers(); G.updateCompass(); SP.updateMotes(dt);
+    SP.Wheel.update(); SP.Progress.update(rdt);
+    SP.updateSun(); SP.VM.update(rdt); G.updateMarkers(); G.updateCompass(); SP.updateMotes(dt);
     if (SP.sunDir && !SP.envCfg.indoor && !SP.envCfg.moon) { const sp = camera.position.clone().addScaledVector(SP.sunDir, 1000).project(camera); const on = sp.z < 1 && Math.abs(sp.x) < 1.6 && Math.abs(sp.y) < 1.6; U.sunPos.value.set(sp.x * 0.5 + 0.5, sp.y * 0.5 + 0.5); U.sunVis.value = damp(U.sunVis.value, on ? clamp(1.6 - Math.hypot(sp.x, sp.y), 0, 1) : 0, 4, dt); } else U.sunVis.value = 0;
     if (SP.sky) { SP.sky.position.copy(camera.position); SP.sky.material.uniforms.time.value += dt; }
     // friendly name tags
@@ -213,9 +221,10 @@ async function boot() {
   const keys = Object.keys(SP.TEX); const bar = $('#bootbar');
   for (let i = 0; i < keys.length; i++) { SP.TEX[keys[i]](); bar.style.width = ((i + 1) / keys.length * 100) + '%'; await new Promise(r => setTimeout(r, 0)); }
   titleBackdrop(); SP.state = 'menu'; $('#boot').hidden = true;
-  if (SP.settings.platform) { SP.Touch.enable(SP.settings.platform === 'mobile'); showScreen('title'); } else { const guess = matchMedia('(pointer: coarse)').matches; $(guess ? '#plat-mob' : '#plat-pc').classList.add('guess'); showScreen('platform'); }
+  if (SP.settings.platform) { SP.Touch.enable(SP.settings.platform === 'mobile'); showScreen('title'); } else { const cros = /CrOS/.test(navigator.userAgent), guess = matchMedia('(pointer: coarse)').matches; $(cros ? '#plat-cb' : guess ? '#plat-mob' : '#plat-pc').classList.add('guess'); showScreen('platform'); }
   requestAnimationFrame(frame);
 }
+SP.isPaused = () => paused;
 SP.forceUnpause = () => { paused = false; $('#lockoverlay').hidden = true; showScreen(null); };
 SP.debug = { load: (n, ch) => SP.loadPart(n, ch || 1), god: () => { SP.P.god = true; }, skip: () => ctx && ctx.complete() };
 window.addEventListener('load', () => { boot().catch(e => { console.error(e); $('#boottext').textContent = 'Could not start: ' + e.message; }); });

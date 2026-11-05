@@ -159,12 +159,14 @@ const WEAP = {
   pistol: { name: 'M17', auto: false, rpm: 450, dmg: 38, head: 3, mag: 17, reload: 1.6, spreadH: 0.02, spreadA: 0.004, kick: 0.02, sound: 'pistol', model: () => SP.Models.pistol() },
   at4: { name: 'AT4', auto: false, rpm: 30, rocket: true, mag: 1, reload: 3.2, spreadH: 0.01, spreadA: 0.002, kick: 0.05, sound: 'fifty', model: () => SP.Models.at4() },
 };
-SP.WEAP = WEAP;
+WEAP.ak = { name: 'AK-47', auto: true, rpm: 600, dmg: 40, head: 3, mag: 30, reload: 2.5, spreadH: 0.026, spreadA: 0.0022, kick: 0.016, sound: 'ak', model: () => SP.Models.ak() };
+WEAP.shotgun = { name: 'M1014', auto: false, rpm: 220, dmg: 22, pellets: 9, pelletSpread: 0.045, head: 1.6, mag: 7, reload: 2.9, spreadH: 0.01, spreadA: 0.008, kick: 0.04, sound: 'shotgun', model: () => SP.Models.shotgun() };
+SP.WEAP = WEAP; SP.WEAP_BASE = {}; // base stats are captured by progress.js before upgrades
 class Player {
   constructor() {
     this.pos = V3(); this.vel = V3(); this.yaw = 0; this.pitch = 0; this.eye = 1.62; this.onGround = true; this.hp = 100; this.lastHit = -10; this.alive = true; this.god = false;
     this.mode = 'walk'; this.crouch = false; this.adsT = 0; this.sprintT = 0; this.recoil = 0; this.recoilYaw = 0; this.bob = 0; this.kick = 0; this.stepD = 0; this.land = 0;
-    this.inv = {}; this.cur = null; this.reloadT = 0; this.fireCd = 0; this.swapT = 0; this.noise = 0; this.flash = false; this.heat = 0; this.overheat = false;
+    this.maxHp = 100; this.inv = {}; this.cur = null; this.reloadT = 0; this.fireCd = 0; this.swapT = 0; this.noise = 0; this.flash = false; this.heat = 0; this.overheat = false;
     this.lookLimit = null; this.speedMul = 1; this.canSprint = true; this.binoc = false; this.binocT = 0; this.downed = false;
   }
   give(w, mag, res) { this.inv[w] = { mag: mag != null ? mag : WEAP[w].mag, res: res != null ? res : WEAP[w].mag * 4 }; if (!this.cur) this.equip(w); }
@@ -175,12 +177,13 @@ class Player {
   hurt(dmg, from) {
     if (!this.alive || this.god) return; if (this.mode === 'turret') dmg *= 0.6;
     this.hp -= dmg * (SP.difficulty || 1); this.lastHit = G.time; G.addTrauma(0.18); A.hurt(); G.hud.dmgDir(from);
+    if (this.hp <= 0 && SP.skill && SP.skill('second') && !this.secondWind) { this.secondWind = true; this.hp = this.maxHp * 0.5; this.lastHit = G.time + 2; G.hud.feed('SECOND WIND', 'gold'); G.addTrauma(0.5); SP.post.U.flash.value = 0.6; return; }
     if (this.hp <= 0) { this.hp = 0; this.alive = false; SP.onPlayerDeath && SP.onPlayerDeath(); }
   }
   forward() { return V3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch)); }
   eyePos() { return V3(this.pos.x, this.pos.y + this.eye, this.pos.z); }
   update(dt) {
-    const W = SP.W; const [mx, my] = I.consume();
+    const W = SP.W; let [mx, my] = I.consume(); if (SP.Wheel && SP.Wheel.open) { SP.Wheel.aim(mx, my); mx = my = 0; }
     const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; const sens = (SP.sens || 1) * 0.0022 * (this.adsT > 0.5 ? (zw ? 0.22 : 0.6) : 1) * (this.binoc ? 0.25 : 1);
     if (this.mode !== 'locked') { this.yaw -= mx * sens; this.pitch -= my * sens; } if (this.camAnim) { this.yaw = SP.damp(this.yaw, this.camAnim.yaw, this.camAnim.k || 2, dt); this.pitch = SP.damp(this.pitch, this.camAnim.pitch, this.camAnim.k || 2, dt); }
     this.pitch = clamp(this.pitch, -1.48, 1.48);
@@ -189,45 +192,73 @@ class Player {
     if (this.mode === 'turret' && this.turret) { const t = this.turret; t.anchor.getWorldPosition(this.pos); this.pos.y -= this.eye; }
     if (this.mode === 'downed') { /* fixed position */ }
     // regen
-    if (this.alive && G.time - this.lastHit > 3.5) this.hp = Math.min(100, this.hp + 28 * dt);
+    const rg = SP.skill && SP.skill('regen'); if (this.alive && G.time - this.lastHit > (rg ? 2.2 : 3.5)) this.hp = Math.min(this.maxHp, this.hp + (rg ? 46 : 28) * dt);
     this.weapon(dt);
     this.camera(dt);
     this.noise = Math.max(0, this.noise - dt * 2);
   }
   walk(dt, W) {
     const K = I.keys;
-    this.crouch = !!(K.KeyC || K.ControlLeft || K.ControlRight) || this.forceCrouch;
-    const ads = I.mouse.r && !this.binocMode && this.cur && this.reloadT <= 0;
+    const S = SP.skill || (() => 0);
+    const crouchKey = !!(K.KeyC || K.ControlLeft || K.ControlRight); const crouchEdge = crouchKey && !this._cPrev; this._cPrev = crouchKey;
     const fwd = K.KeyW || K.ArrowUp, back = K.KeyS || K.ArrowDown, left = K.KeyA, right = K.KeyD;
+    // slide: crouch while sprinting
+    if (S('slide') && crouchEdge && this.onGround && this.sprinting && !(this.slideT > 0)) { const hv = Math.hypot(this.vel.x, this.vel.z) || 1; this.slideDir = V3(this.vel.x / hv, 0, this.vel.z / hv); this.slideV = 11.5 * (S('marathon') ? 1.08 : 1); this.slideT = 0.95; A.step(this.surfaceUnder || W.surface, 0.35); this.noise = Math.max(this.noise, 0.8); }
+    if (this.slideT > 0) { this.slideT -= dt; this.slideV = Math.max(2.5, this.slideV - 10 * dt); if (!this.onGround && this.slideT > 0.2) this.slideT = 0.2; if (this.slideT <= 0 || this.slideV <= 3) this.slideT = 0; }
+    const sliding = this.slideT > 0;
+    this.crouch = crouchKey || !!this.forceCrouch || sliding;
+    const ads = I.mouse.r && !this.binocMode && this.cur && this.reloadT <= 0;
     const sprint = this.canSprint && (K.ShiftLeft || K.ShiftRight) && fwd && !this.crouch && !ads && this.reloadT <= 0;
-    let speed = this.crouch ? 2.2 : sprint ? 7.0 : 4.4; if (ads) speed *= 0.55; speed *= this.speedMul;
+    let speed = this.crouch ? 2.2 : sprint ? 7.0 * (S('marathon') ? 1.12 : 1) : 4.4; if (ads) speed *= 0.55; speed *= this.speedMul;
     const ix = (right ? 1 : 0) - (left ? 1 : 0), iz = (fwd ? 1 : 0) - (back ? 1 : 0);
     const fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw), rx = Math.cos(this.yaw), rz = -Math.sin(this.yaw);
     let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const ml = Math.hypot(mx, mz); if (ml > 0) { mx = mx / ml * speed; mz = mz / ml * speed; }
     const acc = this.onGround ? 1 - Math.exp(-12 * dt) : 1 - Math.exp(-1.5 * dt);
     this.vel.x = lerp(this.vel.x, mx, acc); this.vel.z = lerp(this.vel.z, mz, acc);
-    if (I.hit('Space') && this.onGround && !this.crouch) { this.vel.y = 5.6; this.onGround = false; }
-    this.vel.y -= 17 * dt;
+    if (sliding) { this.vel.x = this.slideDir.x * this.slideV + rx * ix * 1.2; this.vel.z = this.slideDir.z * this.slideV + rz * ix * 1.2; }
+    // dash (Q)
+    this.dashCd = Math.max(0, (this.dashCd || 0) - dt);
+    if (S('dash') && I.hit('KeyQ') && this.dashCd <= 0 && this.mode === 'walk') { let dx = ml > 0 ? mx / speed : fx, dz = ml > 0 ? mz / speed : fz; const dl = Math.hypot(dx, dz) || 1; this.dashDir = V3(dx / dl, 0, dz / dl); this.dashT = 0.17; this.dashCd = 2.2; A.click(300, 0.12); G.addTrauma(0.08); if (SP.Progress) SP.Progress.cooldown('dash', 2.2); }
+    if (this.dashT > 0) { this.dashT -= dt; this.vel.x = this.dashDir.x * 24; this.vel.z = this.dashDir.z * 24; if (!this.onGround) this.vel.y = Math.max(this.vel.y, 0); }
+    // wall run: sprint-jump along a wall
+    this.wallCd = Math.max(0, (this.wallCd || 0) - dt);
+    let wallSide = 0;
+    if (S('wallrun') && !this.onGround && fwd && this.wallCd <= 0 && Math.hypot(this.vel.x, this.vel.z) > 4.2) {
+      const gy = W.groundAt(this.pos.x, this.pos.z, this.pos.y, 0.2);
+      if (this.pos.y - gy > 0.5) { const py = this.pos.y + 1.0; for (const sd of [1, -1]) { const tx = this.pos.x + rx * sd * 0.62, tz = this.pos.z + rz * sd * 0.62; for (const c of W.colliders) { const b = c.box; if (tx > b.min.x && tx < b.max.x && tz > b.min.z && tz < b.max.z && py > b.min.y && py < b.max.y && b.max.y - b.min.y > 1.6) { wallSide = sd; break; } } if (wallSide) break; } }
+    }
+    if (wallSide && (this.wallT || 0) < 1.7) {
+      if (!this.wallRun) { this.wallRun = true; this.wallT = 0; this.vel.y = Math.max(this.vel.y, 1.2); A.step('hard', 0.25); }
+      this.wallT += dt; this.wallSide = wallSide; const sp = Math.max(7.2, Math.hypot(this.vel.x, this.vel.z)); this.vel.x = fx * sp; this.vel.z = fz * sp; this.djUsed = false;
+    } else if (this.wallRun) { this.wallRun = false; this.wallCd = 0.25; }
+    this.tilt = damp(this.tilt || 0, this.wallRun ? -this.wallSide * 0.14 : sliding ? 0.05 : 0, 8, dt);
+    // jumping: normal, slide-jump, wall-jump, double jump
+    if (I.hit('Space')) {
+      if (this.wallRun) { this.vel.y = 6.2; this.vel.x += -rx * this.wallSide * 5.5; this.vel.z += -rz * this.wallSide * 5.5; this.wallRun = false; this.wallCd = 0.35; this.wallT = 0; A.step('hard', 0.3); }
+      else if (this.onGround && (!this.crouch || sliding)) { this.vel.y = 5.6; this.onGround = false; if (sliding) { this.slideT = 0; } }
+      else if (!this.onGround && S('djump') && !this.djUsed) { this.djUsed = true; this.vel.y = 5.4; G.particle && G.particle({ pos: this.pos.clone(), vel: V3(0, -1, 0), life: 0.5, size: 0.8, grow: 2, color: new T.Color(0.7, 0.65, 0.55), opacity: 0.25 }); A.click(500, 0.08); }
+    }
+    this.vel.y -= (this.wallRun ? 4.5 : 17) * dt; if (this.wallRun) this.vel.y = Math.max(this.vel.y, -1.5);
     this.pos.x += this.vel.x * dt; this.pos.z += this.vel.z * dt; this.pos.y += this.vel.y * dt;
     const h = this.crouch ? 1.15 : 1.8; W.push(this.pos, 0.36, this.pos.y, h);
     const g = W.groundAt(this.pos.x, this.pos.z, this.pos.y, 0.2);
-    if (this.pos.y <= g) { if (!this.onGround && this.vel.y < -4) { this.land = Math.min(0.12, -this.vel.y * 0.012); A.step(W.surface, 0.3); } this.pos.y = g; this.vel.y = 0; this.onGround = true; }
+    if (this.pos.y <= g) { if (!this.onGround && this.vel.y < -4) { this.land = Math.min(0.12, -this.vel.y * 0.012); A.step(W.surface, 0.3); } this.pos.y = g; this.vel.y = 0; this.onGround = true; this.djUsed = false; this.wallT = 0; this.wallRun = false; }
     else if (this.pos.y > g + 0.06) { if (this.onGround && this.pos.y - g < 0.45 && this.vel.y <= 0) this.pos.y = g; else this.onGround = false; }
-    this.eye = damp(this.eye, this.crouch ? 1.0 : 1.62, 12, dt);
+    this.eye = damp(this.eye, sliding ? 0.85 : this.crouch ? 1.0 : 1.62, 12, dt);
     const hs = Math.hypot(this.vel.x, this.vel.z); this.speed = hs; this.sprinting = sprint && hs > 4;
     this.sprintT = damp(this.sprintT, this.sprinting ? 1 : 0, 9, dt);
-    if (this.onGround) { this.bob += hs * dt * 1.15; this.stepD += hs * dt; const stride = sprint ? 2.0 : 1.55; if (this.stepD > stride) { this.stepD = 0; A.step(this.surfaceUnder || W.surface, this.crouch ? 0.06 : sprint ? 0.24 : 0.15); this.noise = Math.max(this.noise, this.crouch ? 0.2 : sprint ? 1 : 0.55); } }
+    if (this.onGround) { this.bob += hs * dt * 1.15; this.stepD += hs * dt; const stride = sprint ? 2.0 : 1.55; if (this.stepD > stride) { this.stepD = 0; A.step(this.surfaceUnder || W.surface, this.crouch ? 0.06 : sprint ? 0.24 : 0.15); this.noise = Math.max(this.noise, (this.crouch ? 0.2 : sprint ? 1 : 0.55) * (S('ghost') ? 0.55 : 1)); } }
     this.adsTarget = ads ? 1 : 0;
   }
   weapon(dt) {
     this.adsT = damp(this.adsT, this.adsTarget || 0, 14, dt); this.fireCd -= dt; this.swapT = Math.max(0, this.swapT - dt);
     this.recoil = damp(this.recoil, 0, 9, dt); this.recoilYaw = damp(this.recoilYaw, 0, 9, dt); this.kick = damp(this.kick, 0, 11, dt);
     if (this.mode === 'turret') return this.turretFire(dt);
-    if (!this.cur || this.mode === 'locked' || this.binocMode) return;
+    if (!this.cur || this.mode === 'locked' || this.binocMode || (SP.Wheel && SP.Wheel.open)) return;
     const w = WEAP[this.cur], s = this.inv[this.cur];
     if (this.reloadT > 0) { this.reloadT -= dt; if (this.reloadT <= 0) { const need = w.mag - s.mag, take = Math.min(need, s.res); s.mag += take; s.res -= take; A.mech(0.3); this.updAmmo(); } }
     if (I.hit('KeyR') && this.reloadT <= 0 && s.mag < w.mag && s.res > 0) { this.reloadT = w.reload; A.mech(0.25); setTimeout(() => A.mech(0.2), 700); this.updAmmo(); }
-    if (I.hit('Digit1')) this.cycle(0); if (I.hit('Digit2')) this.cycle(1); if (I.hit('Digit3')) this.cycle(2);
+    for (let k = 0; k < 8; k++) if (I.hit('Digit' + (k + 1))) this.cycle(k);
     const trig = w.auto ? I.mouse.l : I.mouse.lp;
     if (trig && this.reloadT <= 0 && this.fireCd <= 0 && this.swapT <= 0 && this.sprintT < 0.3) {
       if (s.mag > 0) this.fire(w, s);
@@ -245,6 +276,7 @@ class Player {
     this.recoil += w.kick * (this.adsT > 0.5 ? 0.6 : 1); this.pitch += w.kick * 0.5 * (this.adsT > 0.5 ? 0.55 : 1); this.recoilYaw += rand(-1, 1) * w.kick * 0.4; this.yaw += rand(-0.4, 0.6) * w.kick * 0.25;
     G.muzzle(mz, this.forward(), w.rocket ? 2 : 1, !w.silent);
     if (w.rocket) { G.rocket(this.eyePos().addScaledVector(this.forward(), 0.8), this.forward(), 'player'); if (s.mag <= 0 && s.res > 0) { this.reloadT = w.reload; } return; }
+    if (w.pellets) { for (let k = 0; k < w.pellets; k++) { const d2 = this.forward(); const ps = w.pelletSpread * (this.adsT > 0.5 ? 0.75 : 1); d2.x += rand(-ps, ps); d2.y += rand(-ps, ps); d2.z += rand(-ps, ps); d2.normalize(); G.shoot(this.eyePos(), d2, w.dmg, w.head, 'player', mz, k < 3); } return; }
     G.shoot(this.eyePos(), dir, w.dmg, w.head, 'player', mz, true);
   }
   turretFire(dt) {
@@ -269,8 +301,8 @@ class Player {
     this.fovS = damp(this.fovS || fov, fov, 12, dt); cam.fov = this.fovS; cam.updateProjectionMatrix();
     SP.listener = { pos: cam.position, yaw: this.yaw };
     // vignette damage
-    SP.post.U.damage.value = damp(SP.post.U.damage.value, clamp((100 - this.hp) / 75, 0, 1) * (this.alive ? 1 : 1), 6, dt);
-    if (this.hp < 35 && this.alive) { this.hb = (this.hb || 0) - dt; if (this.hb <= 0) { this.hb = 0.85; A.heartbeat(0.45); } }
+    SP.post.U.damage.value = damp(SP.post.U.damage.value, clamp((this.maxHp - this.hp) / (this.maxHp * 0.75), 0, 1) * (this.alive ? 1 : 1), 6, dt);
+    if (this.hp < this.maxHp * 0.35 && this.alive) { this.hb = (this.hb || 0) - dt; if (this.hb <= 0) { this.hb = 0.85; A.heartbeat(0.45); } }
   }
 }
 SP.Player = Player;
@@ -308,7 +340,7 @@ G.updateProjectiles = function (dt) {
     const wh = W.ray(p.pos, dir, len); const uh = G.rayUnits(p.pos, dir, len, null, p.team === 'player' ? 'ally' : p.team);
     let vh = null; for (const v of G.vehicles) { if (v.dead) continue; tmpRay.origin.copy(p.pos); tmpRay.direction.copy(dir); const q = tmpRay.intersectBox(v.box(), tmpV); if (q && q.distanceTo(p.pos) < len) vh = q.clone(); }
     p.life -= dt;
-    if (wh || uh || vh || p.life <= 0) { const at = vh || (uh ? p.pos.clone().addScaledVector(dir, uh.t) : wh ? wh.point : p.pos); G.explosion(at, 8, 400, p.team); G.scene.remove(p.m); G.projectiles.splice(i, 1); continue; }
+    if (wh || uh || vh || p.life <= 0) { const at = vh || (uh ? p.pos.clone().addScaledVector(dir, uh.t) : wh ? wh.point : p.pos); G.explosion(at, p.r || 8, p.dmg || 400, p.team); G.scene.remove(p.m); G.projectiles.splice(i, 1); continue; }
     p.pos.add(step); p.m.position.copy(p.pos);
     G.particle({ pos: p.pos.clone(), vel: V3(rand(-0.3, 0.3), rand(0.2, 0.6), rand(-0.3, 0.3)), life: 1.6, size: 0.5, grow: 3, color: new T.Color(0.7, 0.68, 0.64), opacity: 0.35 });
     G.particle({ pos: p.pos.clone(), life: 0.05, size: 0.5, color: new T.Color(9, 5, 1.5), additive: true, kind: 'glow' });
@@ -493,8 +525,8 @@ G.updateInteract = function (dt) {
   let best = null, bd = 1e9; const f = P.forward(); f.y = 0; f.normalize();
   for (const it of G.interact) { if (!it.enabled) continue; const p = typeof it.pos === 'function' ? it.pos() : it.pos; const d = Math.hypot(p.x - P.pos.x, p.z - P.pos.z); if (d > it.radius) continue; const to = V3(p.x - P.pos.x, 0, p.z - P.pos.z).normalize(); if (d > 0.9 && f.dot(to) < 0.55) continue; if (d < bd) { bd = d; best = it; } }
   // stealth takedown
-  let td = null; if (P.mode === 'walk') for (const u of G.units) { if (u.dead || u.team !== 'foe' || u.aware || u.invuln) continue; const d = u.pos.distanceTo(P.pos); if (d > 1.9) continue; const toP = Math.atan2(-(P.pos.x - u.pos.x), -(P.pos.z - u.pos.z)); if (Math.abs(angDiff(u.yaw, toP)) < 1.9 && d > 1.0) continue; td = u; break; }
-  if (td) { G.hud.prompt('[F]  Takedown'); if (I.hit('KeyF')) { A.impact(td.pos, 'flesh'); A.mech(0.3); td.die(false); G.hud.feed('SILENT TAKEDOWN', 'gold'); G.addTrauma(0.15); } return; }
+  let td = null; G.tdAvail = false; if (P.mode === 'walk') for (const u of G.units) { if (u.dead || u.team !== 'foe' || u.aware || u.invuln) continue; const d = u.pos.distanceTo(P.pos); if (d > 1.9) continue; const toP = Math.atan2(-(P.pos.x - u.pos.x), -(P.pos.z - u.pos.z)); if (Math.abs(angDiff(u.yaw, toP)) < 1.9 && d > 1.0) continue; td = u; break; }
+  if (td) { G.tdAvail = true; G.hud.prompt('[F]  Takedown'); if (I.hit('KeyF')) { A.impact(td.pos, 'flesh'); A.mech(0.3); td.die(false); G.hud.feed('SILENT TAKEDOWN', 'gold'); G.addTrauma(0.15); } return; }
   if (!best) { G.hud.prompt(null); for (const it of G.interact) it.prog = 0; return; }
   const key = I.down('KeyE');
   if (best.hold > 0) { if (key) { best.prog += dt / best.hold; if (best.prog >= 1) { best.prog = 0; best.enabled = false; best.onUse && best.onUse(); } } else best.prog = Math.max(0, best.prog - dt * 2); G.hud.prompt('Hold [E]  ' + best.text, best.prog); }

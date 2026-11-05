@@ -209,16 +209,26 @@ add({
 
 /* 15. THE JACKAL */
 add({
-  name: 'The Jackal', map: 'villa', env: 'night', place: 'Villa Blanche, Cap Falcon', time: '19:56 LOCAL', loadout: ['m4', 'pistol'], squad: [HOU, RAM],
+  name: 'The Jackal', map: 'villa', env: 'night', place: 'Villa Blanche, Cap Falcon', time: '19:56 LOCAL', loadout: ['m4', 'at4', 'pistol'], squad: [HOU, RAM, OKA],
   player: [0, -8, Math.PI],
-  deathTip: 'His bodyguards are in cover around the helipad. Flank them along the house.',
-  setup(c, W) { const j = SP.npc(c, JACK, at(31, -24), 'jackal', { team: 'civ', look: { weapon: 'pistol' } }); j.lookAt = at(34, -26); },
+  ammo: { m4: 300, at4: 4, pistol: 68 },
+  deathTip: 'Boss fight: hit him while he moves between cover. In phase 2 kill his guards to break his armour, and step aside when you see "RPG!".',
   stages: [
     { say: [[RAM, 'House is clear. No Jackal.', 1.6], [HOU, 'Listen.', 1]] },
-    { say: [[JACK, 'Private Sarton. You took my money in the desert, my ship tonight, and now my house.', 4.2], [JACK, 'I am going to leave now. You are going to stay here and burn with it.', 3.6], [HOU, 'Helipad! He\'s at the helicopter!', 1.8]] },
-    { go: [22, -18], obj: 'Get to the helipad', label: 'HELIPAD', r: 6 },
-    { fight: [{ cover: [[30, -18], [40, -30], [27, -33], [42, -20]], n: 3, area: [20, 46, -40, -36], goal: [24, -20] }], obj: 'Kill the bodyguards' },
-    { use: [31, -25], text: 'Drag him out of the cockpit', hold: 1.2, obj: 'Stop the Jackal', label: 'JACKAL' },
+    { say: [[JACK, 'Private Sarton. You took my money in the desert, my ship tonight, and now my house.', 4.2], [JACK, 'I am going to leave now. You are going to stay here and burn with it.', 3.6], [HOU, 'Helipad! He\'s going for the helicopter!', 1.8]] },
+    { go: [14, -8], obj: 'Get out to the helipad', label: 'HELIPAD', r: 6 },
+    { boss: {
+      name: 'THE JACKAL', hp: 2200, start: [34, -32], escape: 90, mortar: 7,
+      covers: [[34, -32], [42, -22], [26, -30], [40, -12], [24, -14], [30, -38]],
+      phases: ['PHASE 1 · THE HELIPAD', 'PHASE 2 · LAST GUARD', 'PHASE 3 · THE ESCAPE'],
+      guards: { cover: [[28, -20], [38, -36], [45, -27]], n: 2, area: [20, 46, -40, -37], goal: [20, -16], stop: 14 },
+      intro: [[JACK, 'You want me, soldier? Come and take me.', 2.6], [HOU, 'He\'s wearing plates under that shirt. Make every shot count.', 3]],
+      p2: { say: [JACK, 'Khalid! Everyone! To me! Now!', 2.4], broken: [OKA, 'His guard\'s down! He\'s exposed!', 2], wave: { cover: [[18, -26], [36, -14]], n: 6, area: [-42, -28, -30, -10], goal: [22, -18], stop: 12 } },
+      p3: { say: [JACK, 'Start the engine! We are leaving!', 2.4], wave: { n: 4, area: [-10, 10, 30, 40], goal: [20, -14], stop: 12 } },
+      obj: 'Defeat the Jackal before he reaches the helicopter', after: 'Secure the Jackal',
+      escapeMsg: 'The Jackal got the helicopter off the ground. Keep the pressure on in phase 3.',
+    } },
+    { use: () => SP.ctx.boss.pos.clone(), text: 'Disarm the Jackal', hold: 1.2, obj: 'Secure the Jackal', label: 'JACKAL' },
     { cut: [[JACK, 'Wait. Wait. Do you know how much I can pay you? You. Him. All of you.', 3.6], [JAKE, 'You can\'t afford it anymore.', 2], [JACK, 'Then shoot me, soldier. That is what you came for.', 3], [HOU, 'Your call, Sarton.', 1.6]], look: [-1.0, -0.2] },
     { choice: { a: 'Take him alive', b: 'Let the courts decide... after Houser\'s word', key: 'jackal', ra: [[JAKE, 'No. You go to trial. Every name you know, every bank, every lab. You\'ll talk for years.', 4], [HOU, 'That\'s the harder thing. Good.', 2]], rb: [[HOU, 'You kept me in a box for nine days. Now you\'ll live in one for the rest of your life.', 4], [JACK, '...', 1]] } },
   ],

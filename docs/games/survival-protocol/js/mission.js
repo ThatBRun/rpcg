@@ -126,6 +126,58 @@ const STAGES = {
     c.obj(s.obj || 'Get to the helicopter', () => h.position, 'EXTRACT');
     await c.until(() => h.position.y < p.y + 1 && Math.hypot(P.pos.x - p.x, P.pos.z - p.z) < 8); c.heliMesh = h;
   },
+  async boss(s, c, W, P) {
+    const d = s.boss; const diff = { easy: 0.7, normal: 1, hard: 1.3 }[SP.settings && SP.settings.difficulty] || 1;
+    const B = { max: Math.round((d.hp || 2200) * diff), phase: 1, armor: false, down: false, escape: d.escape || 80 }; B.hp = B.max;
+    const look = Object.assign({}, SP.LOOKS.jackal, { weapon: 'ak' });
+    const j = c.foe({ pos: P3(d.start), name: d.name || 'THE JACKAL', look, weapon: 'ak', behavior: 'cover', alert: 1, acc: 1.15, sight: 220, hp: 1e9, crouchCover: true });
+    j.invuln = true; j.aware = true; j.runSpeed = 5.2; c.boss = j; c.bossState = B;
+    const covers = d.covers.map(P3); let ci = 0; const goCover = i => { ci = i; j.cover = covers[i].clone(); j.peek = covers[i].clone().add(V3(rand(-1.2, 1.2), 0, rand(-1.2, 1.2))); j.inCover = false; j.behavior = 'cover'; };
+    goCover(0);
+    const el = document.getElementById('boss'), fill = el.querySelector('.fill'), ghost = el.querySelector('.ghost'), ph = el.querySelector('.ph');
+    el.querySelector('.nm').textContent = d.name || 'THE JACKAL'; el.hidden = false; el.classList.remove('armored', 'down'); fill.style.width = '100%'; ghost.style.width = '100%';
+    let ghostHp = B.hp; const setPhaseLabel = t => { ph.textContent = t; };
+    setPhaseLabel(d.phases[0]);
+    j.damage = function (dmg, from, head, src) {
+      if (B.down) return false; this.rig.flinch = 1;
+      let m = src === 'player' || src === undefined ? 1 : src === 'ally' ? 0.12 : 0; if (B.armor) m *= 0.15;
+      if (m <= 0) return false; B.hp = Math.max(0, B.hp - dmg * m); B.lastHit = G.time;
+      if (B.armor && src === 'player') G.hud.feed('HE\'S DUG IN · KILL HIS GUARDS', 'red');
+      return false;
+    };
+    const guards = []; const addWave = w => { const got = spawnWave(c, w); guards.push(...got); return got; };
+    if (d.guards) addWave(d.guards);
+    c.obj(d.obj || 'Take down the Jackal', () => j.pos, d.name || 'THE JACKAL');
+    if (d.intro) for (const l of d.intro) await c.say(l[0], l[1], l[2], l[3]);
+    let moveT = 6, rpgT = 5, t = 0, warned = false, heli = SP.VILLA && SP.VILLA.heli, rot = 0;
+    const rpg = () => { const from = j.pos.clone().add(V3(0, 1.5, 0)); const tgt = P.pos.clone().add(V3(rand(-1.5, 1.5), 0.6, rand(-1.5, 1.5))); const dir = tgt.sub(from).normalize(); G.hud.feed('RPG!', 'red'); A.click(400, 0.2); setTimeout(() => { if (c.dead || B.down) return; G.rocket(from, dir, 'foe'); const pr = G.projectiles[G.projectiles.length - 1]; pr.vel.setLength(30); pr.dmg = 130; pr.r = 6; }, 700); };
+    setTick(c, dt => {
+      t += dt; const frac = B.hp / B.max;
+      if (SP.autoTest && !B.armor) B.hp = Math.max(0, B.hp - dt * B.max / 25);
+      ghostHp = Math.max(B.hp, ghostHp - dt * B.max * 0.25); fill.style.width = (frac * 100) + '%'; ghost.style.width = (ghostHp / B.max * 100) + '%';
+      // phase changes
+      if (B.phase === 1 && frac <= 0.65) { B.phase = 2; B.armor = true; el.classList.add('armored'); setPhaseLabel(d.phases[1]); G.hud.feed('PHASE 2 · BREAK HIS GUARD', 'gold'); if (d.p2) { if (d.p2.say) c.say(...d.p2.say).catch(() => { }); B.p2 = addWave(d.p2.wave); } goCover((ci + 2) % covers.length); }
+      if (B.phase === 2 && B.armor && B.p2 && B.p2.filter(u => !u.dead).length <= 1) { B.armor = false; el.classList.remove('armored'); G.hud.feed('HIS GUARD IS DOWN · HIT HIM NOW', 'gold'); if (d.p2.broken) c.say(...d.p2.broken).catch(() => { }); }
+      if (B.phase === 2 && frac <= 0.3) { B.phase = 3; B.armor = false; el.classList.remove('armored'); setPhaseLabel(d.phases[2]); G.hud.feed('PHASE 3 · HE\'S MAKING A RUN FOR IT', 'gold'); if (d.p3) { if (d.p3.say) c.say(...d.p3.say).catch(() => { }); if (d.p3.wave) addWave(d.p3.wave); } j.behavior = 'assault'; j.goal2 = null; j.stopDist = 7; j.runSpeed = 5.8; j.weapon = 'shotgun'; j.acc = 1.3; A.loop('rotor', 'rotor', 0.35); B.escapeLeft = B.escape; }
+      // behavior per phase
+      if (B.phase < 3) { moveT -= dt; if (moveT <= 0 && j.inCover) { moveT = rand(6, 9); goCover((ci + 1 + Math.floor(Math.random() * (covers.length - 1))) % covers.length); } }
+      if (B.phase === 2) { rpgT -= dt; if (rpgT <= 0 && j.inCover) { rpgT = rand(6, 8); rpg(); } }
+      if (B.phase === 3) {
+        if (heli && heli.userData.rotor) { rot += dt * 22; heli.userData.rotor.rotation.y = rot; if (heli.userData.tail) heli.userData.tail.rotation.x = rot * 1.6; }
+        if (d.mortar && Math.random() < dt / d.mortar) { const tp = P.pos.clone().add(V3(rand(-14, 14), 0, rand(-14, 14))); if (tp.distanceTo(P.pos) < 6) tp.x += 7; tp.y = W.heightAt(tp.x, tp.z); G.mortar(tp, 1.6); }
+        if (!SP.autoTest) B.escapeLeft -= dt; const sec = Math.max(0, Math.ceil(B.escapeLeft)); G.hud.timer('HELICOPTER  0:' + String(sec).padStart(2, '0'));
+        if (B.escapeLeft <= 0) { G.hud.timer(null); el.hidden = true; A.stopLoop('rotor'); SP.fail(d.escapeMsg || 'The Jackal reached his helicopter and got away.'); }
+      }
+      if (!B.down && B.hp <= 0) {
+        B.down = true; el.classList.add('down'); setPhaseLabel('DOWN'); G.hud.timer(null); A.stopLoop('rotor');
+        j.behavior = 'idle'; j.goal = null; j.holdFire = true; j.team = 'civ'; j.stance = 'kneel'; j.hands = 'up'; j.lookAt = P.pos.clone();
+        guards.forEach(u => { if (!u.dead) { u.team = 'civ'; u.holdFire = true; u.behavior = 'idle'; u.hands = 'up'; u.goal = null; } });
+        G.hud.feed('THE JACKAL IS DOWN', 'gold'); G.addTrauma(0.3);
+      }
+    });
+    await c.until(() => B.down); await c.wait(1.2); el.hidden = true; setTick(c);
+    if (d.after) c.obj(d.after, () => j.pos, 'JACKAL');
+  },
   async fn(s, c, W, P) { await s.fn(c, W, P); },
 };
 
