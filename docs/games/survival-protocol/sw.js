@@ -1,9 +1,9 @@
 /* Survival Protocol — offline cache so the installed app works without internet */
-const VERSION = 'sp-v10';
+const VERSION = 'sp-v11';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './js/core.js', './js/models.js', './js/game.js', './js/view.js', './js/maps.js', './js/parts.js', './js/parts2.js', './js/maps2.js', './js/parts3.js',
-  './js/mission.js', './js/maps3.js', './js/ch3.js', './js/ch4.js', './js/ch5.js', './js/progress.js', './js/touch.js', './js/main.js',
+  './js/mission.js', './js/maps3.js', './js/ch3.js', './js/ch4.js', './js/ch5.js', './js/progress.js', './js/detail.js', './js/touch.js', './js/main.js', './js/features.js',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
 ];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting())); });

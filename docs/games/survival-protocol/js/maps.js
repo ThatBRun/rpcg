@@ -35,7 +35,7 @@ SP.setEnv = function (scene, key, over = {}) {
   const hemi = new T.HemisphereLight(SP.lin(e.hemiS), SP.lin(e.hemiG), e.hemiI); scene.add(hemi); SP.hemi = hemi;
   SP.vmHemi.color.copy(hemi.color); SP.vmHemi.groundColor.copy(hemi.groundColor); SP.vmHemi.intensity = e.hemiI + (e.indoor ? 0.3 : 0.15);
   scene.fog = new T.FogExp2(SP.lin(e.fog), e.fogD); scene.background = SP.lin(e.fog);
-  SP.post.U.exposure.value = e.exp; SP.post.U.night.value = e.night; SP.baseExposure = e.exp; SP.post.U.haze.value = e.haze || 0; SP.post.U.sunCol.value = SP.lin(e.sunCol);
+  SP.post.U.exposure.value = e.exp; SP.post.U.night.value = e.night; SP.baseExposure = e.exp; SP.post.U.haze.value = e.haze || 0; SP.post.U.sunCol.value = SP.lin(e.sunCol); { const PU = SP.post.U; PU.atmCol.value = SP.lin(e.fog).multiplyScalar(e.night ? 0.8 : 1.15); PU.sunDirW.value.copy(dir).normalize(); PU.atmDen.value = e.atmDen != null ? e.atmDen : (e.night ? 0.0014 : key === 'interior' || key === 'tunnel' || key === 'cave' ? 0.0 : 0.0019); PU.atmos.value = (key === 'interior' || key === 'tunnel' || key === 'cave') ? 0 : 1; SP.post.cutFrame = true; }
   if (!e.indoor) SP.addMotes(scene, e.moon ? 0x8fa0c0 : 0xffd9a8, e.moon ? 0.25 : 0.6);
   A.setReverb(e.indoor ? 0.6 : 0.25);
 };

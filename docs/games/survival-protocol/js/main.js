@@ -15,10 +15,11 @@ SP.persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SP.save
 SP.settings = { sens: 1, quality: 'high', difficulty: 'normal', platform: null };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY + '_set') || 'null'); if (s) Object.assign(SP.settings, s); } catch (e) { }
 function applySettings() {
-  SP.sens = SP.settings.sens; SP.difficulty = { easy: 0.6, normal: 1, hard: 1.45 }[SP.settings.difficulty] || 1;
-  const q = SP.settings.quality; SP.post.scale = q === 'high' ? 1 : q === 'medium' ? 0.8 : 0.62; SP.shadowRes = q === 'low' ? 1024 : q === 'high' ? 4096 : 2048;
+  SP.sens = SP.settings.sens; SP.difficulty = { easy: 0.6, normal: 1, hard: 1.45, realism: 1.9 }[SP.settings.difficulty] || 1;
+  const q = SP.settings.quality; SP.post.scale = q === 'high' ? 1 : q === 'medium' ? 0.8 : 0.62; SP.shadowRes = q === 'low' ? 1024 : q === 'high' ? 4096 : 2048; SP.post.depthOn = (q === 'high' || q === 'ultra') && !window.__noDepth; SP.post.U.ao.value = 0.75; SP.post.U.mblur.value = SP.settings.mblur === false ? 0 : 0.6;
   SP.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, q === 'high' ? 1.5 : 1)); resize();
   try { localStorage.setItem(SAVE_KEY + '_set', JSON.stringify(SP.settings)); } catch (e) { }
+  if (SP.Features) SP.Features.applySettings();
 }
 
 /* ---------- renderer ---------- */
@@ -81,7 +82,7 @@ SP.loadPart = async function (n, ch) {
   const P = SP.P = new SP.Player(); P.pos.copy(info.start || V3()); P.yaw = 0; P.pitch = 0;
   SP.vmScene.remove(...SP.vmScene.children.filter(o => o.isMesh)); if (SP.VM.group) { SP.vmCam.remove(SP.VM.group); SP.VM.group = null; SP.VM.gun = null; }
   SP.Progress.beforeLoad(part); (part.loadout || ['m4']).forEach(w => P.give(w)); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
-  SP.Progress.afterLoadout(P, part); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
+  SP.Progress.afterLoadout(P, part); SP.Features && SP.Features.onPartLoad(part, n, ch); if (part.loadout && part.loadout.length === 0) { P.cur = null; G.hud.ammo('', '', ''); }
   ctx = makeCtx(part); SP.ctx = ctx;
   SP.fade = 1; SP.fadeTarget = 0; SP.fadeRate = 0.8; SP.lbTarget = 0; SP.blurTarget = 0;
   if (part.setup) part.setup(ctx, W, P);
@@ -100,7 +101,7 @@ function introCard(part, n, ch) {
 }
 async function partComplete(part) {
   const list = chParts(curCh); const n = list.indexOf(part) + 1; const key = curCh + '-' + n; if (!SP.save.dk.includes(key)) SP.save.dk.push(key); SP.save.done = SP.save.dk.filter(k => k.startsWith('1-')).map(k => +k.split('-')[1]); SP.persist();
-  const rewards = SP.Progress.onPartComplete(curCh, n, n >= list.length);
+  const rewards = SP.Progress.onPartComplete(curCh, n, n >= list.length); if (SP.Features) { SP.Features.onPartComplete(); if (n >= list.length) SP.Features.onChapterComplete(); }
   running = false; SP.fadeTarget = 1; SP.fadeRate = 1; await new Promise(r => setTimeout(r, 1100));
   if (n >= list.length) { const ch = curCh; teardown(); I.unlock(); showEnd(ch, rewards); return; }
   SP.loadPart(n + 1, curCh);
@@ -120,7 +121,7 @@ SP.onLockChange = (locked) => {
   else if (SP.state === 'play' && running && !I.fallback) { paused = true; showScreen('pause'); }
 };
 SP.onLockFail = () => { if (SP.state !== 'play') return; paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
-SP.onKey = (code) => { if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
+SP.onKey = (code) => { if (SP.Features && SP.Features.photo) return; if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
 function showScreen(id) { ['title', 'chapters', 'pause', 'dead', 'end', 'settings', 'platform', 'armory'].forEach(s => { $('#' + s).hidden = s !== id; }); if (id) $('#lockoverlay').hidden = true; }
 SP.showScreen = showScreen;
 
@@ -176,10 +177,11 @@ function frame(now) {
   U.letterbox.value = damp(U.letterbox.value, SP.lbTarget, 4, dt); U.blur.value = damp(U.blur.value, SP.blurTarget, 3, dt); U.flash.value = damp(U.flash.value, 0, 6, dt);
   if (SP.state === 'menu' && SP.menuTick) { SP.menuTick(dt); SP.post.render(SP.scene, camera, dt); return; }
   if (SP.state !== 'play' || !SP.scene) { $('#touch').hidden = true; return; }
-  if (paused) $('#touch').hidden = true;
+  if (paused) { $('#touch').hidden = true; SP.Features && SP.Features.pausedTick(dt); }
   if (!paused) {
     const rdt = dt; dt *= SP.Progress.worldScale(); G.time += dt; const P = SP.P;
     if (SP.W.surfaceFn) P.surfaceUnder = SP.W.surfaceFn(P.pos.x, P.pos.z);
+    SP.Features && SP.Features.pre(rdt);
     P.update(rdt * SP.Progress.playerScale());
     for (const u of G.units) u.update(dt);
     for (const v of G.vehicles) v.update(dt);
@@ -189,7 +191,7 @@ function frame(now) {
       for (let i = ctx.untils.length - 1; i >= 0; i--) { const u = ctx.untils[i]; u.t -= dt; let ok = false; try { ok = u.fn(); } catch (e) { } if (ok || u.t <= 0) { ctx.untils.splice(i, 1); u.res(ok); } }
       if (SP.onTick) SP.onTick(dt);
     }
-    SP.Wheel.update(); SP.Progress.update(rdt);
+    SP.Wheel.update(); SP.Progress.update(rdt); SP.Features && SP.Features.post(dt, rdt);
     SP.updateSun(); SP.VM.update(rdt); G.updateMarkers(); G.updateCompass(); SP.updateMotes(dt);
     if (SP.sunDir && !SP.envCfg.indoor && !SP.envCfg.moon) { const sp = camera.position.clone().addScaledVector(SP.sunDir, 1000).project(camera); const on = sp.z < 1 && Math.abs(sp.x) < 1.6 && Math.abs(sp.y) < 1.6; U.sunPos.value.set(sp.x * 0.5 + 0.5, sp.y * 0.5 + 0.5); U.sunVis.value = damp(U.sunVis.value, on ? clamp(1.6 - Math.hypot(sp.x, sp.y), 0, 1) : 0, 4, dt); } else U.sunVis.value = 0;
     if (SP.sky) { SP.sky.position.copy(camera.position); SP.sky.material.uniforms.time.value += dt; }
@@ -203,6 +205,7 @@ function frame(now) {
     I.endFrame();
   }
   SP.post.render(SP.scene, camera, dt, SP.VM.group && SP.VM.group.visible && SP.P.mode !== 'locked' ? SP.vmScene : null, SP.vmCam);
+  SP.Features && SP.Features.afterRender();
 }
 
 /* ---------- title backdrop: helicopter over the dunes ---------- */

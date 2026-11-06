@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <meta charset="utf-8">
 <title>Survival Protocol</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -120,6 +121,8 @@ h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-
 .part.done .pn::after{content:"  ✓";color:var(--green)}
 .set{display:grid;gap:14px;width:min(420px,100%)}
 .set label{display:grid;gap:6px;font-size:14px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.set label.chk{display:flex;align-items:center;gap:10px;letter-spacing:.1em} .set label.chk input{width:18px;height:18px;accent-color:var(--amber)} .set label span{color:var(--amber);font-family:var(--mono);letter-spacing:0}
+#settings{overflow:auto;align-content:start;padding-top:max(28px,env(safe-area-inset-top,0px));padding-bottom:28px}
 .set select,.set input{font-family:var(--hud);font-size:18px;background:#111;color:var(--ink);border:1px solid var(--line);padding:6px 8px}
 #loading,#boot{display:grid;place-items:center;background:#050505}
 .load{display:grid;gap:12px;justify-items:center;font-family:var(--mono);letter-spacing:.2em;color:var(--dim);font-size:13px}
@@ -217,6 +220,63 @@ body.wheel-open #cross,body.wheel-open #prompt{display:none!important}
 .aup button{padding:3px 6px;font-size:13px;font-family:var(--mono)} .aup i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--green);text-align:center}
 #endreward{font-family:var(--mono);font-size:16px;color:var(--amber);letter-spacing:.12em}
 #btn-install{color:var(--amber)}
+
+/* ---------- features pack ---------- */
+:root{--hudscale:1}
+#hud{zoom:var(--hudscale)}
+#hpbar{position:fixed;left:max(22px,env(safe-area-inset-left,0px));bottom:calc(max(22px,env(safe-area-inset-bottom,0px)) + 46px);width:260px;display:grid;gap:5px}
+#hpbar .top{display:flex;align-items:baseline;gap:8px;text-shadow:0 1px 3px #000}
+#hpbar .lb{font-size:12px;letter-spacing:.3em;color:var(--dim);font-weight:600}
+#hpbar .v{font-family:var(--mono);font-size:26px;line-height:1;color:var(--ink)} #hpbar .mx{font-family:var(--mono);font-size:12px;color:var(--dim)}
+#hpbar .rg{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--green);opacity:0;transition:opacity .3s} #hpbar.regen .rg{opacity:1}
+#hpbar .track{position:relative;height:8px;background:rgba(10,10,9,.6);border:1px solid rgba(236,230,218,.25);transform:skewX(-14deg);overflow:hidden}
+#hpbar .ghost{position:absolute;inset:0 auto 0 0;background:rgba(255,226,180,.55)} #hpbar .fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#d8d2c4,#ece6da)}
+#hpbar .track:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(10,10,9,.7) calc(10% - 1px) 10%)}
+#hpbar.mid .fill{background:linear-gradient(90deg,#d99a2b,#f2b33d)} #hpbar.low .fill{background:linear-gradient(90deg,#9e1f17,#e0483a)} #hpbar.low .v{color:#ff6a5a;animation:lowpulse .8s ease-in-out infinite alternate}
+@keyframes lowpulse{to{opacity:.45}}
+body.mobile #hpbar{bottom:auto;top:calc(76px + env(safe-area-inset-top,0px));width:180px}
+#nades{display:flex;justify-content:flex-end;margin-top:4px;gap:6px;align-items:baseline;font-size:12px;letter-spacing:.2em;color:var(--dim)} #nades b{font-family:var(--mono);color:var(--ink);font-size:16px} #nades kbd{font-family:var(--mono);color:var(--amber);font-size:11px} #nades.empty b{color:var(--red)}
+#firemode{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--amber);text-align:right;margin-top:2px} #firemode.flash{animation:objin .6s ease}
+#lowammo{position:fixed;left:50%;top:calc(50% + 34px);transform:translateX(-50%);font-size:14px;letter-spacing:.3em;font-weight:700;text-shadow:0 1px 3px #000}
+#lowammo.warn{color:var(--amber)} #lowammo.crit{color:#ff6a5a;animation:lowpulse .5s ease-in-out infinite alternate}
+#minimap{position:fixed;right:max(22px,env(safe-area-inset-right,0px));top:max(22px,env(safe-area-inset-top,0px));width:150px;height:150px}
+body.mobile #minimap{width:110px;height:110px;top:auto;bottom:calc(330px + env(safe-area-inset-bottom,0px))}
+#killfeed{position:fixed;left:max(22px,env(safe-area-inset-left,0px));top:calc(max(22px,env(safe-area-inset-top,0px)) + 92px);display:grid;gap:4px;justify-items:start}
+body.mobile #killfeed{top:calc(130px + env(safe-area-inset-top,0px))}
+.kf{display:flex;gap:8px;align-items:baseline;background:rgba(8,8,7,.55);padding:3px 10px;font-size:15px;transition:opacity .6s} .kf b{color:var(--green);letter-spacing:.06em} .kf .w{font-family:var(--mono);font-size:11px;color:var(--dim)} .kf .hs{font-style:normal;color:var(--amber)} .kf .t{color:#ff8a7a;letter-spacing:.06em} .kf.out{opacity:0}
+#streak{position:fixed;left:50%;top:24%;transform:translateX(-50%);text-align:center;pointer-events:none;opacity:0;display:grid;gap:2px}
+#streak b{font-size:clamp(28px,4vw,46px);letter-spacing:.18em;color:var(--amber);text-shadow:0 2px 12px rgba(0,0,0,.8)} #streak span{font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:.12em}
+#streak.on{animation:streakin 2.2s ease forwards} @keyframes streakin{0%{opacity:0;transform:translateX(-50%) scale(1.4)}12%{opacity:1;transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+#scorepop{position:fixed;left:50%;top:calc(50% + 56px);transform:translateX(-50%);display:grid;gap:2px;justify-items:center;pointer-events:none}
+.sp{display:flex;gap:8px;align-items:baseline;animation:spop 1.4s ease forwards;text-shadow:0 1px 3px #000} .sp b{font-family:var(--mono);color:var(--amber);font-size:17px} .sp span{font-size:13px;letter-spacing:.2em;color:var(--ink);font-weight:600}
+@keyframes spop{0%{opacity:0;transform:translateY(8px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+#alerts{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.al{position:absolute;left:0;top:0;font-family:var(--hud);font-weight:700;font-size:26px;line-height:1;text-shadow:0 0 6px rgba(0,0,0,.9)}
+.al.sus{color:transparent;background:linear-gradient(0deg,#f2b33d calc(var(--fill)*100%),rgba(236,230,218,.55) calc(var(--fill)*100%));-webkit-background-clip:text;background-clip:text} .al.hot{color:#ff5a48;animation:lowpulse .3s ease-in-out infinite alternate}
+#breath{position:fixed;left:50%;bottom:22%;transform:translateX(-50%);width:160px;display:grid;gap:4px;justify-items:center;font-size:11px;letter-spacing:.25em;color:var(--dim)} #breath b{display:block;width:100%;height:3px;background:rgba(236,230,218,.2)} #breath i{display:block;height:100%;background:var(--ink)} #breath.hold i{background:var(--amber)}
+#toasts{position:fixed;left:50%;top:max(70px,env(safe-area-inset-top,0px));transform:translateX(-50%);display:grid;gap:6px;z-index:30;pointer-events:none}
+.toast{display:grid;gap:2px;justify-items:center;background:rgba(10,10,9,.88);border:1px solid var(--amber);padding:8px 22px;animation:objin .5s ease;transition:opacity .7s} .toast .e{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber)} .toast b{font-size:20px;letter-spacing:.06em} .toast.out{opacity:0}
+#cross[data-style=dot] i{display:none} #cross[data-style=dot]:after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--xc,#ece6da);box-shadow:0 0 2px #000}
+#cross[data-style=circle] i{display:none} #cross[data-style=circle]:after{content:"";position:absolute;inset:3px;border:2px solid var(--xc,#ece6da);border-radius:50%;box-shadow:0 0 2px #000}
+#cross[data-style=none]{visibility:hidden} #cross i{background:var(--xc,rgba(236,230,218,.9))!important}
+body.hudoff #hud,body.hudoff #minimap,body.hudoff #killfeed,body.hudoff #alerts,body.hudoff #cross{visibility:hidden}
+body.realism #minimap,body.realism #alerts,body.realism #scorepop,body.realism #markers,body.realism #compass{display:none!important}
+body.photo #hud,body.photo #minimap,body.photo #killfeed,body.photo #alerts,body.photo #cross,body.photo #touch,body.photo #toasts,body.photo #scorepop,body.photo #streak,body.photo #lowammo,body.photo #breath{display:none!important}
+#photo{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:25;display:grid;gap:8px;justify-items:center;background:rgba(8,8,7,.7);border:1px solid var(--line);padding:12px 18px;text-align:center}
+#photo .k{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--dim);letter-spacing:.06em} #photo .k b{color:var(--ink);font-family:var(--mono);font-size:12px;margin-right:4px}
+#photo .row{display:flex;gap:14px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--amber)} #photo button{font-family:var(--hud);font-weight:700;letter-spacing:.1em;border:1px solid var(--amber);background:rgba(242,179,61,.14);color:var(--amber);padding:6px 14px;cursor:pointer;font-size:15px}
+#career .stack{width:min(1000px,calc(100vw - 32px));gap:14px} #career{align-content:start;overflow:auto;padding-top:max(28px,env(safe-area-inset-top,0px));padding-bottom:28px}
+#c-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px} #c-stats div{display:grid;gap:2px;background:rgba(14,14,13,.85);border:1px solid var(--line);padding:10px 12px} #c-stats span{font-size:12px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase} #c-stats b{font-family:var(--mono);font-size:22px;font-weight:400}
+#c-ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px} .ach{display:grid;gap:2px;background:rgba(14,14,13,.85);border:1px solid var(--line);padding:9px 12px;opacity:.55} .ach.got{opacity:1;border-color:rgba(242,179,61,.6)} .ach b{font-size:18px} .ach span{font-size:14px;color:var(--dim);line-height:1.25} .ach i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--amber)}
+.h3{font-size:14px;letter-spacing:.3em;color:var(--amber);font-weight:700;border-bottom:1px solid var(--line);padding-bottom:6px;margin-top:6px;display:flex;justify-content:space-between}
+#daily,#c-daily{display:grid;gap:6px;max-width:460px} .dc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:15px} .dc b{font-family:var(--mono);font-size:12px;color:var(--dim)} .dc i{grid-column:1/-1;height:3px;background:rgba(236,230,218,.15)} .dc u{display:block;height:100%;background:var(--amber)} .dc.done span{color:var(--green)} .dc.done b{color:var(--green)}
+#title #daily{margin-top:10px}
+#plog{display:grid;gap:4px;text-align:left;border-left:2px solid var(--amber);padding-left:12px;margin:2px 0 6px} #plog b{font-size:20px;letter-spacing:.04em} #plog span{font-family:var(--mono);font-size:12px;color:var(--dim)} #plog .o{font-family:var(--hud);font-size:16px;color:var(--ink)}
+#deathrecap{font-family:var(--mono);font-size:13px;color:var(--dim)}
+#loadtip{font-size:15px;color:var(--dim);max-width:460px;text-align:center;margin-top:14px;line-height:1.35}
+#t-nade{width:50px;height:50px;right:calc(200px + env(safe-area-inset-right,0px));bottom:calc(250px + env(safe-area-inset-bottom,0px));font-size:11px}
+#t-knife{width:50px;height:50px;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(350px + env(safe-area-inset-bottom,0px));font-size:11px}
+#t-nvg{width:46px;height:46px;left:calc(28px + env(safe-area-inset-left,0px));top:calc(170px + env(safe-area-inset-top,0px));font-size:11px}
 body.mobile .keys{display:none}
 body.mobile #ammo{bottom:calc(14px + env(safe-area-inset-bottom,0px));right:calc(14px + env(safe-area-inset-right,0px))}
 body.mobile #amag{font-size:30px}
@@ -233,13 +293,19 @@ body.mobile #amag{font-size:30px}
 
   <div id="obj" hidden><span class="k">OBJECTIVE</span><span class="v" id="objtext"></span></div>
   <div id="feed"></div>
-  <div id="ammo"><div class="row"><span id="amag"></span><span id="ares"></span></div><div id="wname"></div></div>
+  <div id="ammo"><div class="row"><span id="amag"></span><span id="ares"></span></div><div id="wname"></div><div id="firemode"></div><div id="nades"><span>FRAG</span><b>2</b><kbd>G</kbd></div></div>
   <div id="markers"></div>
   <div id="dmgdirs"></div>
   <div id="fname" hidden></div>
   <div id="intro" hidden></div>
+  <div id="hpbar" hidden><div class="top"><span class="lb">HEALTH</span><span class="v">100</span><span class="mx">/ 100</span><span class="rg">REGENERATING</span></div><div class="track"><div class="ghost"></div><div class="fill"></div></div></div>
+  <div id="lowammo"></div>
+  <div id="breath" hidden><span>HOLD SHIFT TO STEADY</span><b><i></i></b></div>
   <div id="abil" hidden><div id="ab-dash"><span>DASH<kbd>Q</kbd></span><b><i></i></b></div><div id="ab-focus"><span>FOCUS<kbd>X</kbd></span><b><i></i></b></div></div>
 </div>
+<canvas id="minimap" width="300" height="300"></canvas>
+<div id="killfeed"></div><div id="streak"><b></b><span></span></div><div id="scorepop"></div><div id="alerts"></div><div id="toasts"></div>
+<div id="photo" hidden><b>PHOTO MODE</b><div class="k"><span><b>WASD</b>Move</span><span><b>DRAG / MOUSE</b>Look</span><span><b>E / Q</b>Up / down</span><span><b>[ ]</b>Zoom</span><span><b>F</b>Filter</span><span><b>X</b>Save picture</span><span><b>ESC</b>Exit</span></div><div class="row"><span>FILTER <span id="ph-filter">NONE</span></span><span>FOV <span id="ph-fov">60°</span></span><span id="ph-msg"></span></div><div class="row"><button id="ph-snap" type="button">Save picture</button><button id="ph-exit" type="button">Exit photo mode</button></div></div>
 <div id="wheel" hidden><div class="wbg"></div><div class="wring"><div class="wlocked"></div><div class="wslots"></div><div class="wc"><b>WEAPON WHEEL</b><span></span></div><div class="whint">MOVE TO PICK · RELEASE F TO EQUIP</div></div></div>
 <div id="scope" hidden><div class="sr"></div><div class="sv"></div><div class="sd"></div></div>
 <div id="binoc" hidden><div class="ret"></div><div class="ret2"></div><div class="rd">x 8.0 · CLICK TO TAG</div></div>
@@ -265,13 +331,15 @@ body.mobile #amag{font-size:30px}
       <button class="mb" id="btn-new" type="button">New game</button>
       <button class="mb" id="btn-parts" type="button">Choose a part</button>
       <button class="mb" id="btn-armory" type="button">Armory</button>
+      <button class="mb" id="btn-career" type="button">Career</button>
       <button class="mb" id="btn-set" type="button">Settings</button>
       <button class="mb" id="btn-install" type="button" hidden>Install app</button>
     </div>
+    <div id="daily"></div>
     <div class="keys">
       <span><b>WASD</b> Move</span><span><b>Mouse</b> Look</span><span><b>Click</b> Fire</span><span><b>Right click</b> Aim</span>
       <span><b>Shift</b> Sprint</span><span><b>C / Ctrl</b> Crouch</span><span><b>Space</b> Jump</span><span><b>R</b> Reload</span>
-      <span><b>E</b> Interact</span><span><b>Hold F</b> Weapon wheel</span><span><b>F</b> Takedown</span><span><b>1–8</b> Weapons</span><span><b>T</b> Flashlight</span><span><b>Q</b> Dash*</span><span><b>X</b> Adrenaline*</span><span><b>*</b> Unlock in the Armory</span>
+      <span><b>E</b> Interact</span><span><b>Hold F</b> Weapon wheel</span><span><b>F</b> Takedown</span><span><b>1–8</b> Weapons</span><span><b>T</b> Flashlight</span><span><b>Q</b> Dash*</span><span><b>X</b> Adrenaline*</span><span><b>G</b> Grenade</span><span><b>V</b> Knife</span><span><b>B</b> Fire mode</span><span><b>Z</b> Tag enemy</span><span><b>N</b> Night vision</span><span><b>I</b> Inspect</span><span><b>H</b> Hide HUD</span><span><b>*</b> Unlock in the Armory</span>
     </div>
   </div>
 </div>
@@ -290,11 +358,14 @@ body.mobile #amag{font-size:30px}
   <div class="stack">
     <span class="eyebrow">PAUSED</span>
     <h2>Survival Protocol</h2>
+    <div id="plog"><b id="plog-name"></b><span id="plog-place"></span><span class="o" id="plog-obj"></span></div>
     <div class="menu">
       <button class="mb" id="p-resume" type="button">Resume</button>
       <button class="mb" id="p-restart" type="button">Restart part</button>
       <button class="mb" id="p-parts" type="button">Choose a part</button>
       <button class="mb" id="p-armory" type="button">Armory</button>
+      <button class="mb" id="p-career" type="button">Career</button>
+      <button class="mb" id="p-photo" type="button">Photo mode</button>
       <button class="mb" id="p-set" type="button">Settings</button>
       <button class="mb" id="p-quit" type="button">Quit to title</button>
     </div>
@@ -307,9 +378,16 @@ body.mobile #amag{font-size:30px}
     <h2>Settings</h2>
     <div class="set">
       <label for="s-sens">Mouse sensitivity<input id="s-sens" type="range" min="0.3" max="2.5" step="0.05" value="1"></label>
-      <label for="s-q">Graphics quality<select id="s-q"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low (faster)</option></select></label>
+      <label for="s-q">Graphics quality<select id="s-q"><option value="high">High (ambient occlusion, haze, motion blur)</option><option value="medium">Medium</option><option value="low">Low (faster)</option></select></label>
       <label for="s-p">Playing on<select id="s-p"><option value="pc">PC (keyboard and mouse)</option><option value="chromebook">Chromebook (keyboard and trackpad)</option><option value="mobile">Mobile (touch controls)</option></select></label>
-      <label for="s-d">Difficulty<select id="s-d"><option value="easy">Recruit</option><option value="normal">Regular</option><option value="hard">Veteran</option></select></label>
+      <label for="s-d">Difficulty<select id="s-d"><option value="easy">Recruit</option><option value="normal">Regular</option><option value="hard">Veteran</option><option value="realism">Realism (minimal HUD, deadly)</option></select></label>
+      <label for="s-fov">Field of view <span id="s-fovv">74°</span><input id="s-fov" type="range" min="60" max="100" step="1" value="74"></label>
+      <label for="s-x">Crosshair<select id="s-x"><option value="default">Classic</option><option value="dot">Dot</option><option value="circle">Circle</option><option value="none">None</option></select></label>
+      <label for="s-xc">Crosshair colour<select id="s-xc"><option value="#ece6da">White</option><option value="#8fd18a">Green</option><option value="#5fd7ff">Cyan</option><option value="#ffd23d">Yellow</option><option value="#ff5a5a">Red</option></select></label>
+      <label for="s-hud">HUD size<input id="s-hud" type="range" min="0.75" max="1.25" step="0.05" value="1"></label>
+      <label class="chk" for="s-mb"><input id="s-mb" type="checkbox" checked> Motion blur (High graphics)</label>
+      <label class="chk" for="s-mu"><input id="s-mu" type="checkbox" checked> Combat music</label>
+      <label class="chk" for="s-ru"><input id="s-ru" type="checkbox" checked> Controller rumble and phone vibration</label>
     </div>
     <div class="menu"><button class="mb" id="s-done" type="button">Done</button></div>
   </div>
@@ -320,6 +398,7 @@ body.mobile #amag{font-size:30px}
     <span class="eyebrow" style="color:var(--red)">K.I.A.</span>
     <h2 id="deadtitle">You were killed</h2>
     <p class="lede" id="deadmsg"></p>
+    <div id="deathrecap"></div>
     <div class="menu"><button class="mb" id="d-retry" type="button">Retry part</button><button class="mb" id="d-parts" type="button">Choose a part</button><button class="mb" id="d-armory" type="button">Armory</button></div>
   </div>
 </div>
@@ -347,6 +426,19 @@ body.mobile #amag{font-size:30px}
   </div>
 </div>
 
+<div id="career" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">CAREER</span>
+    <h2>Service record</h2>
+    <div id="c-stats"></div>
+    <div class="h3"><span>DAILY CHALLENGES</span><span>RESETS AT MIDNIGHT</span></div>
+    <div id="c-daily"></div>
+    <div class="h3"><span>ACHIEVEMENTS</span><span id="c-achn"></span></div>
+    <div id="c-ach"></div>
+    <div class="menu"><button class="mb" id="c-back" type="button">Back</button></div>
+  </div>
+</div>
+
 <div id="platform" class="ov screen" hidden>
   <div class="stack">
     <span class="eyebrow">SURVIVAL PROTOCOL</span>
@@ -363,7 +455,7 @@ body.mobile #amag{font-size:30px}
 <div id="touch" hidden>
   <div id="t-stick"></div><div id="t-look"></div><div id="t-base" hidden><div id="t-knob"></div></div>
   <div class="tb" id="t-fire">FIRE</div><div class="tb" id="t-aim">AIM</div><div class="tb" id="t-jump">JUMP</div><div class="tb" id="t-crouch">DUCK</div>
-  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
+  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-nade" hidden>NADE</div><div class="tb" id="t-knife" hidden>KNIFE</div><div class="tb" id="t-nvg" hidden>NVG</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
 </div>
 
 <div id="chapterend" class="ov" hidden><div class="stack"><span class="eyebrow">END OF CHAPTER 1</span><h1>Left Behind</h1></div></div>
@@ -372,7 +464,7 @@ body.mobile #amag{font-size:30px}
   <div class="stack"><span class="eyebrow">READY</span><h2>Click to play</h2><p class="lede">Your mouse controls the camera. Press Esc to pause.</p><button class="cta" id="lockbtn" type="button">Play</button></div>
 </div>
 
-<div id="loading" class="ov" hidden><div class="load"><span id="loadtext">Loading</span><div class="bar"><div style="height:100%;width:100%;background:var(--amber);animation:lb 1s ease infinite alternate"></div></div></div></div>
+<div id="loading" class="ov" hidden><div class="load"><span id="loadtext">Loading</span><div class="bar"><div style="height:100%;width:100%;background:var(--amber);animation:lb 1s ease infinite alternate"></div></div><p id="loadtip"></p></div></div>
 <div id="boot" class="ov"><div class="load"><span id="boottext">SURVIVAL PROTOCOL · BUILDING THE WORLD</span><div class="bar"><div id="bootbar"></div></div></div></div>
 <style>@keyframes lb{from{opacity:.25}to{opacity:1}}</style>
 
@@ -392,8 +484,10 @@ body.mobile #amag{font-size:30px}
 <script src="js/ch4.js"></script>
 <script src="js/ch5.js"></script>
 <script src="js/progress.js"></script>
+<script src="js/detail.js"></script>
 <script src="js/touch.js"></script>
 <script src="js/main.js"></script>
+<script src="js/features.js"></script>
 <script>
 /* installable app (Chromebook, Windows, Android): offline cache + Install button */
 (function(){
@@ -408,3 +502,5 @@ body.mobile #amag{font-size:30px}
 (function(){ const s=document.getElementById('compass-strip'); const L={0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'};
   for(let d=-360; d<=720; d+=15){ const n=((d%360)+360)%360; if(L[n]!==undefined){ const b=document.createElement('b'); b.textContent=L[n]; b.style.left=(d*4)+'px'; s.append(b);} else { const i=document.createElement('i'); i.style.left=(d*4)+'px'; if(d%45===0) i.className='big'; s.append(i);} } })();
 </script>
+
+</body></html>

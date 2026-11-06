@@ -213,6 +213,9 @@ SP.Post = class {
     this.rtScene = gl2 && T.WebGLMultisampleRenderTarget ? new T.WebGLMultisampleRenderTarget(4, 4, opts) : new T.WebGLRenderTarget(4, 4, opts);
     if (this.rtScene.samples !== undefined) this.rtScene.samples = 4;
     this.rtA = new T.WebGLRenderTarget(4, 4, opts); this.rtB = new T.WebGLRenderTarget(4, 4, opts); this.rtC = new T.WebGLRenderTarget(4, 4, opts);
+    this.rtDepth = new T.WebGLRenderTarget(4, 4, { minFilter: T.NearestFilter, magFilter: T.NearestFilter });
+    this.depthMat = new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }); this.maskMat = new T.MeshBasicMaterial({ color: 0x000000, depthTest: false });
+    this.prevVP = new T.Matrix4(); this.depthOn = false; this._cc = new T.Color();
     this.bright = new T.ShaderMaterial({ uniforms: { t: { value: null }, th: { value: 1.0 } }, vertexShader: FSQ_VS, depthTest: false, depthWrite: false,
       fragmentShader: `uniform sampler2D t; uniform float th; varying vec2 vUv; void main(){ vec3 c=texture2D(t,vUv).rgb; float l=dot(c,vec3(.2126,.7152,.0722)); float k=max(l-th,0.)/max(l,1e-4); gl_FragColor=vec4(min(c*k,vec3(40.)),1.); }` });
     this.blur = new T.ShaderMaterial({ uniforms: { t: { value: null }, dir: { value: new T.Vector2() } }, vertexShader: FSQ_VS, depthTest: false, depthWrite: false,
@@ -221,9 +224,15 @@ SP.Post = class {
     this.U = { tScene: { value: null }, tBloom: { value: null }, res: { value: new T.Vector2(1, 1) }, time: { value: 0 }, exposure: { value: 1 }, bloom: { value: 0.55 },
       grain: { value: 0.06 }, vignette: { value: 0.45 }, ca: { value: 0.0018 }, damage: { value: 0 }, blur: { value: 0 }, sat: { value: 1.05 }, contrast: { value: 1.08 },
       warm: { value: 1 }, letterbox: { value: 0 }, flash: { value: 0 }, night: { value: 0 }, fade: { value: 0 },
-      sunPos: { value: new T.Vector2(0.5, 0.5) }, sunVis: { value: 0 }, sunCol: { value: new T.Color(1, 0.8, 0.6) }, rays: { value: 0.55 }, dirt: { value: 0.5 }, sharp: { value: 0.35 }, haze: { value: 0 } };
+      sunPos: { value: new T.Vector2(0.5, 0.5) }, sunVis: { value: 0 }, sunCol: { value: new T.Color(1, 0.8, 0.6) }, rays: { value: 0.55 }, dirt: { value: 0.5 }, sharp: { value: 0.35 }, haze: { value: 0 },
+      tDepth: { value: null }, useDepth: { value: 0 }, cNear: { value: 0.1 }, cFar: { value: 1000 }, projInv: { value: new T.Matrix4() }, camWorld: { value: new T.Matrix4() }, prevVP: { value: new T.Matrix4() }, pscale: { value: 1 },
+      ao: { value: 0.75 }, atmos: { value: 1 }, atmCol: { value: new T.Color(0.6, 0.6, 0.65) }, atmDen: { value: 0.0022 }, sunDirW: { value: new T.Vector3(0, 1, 0) }, mblur: { value: 0.6 }, nvg: { value: 0 }, photo: { value: 0 } };
     this.final = new T.ShaderMaterial({ uniforms: this.U, vertexShader: FSQ_VS, depthTest: false, depthWrite: false, fragmentShader: `
       uniform sampler2D tScene,tBloom; uniform vec2 res; uniform float time,exposure,bloom,grain,vignette,ca,damage,blur,sat,contrast,warm,letterbox,flash,night,fade,sunVis,rays,dirt,sharp,haze; uniform vec2 sunPos; uniform vec3 sunCol; varying vec2 vUv;
+      uniform sampler2D tDepth; uniform float useDepth,cNear,cFar,pscale,ao,atmos,atmDen,mblur,nvg,photo; uniform mat4 projInv,camWorld,prevVP; uniform vec3 atmCol,sunDirW;
+      #include <packing>
+      float vz(vec2 q){ return -perspectiveDepthToViewZ(unpackRGBAToDepth(texture2D(tDepth,q)),cNear,cFar); }
+      vec3 vpos(vec2 q,float d){ vec4 r=projInv*vec4(q*2.-1.,1.,1.); r.xyz/=r.w; return r.xyz*(d/-r.z); }
       float h(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
       float vn(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y); }
       vec3 aces(vec3 x){ return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.); }
@@ -233,6 +242,13 @@ SP.Post = class {
         vec2 uv=vUv;
         if(haze>0.){ float hz=smoothstep(.62,.45,uv.y)*smoothstep(.25,.45,uv.y); uv.x+=(vn(vec2(uv.x*60.,uv.y*140.-time*3.))-.5)*.0025*haze*hz; uv.y+=(vn(vec2(uv.x*50.+9.,uv.y*120.-time*2.))-.5)*.0018*haze*hz; }
         vec3 c=samp(uv);
+        float dc=1e4; if(useDepth>0.){ dc=vz(uv); }
+        // camera motion blur (world only)
+        if(useDepth>0. && mblur>0. && dc>0.6 && dc<cFar*.95){ vec3 wp=(camWorld*vec4(vpos(uv,dc),1.)).xyz; vec4 pp=prevVP*vec4(wp,1.); vec2 puv=pp.xy/pp.w*.5+.5; vec2 vel=(uv-puv)*mblur; float vl=length(vel); if(vl>.0015){ vel*=min(1.,.04/vl); vec3 acc=c; for(int i=1;i<7;i++){ acc+=texture2D(tScene,uv-vel*(float(i)/6.)).rgb; } c=acc/7.; } }
+        // ambient occlusion from the depth buffer
+        if(useDepth>0. && ao>0. && dc>0.6 && dc<90.){ float occ=0.; float rad=.55*pscale/dc; for(int i=0;i<12;i++){ float a=float(i)*2.39996+h(floor(uv*res))*0.6; float rr=(float(i)+.5)/12.; vec2 o=vec2(cos(a),sin(a))*rad*rr*vec2(res.y/res.x,1.); float sd=vz(uv+o); float df=dc-sd; occ+=smoothstep(.04,.25,df)*(1.-smoothstep(.8,2.2,df)); } float k=1.-occ/12.*1.6*ao*smoothstep(90.,40.,dc); c*=clamp(k,.25,1.); }
+        // aerial perspective: distance haze that brightens toward the sun and thins with height
+        if(useDepth>0. && atmos>0. && dc>0.6 && dc<cFar*.95){ vec3 vp=vpos(uv,dc); vec3 wp=(camWorld*vec4(vp,1.)).xyz; vec3 cp=(camWorld*vec4(0.,0.,0.,1.)).xyz; vec3 rd=normalize(wp-cp); float hf=exp(-max(wp.y-cp.y+2.,0.)*.035); float am=(1.-exp(-dc*atmDen))*hf*atmos; float mie=pow(max(dot(rd,sunDirW),0.),10.); vec3 ac=atmCol*(1.+mie*1.6)+sunCol*mie*.35; c=mix(c,ac,clamp(am,0.,.85)); }
         if(sharp>0.){ vec2 px=1./res; vec3 nb=texture2D(tScene,uv+vec2(px.x,0.)).rgb+texture2D(tScene,uv-vec2(px.x,0.)).rgb+texture2D(tScene,uv+vec2(0.,px.y)).rgb+texture2D(tScene,uv-vec2(0.,px.y)).rgb; c=max(c+(c-nb*.25)*sharp,vec3(0.)); }
         if(blur>0.001){ vec3 acc=c; float n=1.; for(int i=0;i<12;i++){ float a=float(i)*2.39996; float rr=sqrt(float(i)+.5)/3.6; vec2 o=vec2(cos(a),sin(a))*rr*blur*14./res; acc+=samp(uv+o); n+=1.; } c=acc/n; }
         vec3 bl=texture2D(tBloom,uv).rgb; c+=bl*bloom;
@@ -245,6 +261,8 @@ SP.Post = class {
         vec3 sh=vec3(.93,1.,1.06), hi=vec3(1.07,1.0,.9); c*=mix(vec3(1.),mix(sh,hi,smoothstep(.15,.8,l)),warm);
         c=mix(vec3(l),c,sat); c=(c-.5)*contrast+.5;
         if(night>0.){ c=mix(c, vec3(l)*vec3(.75,.88,1.15), night*.35); }
+        if(nvg>0.){ float nl=dot(c,vec3(.3,.59,.11)); nl=pow(clamp(nl*2.6,0.,1.),.8); vec3 g=vec3(.25,1.,.35)*nl+vec3(.02,.06,.03); g+=(h(uv*res*.5+fract(time*29.)*13.)-.5)*.12; float sl=.9+.1*sin(uv.y*res.y*1.2); c=mix(c,g*sl,nvg); float rv=smoothstep(.75,.45,length((uv-.5)*vec2(res.x/res.y,1.)*.85)); c*=mix(1.,rv,nvg); }
+        if(photo>0.5){ if(photo<1.5){ c=vec3(dot(c,vec3(.3,.59,.11))); c=(c-.5)*1.25+.5; } else if(photo<2.5){ float pl=dot(c,vec3(.3,.59,.11)); c=mix(vec3(pl),c,.55)*vec3(1.08,.98,.82); } else if(photo<3.5){ c=pow(c,vec3(1.1)); c*=vec3(.9,1.02,1.12); } }
         vec2 d=uv-.5; float v=smoothstep(.85,.2,length(d*vec2(1.,.8))); c*=mix(1.,v,vignette);
         float dm=smoothstep(.25,.75,length(d))*damage; c=mix(c, vec3(l*.4+.35,.0,.0)+c*.3, dm*.85); c=mix(c,vec3(l),damage*.35);
         c+= (h(uv*res+fract(time*13.1)*91.)-.5)*grain*(1.15-l*.6);
@@ -257,11 +275,23 @@ SP.Post = class {
   }
   setSize(w, h) {
     const s = this.scale; const W = Math.max(4, Math.floor(w * s)), H = Math.max(4, Math.floor(h * s));
-    this.rtScene.setSize(W, H); this.rtA.setSize(W >> 1, H >> 1); this.rtB.setSize(W >> 2, H >> 2); this.rtC.setSize(W >> 2, H >> 2); this.U.res.value.set(W, H);
+    this.rtScene.setSize(W, H); this.rtDepth.setSize(W >> 1, H >> 1); this.rtA.setSize(W >> 1, H >> 1); this.rtB.setSize(W >> 2, H >> 2); this.rtC.setSize(W >> 2, H >> 2); this.U.res.value.set(W, H);
   }
   pass(mat, target) { this.quad.material = mat; this.r.setRenderTarget(target); this.r.render(this.scene, this.cam); }
   render(scene, camera, dt, ovS, ovC) {
-    const r = this.r; r.setRenderTarget(this.rtScene); r.render(scene, camera);
+    const r = this.r; const U = this.U;
+    U.useDepth.value = this.depthOn ? 1 : 0;
+    if (this.depthOn) {
+      r.getClearColor(this._cc); const ca = r.getClearAlpha(); r.setClearColor(0xffffff, 1);
+      const bg = scene.background; scene.background = null; const hid = this._hid || (this._hid = []); hid.length = 0; scene.traverseVisible(o => { if (o.isPoints || o.isLine || o.isSprite || (o.material && (o.material.transparent || o.material.isShaderMaterial))) hid.push(o); }); for (const o of hid) o.visible = false;
+      scene.overrideMaterial = this.depthMat; r.setRenderTarget(this.rtDepth); r.clear(); r.render(scene, camera); scene.overrideMaterial = null; scene.background = bg; for (const o of hid) o.visible = true;
+      if (ovS) { ovS.overrideMaterial = this.maskMat; r.autoClear = false; r.render(ovS, ovC); r.autoClear = true; ovS.overrideMaterial = null; }
+      r.setClearColor(this._cc, ca);
+      U.tDepth.value = this.rtDepth.texture; U.cNear.value = camera.near; U.cFar.value = camera.far; U.projInv.value.copy(camera.projectionMatrixInverse); U.camWorld.value.copy(camera.matrixWorld);
+      U.pscale.value = camera.projectionMatrix.elements[5] * 0.5;
+      const vp = this._vp || (this._vp = new T.Matrix4()); vp.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); if (!this._vpInit || this.cutFrame) { this.prevVP.copy(vp); this._vpInit = true; this.cutFrame = false; } U.prevVP.value.copy(this.prevVP); this.prevVP.copy(vp);
+    }
+    r.setRenderTarget(this.rtScene); r.render(scene, camera);
     if (ovS) { r.autoClear = false; r.clearDepth(); r.render(ovS, ovC); r.autoClear = true; }
     this.bright.uniforms.t.value = this.rtScene.texture; this.pass(this.bright, this.rtA);
     this.blur.uniforms.t.value = this.rtA.texture; this.blur.uniforms.dir.value.set(1 / this.rtB.width, 0); this.pass(this.blur, this.rtB);

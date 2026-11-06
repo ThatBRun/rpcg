@@ -108,7 +108,8 @@ G.explosion = function (pos, radius = 7, dmg = 220, source) {
   for (let i = 0; i < 18; i++) G.particle({ pos: pos.clone().add(V3(rand(-1.5, 1.5), rand(0, 2), rand(-1.5, 1.5))), vel: V3(rand(-3, 3), rand(2, 6), rand(-3, 3)), life: rand(2.5, 5), size: rand(2, 3.5), grow: 2.5, color: new T.Color(0.18, 0.16, 0.14), opacity: 0.75, drag: 1 });
   for (let i = 0; i < 12; i++) G.particle({ pos: pos.clone().add(V3(0, 0.5, 0)), vel: V3(rand(-12, 12), rand(5, 14), rand(-12, 12)), life: rand(0.6, 1.4), size: 0.08, color: new T.Color(6, 3, 1), additive: true, kind: 'spark', gravity: 15 });
   const d = SP.P ? SP.P.pos.distanceTo(pos) : 99; G.addTrauma(clamp(1.2 - d / 40, 0, 1));
-  if (SP.P && SP.P.alive && d < radius * 1.2) SP.P.hurt(dmg * clamp(1 - d / (radius * 1.2), 0, 1) * (SP.P.mode === 'turret' ? 0.35 : 1), pos);
+  G._dmgKind = 'explosion'; if (SP.P && SP.P.alive && d < radius * 1.2) SP.P.hurt(dmg * clamp(1 - d / (radius * 1.2), 0, 1) * (SP.P.mode === 'turret' ? 0.35 : 1), pos);
+  G._dmgKind = null;
   for (const u of G.units) if (!u.dead) { const du = u.pos.distanceTo(pos); if (du < radius) u.damage(dmg * (1 - du / radius), pos, false, source); }
   for (const v of G.vehicles) if (!v.dead && v.mesh.position.distanceTo(pos) < radius + 2) v.damage(dmg * 0.8);
   for (const x of G.destructibles.slice()) if (!x.dead && x.pos.distanceTo(pos) < radius * 0.8) x.damage(999);
@@ -176,7 +177,7 @@ class Player {
   updAmmo() { if (this.mode === 'turret') { G.hud.ammo(this.turretName || 'M2 .50 CAL', this.overheat ? 'HOT' : Math.round(this.heat * 100) + '%', '∞'); return; } if (!this.cur) { G.hud.ammo('', '', ''); return; } const s = this.inv[this.cur]; G.hud.ammo(WEAP[this.cur].name + (this.reloadT > 0 ? ' · RELOADING' : ''), s.mag, s.res); }
   hurt(dmg, from) {
     if (!this.alive || this.god) return; if (this.mode === 'turret') dmg *= 0.6;
-    this.hp -= dmg * (SP.difficulty || 1); this.lastHit = G.time; G.addTrauma(0.18); A.hurt(); G.hud.dmgDir(from);
+    this.hp -= dmg * (SP.difficulty || 1); this.lastHit = G.time; this.lastFrom = from ? from.clone() : null; this.lastKind = G._dmgKind || 'gunfire'; SP.onPlayerHurt && SP.onPlayerHurt(dmg, from); G.addTrauma(0.18); A.hurt(); G.hud.dmgDir(from);
     if (this.hp <= 0 && SP.skill && SP.skill('second') && !this.secondWind) { this.secondWind = true; this.hp = this.maxHp * 0.5; this.lastHit = G.time + 2; G.hud.feed('SECOND WIND', 'gold'); G.addTrauma(0.5); SP.post.U.flash.value = 0.6; return; }
     if (this.hp <= 0) { this.hp = 0; this.alive = false; SP.onPlayerDeath && SP.onPlayerDeath(); }
   }
@@ -259,15 +260,16 @@ class Player {
     if (this.reloadT > 0) { this.reloadT -= dt; if (this.reloadT <= 0) { const need = w.mag - s.mag, take = Math.min(need, s.res); s.mag += take; s.res -= take; A.mech(0.3); this.updAmmo(); } }
     if (I.hit('KeyR') && this.reloadT <= 0 && s.mag < w.mag && s.res > 0) { this.reloadT = w.reload; A.mech(0.25); setTimeout(() => A.mech(0.2), 700); this.updAmmo(); }
     for (let k = 0; k < 8; k++) if (I.hit('Digit' + (k + 1))) this.cycle(k);
-    const trig = w.auto ? I.mouse.l : I.mouse.lp;
+    const fm = w.auto ? ((SP.fireModes && SP.fireModes[this.cur]) || 'auto') : 'semi'; if (fm === 'burst' && I.mouse.lp && !(this.burstLeft > 0)) this.burstLeft = 3; if (!I.mouse.l && fm !== 'burst') this.burstLeft = 0;
+    const trig = fm === 'auto' ? I.mouse.l : fm === 'burst' ? this.burstLeft > 0 : I.mouse.lp;
     if (trig && this.reloadT <= 0 && this.fireCd <= 0 && this.swapT <= 0 && this.sprintT < 0.3) {
-      if (s.mag > 0) this.fire(w, s);
+      if (s.mag > 0) { this.fire(w, s); if (fm === 'burst') { this.burstLeft--; if (this.burstLeft <= 0) this.fireCd = Math.max(this.fireCd, 0.28); } }
       else { A.click(); this.fireCd = 0.25; if (s.res > 0) { this.reloadT = w.reload; this.updAmmo(); } }
     }
   }
   cycle(i) { const list = Object.keys(this.inv); if (list[i] && list[i] !== this.cur) this.equip(list[i]); }
   fire(w, s) {
-    this.fireCd = 60 / w.rpm; s.mag--; this.updAmmo(); this.noise = w.silent ? 0.5 : 1.6; G.lastShot = G.time;
+    this.fireCd = 60 / w.rpm; s.mag--; this.updAmmo(); SP.onShot && SP.onShot(w, this.cur); this.noise = w.silent ? 0.5 : 1.6; G.lastShot = G.time;
     A.gun(w.sound, null, 0.85);
     const vm = SP.VM; const mz = vm && vm.muzzleWorld ? vm.muzzleWorld() : this.eyePos();
     const dir = this.forward(); const spread = lerp(w.spreadH, w.spreadA, this.adsT) + Math.min(0.03, this.speed * 0.003) + (this.onGround ? 0 : 0.04) - (this.crouch ? 0.003 : 0);
@@ -297,7 +299,7 @@ class Player {
     cam.position.set(this.pos.x, this.pos.y + this.eye + bobY - this.land - this.kick, this.pos.z);
     const nx = (SP.vnoise(t * 22, 1.3) - 0.5) * sh * 0.09, ny = (SP.vnoise(t * 22, 7.1) - 0.5) * sh * 0.09, nz = (SP.vnoise(t * 22, 3.7) - 0.5) * sh * 0.05;
     cam.rotation.set(this.pitch + this.recoil + ny, this.yaw + this.recoilYaw + nx, bobX * 0.4 + nz + (this.tilt || 0));
-    let fov = lerp(74, 56, this.adsT) + this.sprintT * 6; const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; if (zw && this.mode !== 'turret') fov = lerp(fov, zw, clamp((this.adsT - 0.55) * 2.5, 0, 1)); if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
+    const bf = SP.fov || 74; let fov = lerp(bf, bf - 18, this.adsT) + this.sprintT * 6; const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; if (zw && this.mode !== 'turret') fov = lerp(fov, zw, clamp((this.adsT - 0.55) * 2.5, 0, 1)); if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
     this.fovS = damp(this.fovS || fov, fov, 12, dt); cam.fov = this.fovS; cam.updateProjectionMatrix();
     SP.listener = { pos: cam.position, yaw: this.yaw };
     // vignette damage
@@ -318,10 +320,10 @@ G.shoot = function (origin, dir, dmg, headMul, team, muzzlePos, tracer, vehDmg) 
   if (uh && uh.t < maxT) {
     end = origin.clone().addScaledVector(dir, uh.t); const mul = uh.part === 'head' ? headMul : uh.part === 'leg' ? 0.75 : 1;
     const killed = uh.u.damage(dmg * mul, origin, uh.part === 'head', team);
-    G.impact(end, 'flesh'); if (team === 'player') G.hud.hit(killed, uh.part === 'head' && killed);
+    G.impact(end, 'flesh'); if (team === 'player') { G.hud.hit(killed, uh.part === 'head' && killed); SP.onHit && SP.onHit(uh.u, uh.part, killed); }
   } else if (vh) { end = vh.p; G.impact(end, 'metal'); vh.v.damage(vehDmg || dmg * 0.12); if (team === 'player') G.hud.hit(false); }
   else if (dh) { end = dh.p; G.impact(end, dh.x.surf || 'metal'); dh.x.damage(dmg); }
-  else if (wh) { end = wh.point; G.impact(end, wh.surf); }
+  else if (wh) { end = wh.point; G.impact(end, wh.surf); SP.onWallHit && SP.onWallHit(wh, dir, team); }
   else end = origin.clone().addScaledVector(dir, 300);
   if (tracer && Math.random() < (team === 'player' ? 0.5 : 0.85)) G.tracer(muzzlePos || origin, end, team === 'player' ? [8, 5.5, 2.2] : [9, 3.2, 1.2]);
   return end;
@@ -367,9 +369,10 @@ class Unit {
   get eye() { return V3(this.pos.x, this.pos.y + (this.crouch || this.exposure < 0.5 && this.crouchCover ? 1.1 : 1.55), this.pos.z); }
   damage(d, from, head, source) {
     if (this.dead) return false; if (this.invuln) { this.rig.flinch = 1; return false; }
+    if (source === 'player' && SP.playerDmgMul) d *= SP.playerDmgMul;
     this.hp -= d; this.rig.flinch = 1; this.lastHurt = G.time;
     if (!this.aware && this.team === 'foe') { this.aware = true; this.alert = 1; SP.onAlert && SP.onAlert(this); }
-    if (this.hp <= 0) { this.die(head); return true; }
+    if (this.hp <= 0) { this.die(head); SP.onKilled && SP.onKilled(this, source, head, from); return true; }
     if (this.phase === 'out') this.t = Math.min(this.t, 0.3); return false;
   }
   die(head) {
@@ -389,7 +392,7 @@ class Unit {
   }
   targetPos(tg) { if (tg === 'player') { const P = SP.P; return V3(P.pos.x, P.pos.y + P.eye - 0.2, P.pos.z); } return V3(tg.pos.x, tg.pos.y + (tg.crouch || (tg.crouchCover && tg.exposure < 0.5) ? 0.9 : 1.3), tg.pos.z); }
   shootAt(tg) {
-    const P = SP.P; const from = this.muzzle(); const tp = this.targetPos(tg); const dist = from.distanceTo(tp);
+    this.lastShotT = G.time; const P = SP.P; const from = this.muzzle(); const tp = this.targetPos(tg); const dist = from.distanceTo(tp);
     const isP = tg === 'player'; let chance;
     if (this.team === 'foe') { chance = clamp(0.55 - dist / 90, 0.06, 0.45) * this.acc * (SP.difficulty || 1); if (isP) { if (P.crouch) chance *= 0.75; if (P.speed > 4.5) chance *= 0.6; if (P.mode === 'turret') chance *= 0.7; } }
     else chance = clamp(0.32 - dist / 160, 0.06, 0.25) * this.acc;
@@ -526,7 +529,7 @@ G.updateInteract = function (dt) {
   for (const it of G.interact) { if (!it.enabled) continue; const p = typeof it.pos === 'function' ? it.pos() : it.pos; const d = Math.hypot(p.x - P.pos.x, p.z - P.pos.z); if (d > it.radius) continue; const to = V3(p.x - P.pos.x, 0, p.z - P.pos.z).normalize(); if (d > 0.9 && f.dot(to) < 0.55) continue; if (d < bd) { bd = d; best = it; } }
   // stealth takedown
   let td = null; G.tdAvail = false; if (P.mode === 'walk') for (const u of G.units) { if (u.dead || u.team !== 'foe' || u.aware || u.invuln) continue; const d = u.pos.distanceTo(P.pos); if (d > 1.9) continue; const toP = Math.atan2(-(P.pos.x - u.pos.x), -(P.pos.z - u.pos.z)); if (Math.abs(angDiff(u.yaw, toP)) < 1.9 && d > 1.0) continue; td = u; break; }
-  if (td) { G.tdAvail = true; G.hud.prompt('[F]  Takedown'); if (I.hit('KeyF')) { A.impact(td.pos, 'flesh'); A.mech(0.3); td.die(false); G.hud.feed('SILENT TAKEDOWN', 'gold'); G.addTrauma(0.15); } return; }
+  if (td) { G.tdAvail = true; G.hud.prompt('[F]  Takedown'); if (I.hit('KeyF')) { A.impact(td.pos, 'flesh'); A.mech(0.3); td.die(false); SP.onKilled && SP.onKilled(td, 'player', false, null, 'takedown'); G.hud.feed('SILENT TAKEDOWN', 'gold'); G.addTrauma(0.15); } return; }
   if (!best) { G.hud.prompt(null); for (const it of G.interact) it.prog = 0; return; }
   const key = I.down('KeyE');
   if (best.hold > 0) { if (key) { best.prog += dt / best.hold; if (best.prog >= 1) { best.prog = 0; best.enabled = false; best.onUse && best.onUse(); } } else best.prog = Math.max(0, best.prog - dt * 2); G.hud.prompt('Hold [E]  ' + best.text, best.prog); }
