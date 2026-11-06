@@ -47,14 +47,14 @@ PARTS.push({
     const sg = c.foe({ pos: V3(-10.5, 0, -27), weapon: 'shotgun', alert: 1, behavior: 'hold', acc: 3 }); sg.facePoint(P.pos.x, P.pos.z, 99, 1);
     await c.wait(0.4); A.gun('shotgun', sg.pos, 1.4); G.muzzle(sg.muzzle(), V3(1, 0, 0), 2, true);
     // knocked down
-    P.mode = 'downed'; P.hp = 22; P.lastHit = G.time + 99; P.eye = 0.3; P.tilt = 0.5; G.addTrauma(0.9); SP.post.U.flash.value = 0.5; A.hurt(); SP.blurTarget = 0.7; SP.hbRate = 0.5;
+    P.mode = 'downed'; P.hp = 55; P.lastHit = G.time + 99; P.eye = 0.3; P.tilt = 0.5; G.addTrauma(0.9); SP.post.U.flash.value = 0.5; A.hurt(); SP.blurTarget = 0.7; SP.hbRate = 0.5;
     P.equip('pistol'); P.inv.pistol.mag = 17; P.inv.pistol.res = 34;
     P.lookLimit = { yaw: P.yaw + 0.3, yawR: 1.3, pMin: -0.2, pMax: 0.6 };
     c.obj('Survive');
     await c.say(DOC, 'Sarton! Jake, stay with me! Shoot back!', 2.4);
-    SP.blurTarget = 0.35; sg.acc = 0.5; sg.behavior = 'assault'; sg.stopDist = 5;
-    const more = [V3(-18, 0, -21), V3(-18, 0, -24), V3(-14, 0, -34)].map((p, i) => { const u = c.foe({ pos: p, alert: 1, behavior: 'assault', acc: 0.55 }); u.stopDist = 9 + i * 2; return u; });
-    const doc = c.squad[DOC], mit = c.squad[MIT]; doc.behavior = 'idle'; doc.holdFire = true; mit.behavior = 'hold';
+    SP.blurTarget = 0.35; sg.acc = 0.3; sg.behavior = 'assault'; sg.stopDist = 8;
+    const more = [V3(-18, 0, -21), V3(-18, 0, -24), V3(-14, 0, -34)].map((p, i) => { const u = c.foe({ pos: p, alert: 1, behavior: 'assault', acc: 0.35, hp: 70 }); u.stopDist = 9 + i * 2; return u; });
+    const doc = c.squad[DOC], mit = c.squad[MIT]; doc.behavior = 'hold'; doc.holdFire = false; doc.acc = 1.4; mit.behavior = 'hold'; mit.acc = 1.4;
     const all = [sg, ...more];
     let hb = 0; SP.onTick = dt => { interiorTick(dt); hb -= dt; if (hb <= 0) { hb = 0.55; A.heartbeat(0.6); } P.tilt = damp(P.tilt, 0.45 + Math.sin(G.time * 0.8) * 0.05, 2, dt); };
     await c.until(() => all.every(u => u.dead), 30);
@@ -222,7 +222,7 @@ PARTS.push({
   async run(c, W, P) {
     A.loop('wind', 'wind', 0.04); A.loop('drone', 'drone', 0.35);
     SP.onTick = () => mgTick(c, P);
-    const mkTech = (pts, delay) => { const m = SP.Models.technical(SP.pick([0xd8d2c4, 0x9a8a6a])); const v = new SP.Vehicle(m, { team: 'foe', hp: 650, speed: 15, curve: new T.CatmullRomCurve3(pts.map(([x, z]) => V3(x, 0, z))) }); const gn = c.foe({ pos: m.position.clone(), alert: 1, behavior: 'hold', acc: 0.9 }); gn.fixedY = true; v.gunner = gn; v.onArrive = vv => { vv.spd = 0; }; return v; };
+    const mkTech = (pts, delay) => { const m = SP.Models.technical(SP.pick([0xd8d2c4, 0x9a8a6a])); const v = new SP.Vehicle(m, { team: 'foe', hp: 650, speed: 15, curve: new T.CatmullRomCurve3(pts.map(([x, z]) => V3(x, 0, z))) }); const gn = c.foe({ pos: m.position.clone(), alert: 1, behavior: 'hold', acc: 0.5 }); gn.fixedY = true; v.gunner = gn; v.onArrive = vv => { vv.spd = 0; }; return v; };
     const t1 = mkTech([[0, -260], [0, -150], [0, -95], [-2, -72]]);
     await c.say(H, 'Technical coming through the gate!', 2.2);
     const techs = [t1];
@@ -232,8 +232,8 @@ PARTS.push({
     await c.wait(1.5); await c.say(DAW, "Woo! Scratch one! Sarton, there's an AT4 in your kit, use it!", 3.2);
     c.obj('Destroy the technicals with the AT4 (press 2)');
     const t2 = mkTech([[-120, -240], [-40, -150], [-4, -95], [-6, -70]]); const t3 = mkTech([[140, -260], [40, -160], [4, -100], [8, -74]]); techs.push(t2, t3);
-    let mortar = true; (async () => { while (mortar) { await c.wait(rand(2.5, 4.5)); const tgt = P.pos.clone().add(V3(rand(-18, 18), 0, rand(-18, 18))); if (tgt.distanceTo(P.pos) < 5) tgt.x += 8; G.mortar(tgt, 1.5); } })().catch(() => { });
-    for (let i = 0; i < 6; i++) { const u = c.foe({ pos: V3(rand(-4, 4), 0, rand(-110, -95)), alert: 1, behavior: 'assault' }); u.goal2 = V3(rand(-12, 12), 0, -60); u.stopDist = 20; }
+    let mortar = true; (async () => { while (mortar) { await c.wait(rand(2.5, 4.5)); const sp = Math.hypot(P.vel.x, P.vel.z); const back = sp > 1 ? Math.atan2(-P.vel.z, -P.vel.x) : rand(0, 6.28); const a = back + rand(-1.2, 1.2), r = rand(11, 20); const tgt = P.pos.clone().add(V3(Math.cos(a) * r, 0, Math.sin(a) * r)); G.mortar(tgt, 1.5); } })().catch(() => { });
+    for (let i = 0; i < 6; i++) { const u = c.foe({ pos: V3(rand(-4, 4), 0, rand(-110, -95)), alert: 1, behavior: 'assault', acc: 0.6 }); u.goal2 = V3(rand(-12, 12), 0, -60); u.stopDist = 20; }
     await c.wait(6); G.hud.feed('PVT. MITCHELL IS WOUNDED', 'red'); await c.say(MIT, "I'm hit! I'm hit!", 1.6).catch(() => { });
     await c.say(DOC, 'Got him! Keep those trucks off us!', 2.4).catch(() => { });
     let left = -1; SP.onTick = () => { mgTick(c, P); for (const v of techs) if (!v.dead && v.gunner && !v.gunner.dead) { v.gunner.pos.copy(v.mesh.localToWorld(V3(0, 1.3, 1.6))); } const n = [t2, t3].filter(v => !v.dead).length; if (n !== left) { left = n; G.hud.objective('Destroy the technicals with the AT4 (' + n + ' left)'); } if (P.inv.at4 && P.inv.at4.mag + P.inv.at4.res === 0 && n > 0) { P.inv.at4.res = 1; G.hud.feed('DAWSON TOSSED YOU A ROCKET', ''); } };
@@ -263,8 +263,8 @@ PARTS.push({
     c.obj('Get to the helicopter', () => heli.position, 'EXTRACT');
     await c.say(H, 'Go! Get Elena on that bird! I\'ll cover the gate!', 2.8);
     const h = c.squad[H]; h.holdFire = false; h.moveTo(V3(-4, 0, -86), true).then(() => { h.behavior = 'hold'; h.lookAt = V3(40, 0, -200); });
-    let mortar = true; (async () => { while (mortar) { await c.wait(rand(1.4, 2.6)); const tgt = P.pos.clone().add(V3(P.vel.x * 1.8 + rand(-10, 10), 0, P.vel.z * 1.8 + rand(-10, 10))); if (tgt.distanceTo(P.pos) < 6) tgt.z += 9; tgt.y = W.heightAt(tgt.x, tgt.z); G.mortar(tgt, 1.4); } })().catch(() => { });
-    for (let i = 0; i < 8; i++) { const u = c.foe({ pos: V3(rand(30, 70), 0, rand(-150, -120)), alert: 1, behavior: 'assault', acc: 0.6 }); u.goal2 = V3(-40, 0, -110); u.stopDist = 40; }
+    let mortar = true; (async () => { while (mortar) { await c.wait(rand(1.4, 2.6)); const sp = Math.hypot(P.vel.x, P.vel.z); const back = sp > 1 ? Math.atan2(-P.vel.z, -P.vel.x) : rand(0, 6.28); const a = back + rand(-1.1, 1.1), r = rand(10, 16); const tgt = P.pos.clone().add(V3(Math.cos(a) * r, 0, Math.sin(a) * r)); tgt.y = W.heightAt(tgt.x, tgt.z); G.mortar(tgt, 1.4); } })().catch(() => { });
+    for (let i = 0; i < 8; i++) { const u = c.foe({ pos: V3(rand(30, 70), 0, rand(-150, -120)), alert: 1, behavior: 'assault', acc: 0.35 }); u.goal2 = V3(-40, 0, -110); u.stopDist = 40; }
     await c.until(() => P.pos.distanceTo(V3(hp.x, P.pos.y, hp.z)) < 9);
     mortar = false;
     c.complete();

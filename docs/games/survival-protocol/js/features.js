@@ -96,14 +96,17 @@ function updNadeHud() { const el = $('#nades'); el.querySelector('b').textConten
 
 /* ====================== knife ====================== */
 F.knifeCd = 0;
-function melee() {
-  const P = SP.P; if (!P || !P.alive || P.mode !== 'walk' || F.knifeCd > 0 || (SP.Wheel && SP.Wheel.open)) return;
-  F.knifeCd = 0.75; const f = P.forward(); let best = null, bd = 2.6;
+function melee(fromWheel) {
+  const P = SP.P; if (!P || !P.alive || P.mode !== 'walk' || (!fromWheel && F.knifeCd > 0) || (SP.Wheel && SP.Wheel.open)) return;
+  const K = (SP.KNIVES && SP.KNIVES[SP.knifeKind ? SP.knifeKind() : 'combat']) || { range: 2.6, swing: 0.6 };
+  F.knifeCd = K.swing + 0.15; const f = P.forward(); let best = null, bd = K.range * (SP.Progress && SP.Progress.skills && SP.Progress.skills.lunge ? 1.3 : 1);
   for (const u of G.units) { if (u.dead || u.team !== 'foe' || u.invuln) continue; const to = V3(u.pos.x - P.pos.x, 0, u.pos.z - P.pos.z); const d = to.length(); if (d > bd) continue; to.normalize(); if (to.dot(V3(f.x, 0, f.z).normalize()) < 0.55) continue; if (Math.abs(u.pos.y - P.pos.y) > 1.6) continue; best = u; bd = d; }
   if (SP.VM && SP.VM.group) { F.knifeAnim = 0.35; }
   A.click(260, 0.12); G.addTrauma(0.08); rumble(0.4, 80);
   if (best) { F.meleeNow = true; best.damage(9999, P.eyePos(), false, 'player'); F.meleeNow = false; A.impact(best.pos, 'flesh'); G.hud.hit(true, false); }
 }
+
+F.knifeSwing = function (w) { melee(true); };
 
 /* ====================== fire modes ====================== */
 SP.fireModes = SP.fireModes || {};
@@ -153,6 +156,8 @@ SP.onKilled = function (u, source, head, from, how) {
     if (dist > 60 && !isNade && how !== 'takedown') { add('longshots'); label += ' · LONGSHOT ' + Math.round(dist) + 'M'; pts += 50; }
     if (dist > C.best.longest && !isNade) C.best.longest = Math.round(dist);
     if (u.isBoss || u.name === 'THE JACKAL') add('bossKills');
+    { const PRx = SP.Progress; const wid = isMelee ? 'knife' : isNade || how === 'takedown' ? null : P && P.cur; if (PRx && wid) { PRx.wkills = PRx.wkills || {}; PRx.wxp = PRx.wxp || {}; PRx.wkills[wid] = (PRx.wkills[wid] || 0) + 1; PRx.wxp[wid] = (PRx.wxp[wid] || 0) + (head ? 150 : 100); const cm = Object.values(SP.CAMOS || {}).find(c => c && c.kills === PRx.wkills[wid]); if (cm) G.hud.feed(SP.WEAP[wid].name + ' · ' + cm.name.toUpperCase() + ' CAMO UNLOCKED', 'gold'); if (PRx.wkills[wid] % 10 === 0) PRx.save(); } }
+    SP.onKillExtra && SP.onKillExtra(u, head, dist, isMelee, isNade, how);
     const wpn = how === 'takedown' ? 'TAKEDOWN' : isMelee ? 'KNIFE' : isNade ? 'FRAG' : (P && P.cur ? SP.WEAP[P.cur].name : 'RIFLE');
     killFeed(u.name && u.name !== 'Unit' ? u.name : 'HOSTILE', head && !isMelee && !isNade, wpn); scorePop(pts, label);
     // multi-kill streaks
@@ -439,7 +444,7 @@ F.onPartLoad = function (part, n, ch) {
     F.nadeCount = (part.loadout && part.loadout.length) ? 2 : 0; updNadeHud(); partKills = 0; F.partScore = 0; F.nvg = false; SP.post.U.nvg.value = 0; F.inspectT = 0; F.slowT = 0; F.breath = 4;
     nades.length = 0; pickups.length = 0; decals.length = 0; streak = [];
     for (const [, el] of alertEls) el.remove(); alertEls.clear(); $('#killfeed').innerHTML = '';
-    F.partKey = ch + '-' + n; F.placeIntelPending = 1.5; mmSetup(); updFireHud();
+    F.partKey = ch + '-' + n; F.placeIntelPending = ch ? 1.5 : 0; mmSetup(); updFireHud();
     $('#plog-name').textContent = 'Chapter ' + ch + ' · Part ' + n + ' — ' + (part.name || ''); $('#plog-place').textContent = [part.place, part.time].filter(Boolean).join(' · ');
     $('#t-nvg').hidden = !(SP.Touch.on && SP.night); $('#t-nade').hidden = !(SP.Touch.on && F.nadeCount > 0); $('#t-knife').hidden = !SP.Touch.on;
   });
@@ -495,5 +500,6 @@ function wire() {
   const lt = $('#loadtip'); if (lt) { new MutationObserver(() => { if (!$('#loading').hidden) lt.textContent = F.tip(); }).observe($('#loading'), { attributes: true, attributeFilter: ['hidden'] }); }
   F.applySettings(); renderDailyPanel(); checkAch();
 }
+F.stat = add; F.addNade = n => { F.nadeCount += n; updNadeHud(); }; F.ACH = ACH; F.ST = ST; F.checkAch = checkAch; F.scorePop = scorePop; F.toast = toast; F.saveCareer = () => saveCareer(); F.rumble = rumble;
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', wire); else wire();
 })();

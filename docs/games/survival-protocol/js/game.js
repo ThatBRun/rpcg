@@ -174,9 +174,9 @@ class Player {
   equip(w) {
     if (!this.inv[w]) return; this.cur = w; this.reloadT = 0; this.swapT = 0.45; SP.buildViewModel(w); A.mech(0.2); this.updAmmo();
   }
-  updAmmo() { if (this.mode === 'turret') { G.hud.ammo(this.turretName || 'M2 .50 CAL', this.overheat ? 'HOT' : Math.round(this.heat * 100) + '%', '∞'); return; } if (!this.cur) { G.hud.ammo('', '', ''); return; } const s = this.inv[this.cur]; G.hud.ammo(WEAP[this.cur].name + (this.reloadT > 0 ? ' · RELOADING' : ''), s.mag, s.res); }
+  updAmmo() { if (this.mode === 'turret') { G.hud.ammo(this.turretName || 'M2 .50 CAL', this.overheat ? 'HOT' : Math.round(this.heat * 100) + '%', '∞'); return; } if (!this.cur) { G.hud.ammo('', '', ''); return; } const s = this.inv[this.cur]; if (WEAP[this.cur].melee) { G.hud.ammo(WEAP[this.cur].name, '', ''); return; } G.hud.ammo(WEAP[this.cur].name + (this.reloadT > 0 ? ' · RELOADING' : ''), s.mag, s.res); }
   hurt(dmg, from) {
-    if (!this.alive || this.god) return; if (this.mode === 'turret') dmg *= 0.6;
+    if (!this.alive || this.god) return; if (this.mode === 'turret') dmg *= 0.6; if (this.mode === 'downed') dmg *= 0.35;
     this.hp -= dmg * (SP.difficulty || 1); this.lastHit = G.time; this.lastFrom = from ? from.clone() : null; this.lastKind = G._dmgKind || 'gunfire'; SP.onPlayerHurt && SP.onPlayerHurt(dmg, from); G.addTrauma(0.18); A.hurt(); G.hud.dmgDir(from);
     if (this.hp <= 0 && SP.skill && SP.skill('second') && !this.secondWind) { this.secondWind = true; this.hp = this.maxHp * 0.5; this.lastHit = G.time + 2; G.hud.feed('SECOND WIND', 'gold'); G.addTrauma(0.5); SP.post.U.flash.value = 0.6; return; }
     if (this.hp <= 0) { this.hp = 0; this.alive = false; SP.onPlayerDeath && SP.onPlayerDeath(); }
@@ -185,8 +185,8 @@ class Player {
   eyePos() { return V3(this.pos.x, this.pos.y + this.eye, this.pos.z); }
   update(dt) {
     const W = SP.W; let [mx, my] = I.consume(); if (SP.Wheel && SP.Wheel.open) { SP.Wheel.aim(mx, my); mx = my = 0; }
-    const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; const sens = (SP.sens || 1) * 0.0022 * (this.adsT > 0.5 ? (zw ? 0.22 : 0.6) : 1) * (this.binoc ? 0.25 : 1);
-    if (this.mode !== 'locked') { this.yaw -= mx * sens; this.pitch -= my * sens; } if (this.camAnim) { this.yaw = SP.damp(this.yaw, this.camAnim.yaw, this.camAnim.k || 2, dt); this.pitch = SP.damp(this.pitch, this.camAnim.pitch, this.camAnim.k || 2, dt); }
+    const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; const sens = (SP.sens || 1) * 0.0022 * (this.adsT > 0.5 ? (zw ? 0.22 : 0.6) * (SP.adsSens || 1) : 1) * (this.binoc ? 0.25 : 1);
+    if (this.mode !== 'locked') { this.yaw -= mx * sens; this.pitch -= my * sens * (SP.invertY ? -1 : 1); } if (this.camAnim) { this.yaw = SP.damp(this.yaw, this.camAnim.yaw, this.camAnim.k || 2, dt); this.pitch = SP.damp(this.pitch, this.camAnim.pitch, this.camAnim.k || 2, dt); }
     this.pitch = clamp(this.pitch, -1.48, 1.48);
     if (this.lookLimit) { const L = this.lookLimit; let d = angDiff(L.yaw, this.yaw); d = clamp(d, -L.yawR, L.yawR); this.yaw = L.yaw + d; this.pitch = clamp(this.pitch, L.pMin, L.pMax); }
     if (this.mode === 'walk') this.walk(dt, W);
@@ -208,7 +208,7 @@ class Player {
     if (this.slideT > 0) { this.slideT -= dt; this.slideV = Math.max(2.5, this.slideV - 10 * dt); if (!this.onGround && this.slideT > 0.2) this.slideT = 0.2; if (this.slideT <= 0 || this.slideV <= 3) this.slideT = 0; }
     const sliding = this.slideT > 0;
     this.crouch = crouchKey || !!this.forceCrouch || sliding;
-    const ads = I.mouse.r && !this.binocMode && this.cur && this.reloadT <= 0;
+    const ads = (SP.toggleAds ? !!SP.adsLatched : I.mouse.r) && !this.binocMode && this.cur && this.reloadT <= 0;
     const sprint = this.canSprint && (K.ShiftLeft || K.ShiftRight) && fwd && !this.crouch && !ads && this.reloadT <= 0;
     let speed = this.crouch ? 2.2 : sprint ? 7.0 * (S('marathon') ? 1.12 : 1) : 4.4; if (ads) speed *= 0.55; speed *= this.speedMul;
     const ix = (right ? 1 : 0) - (left ? 1 : 0), iz = (fwd ? 1 : 0) - (back ? 1 : 0);
@@ -260,7 +260,7 @@ class Player {
     if (this.reloadT > 0) { this.reloadT -= dt; if (this.reloadT <= 0) { const need = w.mag - s.mag, take = Math.min(need, s.res); s.mag += take; s.res -= take; A.mech(0.3); this.updAmmo(); } }
     if (I.hit('KeyR') && this.reloadT <= 0 && s.mag < w.mag && s.res > 0) { this.reloadT = w.reload; A.mech(0.25); setTimeout(() => A.mech(0.2), 700); this.updAmmo(); }
     for (let k = 0; k < 8; k++) if (I.hit('Digit' + (k + 1))) this.cycle(k);
-    const fm = w.auto ? ((SP.fireModes && SP.fireModes[this.cur]) || 'auto') : 'semi'; if (fm === 'burst' && I.mouse.lp && !(this.burstLeft > 0)) this.burstLeft = 3; if (!I.mouse.l && fm !== 'burst') this.burstLeft = 0;
+    const fm = w.auto ? ((SP.fireModes && SP.fireModes[this.cur]) || w.defaultMode || 'auto') : 'semi'; if (fm === 'burst' && I.mouse.lp && !(this.burstLeft > 0)) this.burstLeft = 3; if (!I.mouse.l && fm !== 'burst') this.burstLeft = 0;
     const trig = fm === 'auto' ? I.mouse.l : fm === 'burst' ? this.burstLeft > 0 : I.mouse.lp;
     if (trig && this.reloadT <= 0 && this.fireCd <= 0 && this.swapT <= 0 && this.sprintT < 0.3) {
       if (s.mag > 0) { this.fire(w, s); if (fm === 'burst') { this.burstLeft--; if (this.burstLeft <= 0) this.fireCd = Math.max(this.fireCd, 0.28); } }
@@ -269,6 +269,7 @@ class Player {
   }
   cycle(i) { const list = Object.keys(this.inv); if (list[i] && list[i] !== this.cur) this.equip(list[i]); }
   fire(w, s) {
+    if (w.melee) { this.fireCd = w.swing || 0.6; SP.Features && SP.Features.knifeSwing && SP.Features.knifeSwing(w); return; }
     this.fireCd = 60 / w.rpm; s.mag--; this.updAmmo(); SP.onShot && SP.onShot(w, this.cur); this.noise = w.silent ? 0.5 : 1.6; G.lastShot = G.time;
     A.gun(w.sound, null, 0.85);
     const vm = SP.VM; const mz = vm && vm.muzzleWorld ? vm.muzzleWorld() : this.eyePos();
@@ -299,7 +300,7 @@ class Player {
     cam.position.set(this.pos.x, this.pos.y + this.eye + bobY - this.land - this.kick, this.pos.z);
     const nx = (SP.vnoise(t * 22, 1.3) - 0.5) * sh * 0.09, ny = (SP.vnoise(t * 22, 7.1) - 0.5) * sh * 0.09, nz = (SP.vnoise(t * 22, 3.7) - 0.5) * sh * 0.05;
     cam.rotation.set(this.pitch + this.recoil + ny, this.yaw + this.recoilYaw + nx, bobX * 0.4 + nz + (this.tilt || 0));
-    const bf = SP.fov || 74; let fov = lerp(bf, bf - 18, this.adsT) + this.sprintT * 6; const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; if (zw && this.mode !== 'turret') fov = lerp(fov, zw, clamp((this.adsT - 0.55) * 2.5, 0, 1)); if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
+    const bf = SP.fov || 74; const az = (this.cur && WEAP[this.cur] && WEAP[this.cur].adsZoom) || 0; let fov = lerp(bf, (bf - 18) / (1 + az), this.adsT) + this.sprintT * 6; const zw = this.cur && WEAP[this.cur] && WEAP[this.cur].zoom; if (zw && this.mode !== 'turret') fov = lerp(fov, zw, clamp((this.adsT - 0.55) * 2.5, 0, 1)); if (this.binoc) fov = 9; if (this.mode === 'turret') fov = lerp(fov, 62, 0.5); if (this.fovOverride) fov = this.fovOverride;
     this.fovS = damp(this.fovS || fov, fov, 12, dt); cam.fov = this.fovS; cam.updateProjectionMatrix();
     SP.listener = { pos: cam.position, yaw: this.yaw };
     // vignette damage
@@ -386,6 +387,7 @@ class Unit {
   pickTarget() {
     const P = SP.P; let best = null, bd = 1e9; const eye = this.eye;
     const consider = (pos, obj, isPlayer) => { const d = pos.distanceTo(this.pos); if (d > this.sight * (this.aware ? 1.6 : 1) || d >= bd) return; const tp = isPlayer ? P.eyePos() : V3(pos.x, pos.y + 1.3, pos.z); if (!SP.W.los(eye, tp)) return; best = obj; bd = d; };
+    if (this.br) { if (P && P.alive && P.mode !== 'locked') consider(P.pos, 'player', true); for (const u of G.units) if (u !== this && !u.dead && u.br) consider(u.pos, u); return best; }
     if (this.team === 'foe') { if (P && P.alive && P.mode !== 'locked' && !P.hidden) consider(P.pos, 'player', true); for (const u of G.units) if (!u.dead && u.team === 'ally' && !u.ignored) consider(u.pos, u); }
     else if (this.team === 'ally') { for (const u of G.units) if (!u.dead && u.team === 'foe' && u.aware && !u.ignored) consider(u.pos, u); }
     return best;

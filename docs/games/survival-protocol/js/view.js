@@ -21,6 +21,7 @@ const CFG = {
   m4: { hip: V3(0.17, -0.185, -0.42), ads: (s) => V3(-s.x, -s.y, -0.2), hands: [V3(0, -0.11, 0.06), V3(0, -0.035, -0.42), V3(0.12, -0.3, 0.28), V3(-0.2, -0.24, -0.15)] },
   sup: null,
   pistol: { hip: V3(0.13, -0.15, -0.38), adsP: V3(0, -0.052, -0.34), hands: [V3(0, -0.07, 0.03), V3(-0.015, -0.08, 0.02), V3(0.1, -0.25, 0.3), V3(-0.12, -0.25, 0.28)] },
+  knife: { hip: V3(0.16, -0.17, -0.34), adsP: V3(0.12, -0.15, -0.34), hands: [V3(0, -0.0, 0.04), null, V3(0.1, -0.25, 0.3), null] },
   at4: { hip: V3(0.2, -0.22, -0.2), adsP: V3(0.05, -0.115, -0.25), hands: [V3(0, -0.08, -0.05), V3(0, -0.08, -0.25), V3(0.12, -0.3, 0.2), V3(-0.18, -0.3, -0.05)] },
 };
 CFG.sup = CFG.m4;
@@ -31,8 +32,8 @@ SP.buildViewModel = function (w) {
   // see-through optic
   gun.traverse(m => { if (m.isMesh && m.material === SP.MAT.glassDark()) { m.material = new T.MeshStandardMaterial({ color: 0x9fb8c0, transparent: true, opacity: 0.12, roughness: 0.05, metalness: 0.5 }); } });
   gun.traverse(m => { if (m.isMesh && m.geometry.parameters && m.geometry.parameters.radiusTop === 0.024) { m.geometry = new T.CylinderGeometry(0.024, 0.024, 0.1, 18, 1, true); m.material = SP.flat(0x1a1a1a, 0.6, 0.1, { side: T.DoubleSide }); } });
-  const c = CFG[w] || CFG.m4; const h = c.hands; arms(gun, h[0], w === 'pistol' ? null : h[1], h[2], h[3]);
-  if (w === 'pistol') { const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.07, 0.08, 0.08), glove, -0.03, -0.08, 0.02, gun, false); limb(V3(-0.15, -0.3, 0.3), V3(-0.03, -0.08, 0.02), 0.042, SP.mat('camo', {}), gun); }
+  const base = SP.WEAP[w].vmAs || w; const c = CFG[base] || CFG.m4; const h = c.hands; if (base === 'knife') { const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.06, 0.07, 0.09), glove, 0, 0, 0.04, gun, false); limb(V3(0.1, -0.25, 0.3), V3(0, 0, 0.04), 0.042, SP.mat('camo', {}), gun); gun.rotation.set(0.25, 0.15, -0.35); } else arms(gun, h[0], base === 'pistol' ? null : h[1], h[2], h[3]);
+  if (base === 'pistol') { const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.07, 0.08, 0.08), glove, -0.03, -0.08, 0.02, gun, false); limb(V3(-0.15, -0.3, 0.3), V3(-0.03, -0.08, 0.02), 0.042, SP.mat('camo', {}), gun); }
   gun.traverse(m => { if (m.isMesh) { m.castShadow = false; m.receiveShadow = false; } });
   g.position.copy(c.hip); SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.cfg = c; VM.w = w; VM.drop = 0.5;
   const sight = gun.userData.sight || V3(0, 0.05, 0);

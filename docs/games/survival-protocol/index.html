@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <meta charset="utf-8">
 <title>Survival Protocol</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -103,8 +102,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 #choices .wrap{display:grid;gap:10px;width:min(460px,100%);pointer-events:auto}
 .choice{text-align:left;font-size:21px;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:11px 16px;cursor:pointer;display:flex;gap:14px;align-items:baseline}
 .choice:hover{border-color:var(--amber)} .choice kbd{font-family:var(--hud);font-weight:700;color:var(--amber);font-size:17px}
-.screen{display:grid;align-content:center;justify-items:start;padding-left:max(7vw,env(safe-area-inset-left,0px),16px);background:linear-gradient(90deg,rgba(5,5,5,.86) 0,rgba(5,5,5,.6) 45%,rgba(5,5,5,.1) 100%)}
-.stack{display:grid;gap:22px;width:min(560px,100%)}
+.screen{display:grid;align-content:start;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;justify-items:start;padding-left:max(7vw,env(safe-area-inset-left,0px),16px);background:linear-gradient(90deg,rgba(5,5,5,.86) 0,rgba(5,5,5,.6) 45%,rgba(5,5,5,.1) 100%)}
+.stack{display:grid;gap:22px;width:min(560px,100%);margin:auto 0;padding:8px 0 24px}
+.screen::-webkit-scrollbar{width:6px} .screen::-webkit-scrollbar-thumb{background:rgba(236,230,218,.25)}
 .eyebrow{font-size:14px;letter-spacing:.38em;color:var(--amber);font-weight:600}
 h1{margin:0;font-size:clamp(54px,9vw,112px);line-height:.86;font-weight:700;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 h2{margin:0;font-size:clamp(36px,5vw,58px);line-height:.95;font-weight:700;text-transform:uppercase;text-wrap:balance}
@@ -282,6 +282,58 @@ body.mobile #ammo{bottom:calc(14px + env(safe-area-inset-bottom,0px));right:calc
 body.mobile #amag{font-size:30px}
 @media (max-width:560px){#amag{font-size:36px}#sub{font-size:17px}.mb{font-size:24px}#intro{font-size:12px}#intro .h{font-size:20px}}
 @media (prefers-reduced-motion:reduce){#obj.new .v,#feed div{animation:none}}
+
+/* ---- 1.0 ---- */
+#boss .pips{display:flex;gap:4px} #boss .pips i{flex:1;height:4px;background:rgba(236,230,218,.18)} #boss .pips i.on{background:var(--amber);box-shadow:0 0 8px rgba(255,170,60,.6)} #boss .pips i.done{background:rgba(236,230,218,.55)}
+.rankline{font-family:var(--mono);font-size:13px;letter-spacing:.14em;color:var(--amber)}
+.menu.row{display:flex;flex-wrap:wrap;gap:10px}
+#missiongrid{display:grid;gap:12px}
+.mcard{display:grid;gap:4px;text-align:left;background:rgba(14,14,13,.82);border:1px solid var(--line);color:var(--ink);padding:16px 18px;cursor:pointer}
+.mcard:hover:not(:disabled){border-color:var(--amber)} .mcard .mn{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.14em} .mcard b{font-size:30px;line-height:1;font-weight:700} .mcard .ms,.mcard .mp{font-size:13px;color:var(--dim);letter-spacing:.06em}
+.mcard .mbar{height:4px;background:rgba(236,230,218,.12)} .mcard .mbar i{display:block;height:100%;background:var(--amber)}
+.mcard.lock{opacity:.5;cursor:not-allowed} .part.lock{opacity:.45;cursor:not-allowed} .part.lock .pt{color:var(--dim)} .ctab.lock{opacity:.5} .ctab.dn span{color:var(--green)}
+#chaptabs{display:flex;flex-wrap:wrap;gap:6px}
+.modecard{display:grid;gap:12px;background:rgba(14,14,13,.78);border:1px solid var(--line);padding:16px}
+.modecard .mh{display:grid;gap:3px} .modecard .mh b{font-size:24px} .modecard .mh span{color:var(--dim);font-size:14px}
+.mset{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.modelb{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.1em} .modelb b{color:var(--amber)}
+.achips{display:flex;flex-wrap:wrap;gap:6px} .achip{background:rgba(14,14,13,.8);border:1px solid var(--line);color:var(--dim);padding:6px 11px;cursor:pointer;font:inherit;font-size:14px} .achip.sm{font-size:13px;padding:5px 9px} .achip.on{border-color:var(--amber);color:var(--ink);background:rgba(255,170,60,.12)}
+.asplit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px} @media (max-width:700px){.asplit{grid-template-columns:1fr}}
+.alist{display:grid;gap:4px;max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;align-content:start}
+.arow{display:flex;justify-content:space-between;gap:10px;text-align:left;background:rgba(14,14,13,.8);border:1px solid var(--line);color:var(--ink);padding:8px 10px;cursor:pointer;font:inherit} .arow span{font-family:var(--mono);font-size:11px;color:var(--dim)} .arow.sel{border-color:var(--amber)} .arow.owned span{color:var(--green)}
+.adet{display:grid;gap:10px;align-content:start;background:rgba(14,14,13,.7);border:1px solid var(--line);padding:12px}
+.abars{display:grid;gap:5px} .abars div{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;font-size:12px;color:var(--dim)} .abars i{display:block;height:5px;background:rgba(236,230,218,.12)} .abars i u{display:block;height:100%;background:var(--amber);text-decoration:none}
+.h4{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
+.aattrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.acamos{display:flex;flex-wrap:wrap;gap:6px} .acam{width:34px;height:34px;border:1px solid var(--line);cursor:pointer;position:relative} .acam.on{outline:2px solid var(--amber);outline-offset:1px} .acam.lock{opacity:.35;cursor:not-allowed}
+.brstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px} .brstats div{display:grid;background:rgba(14,14,13,.8);border:1px solid var(--line);padding:8px 10px} .brstats span{font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase} .brstats b{font-family:var(--mono);font-size:22px;color:var(--ink)}
+#br-hist{display:grid;gap:4px} .brh{display:flex;gap:14px;font-family:var(--mono);font-size:13px;color:var(--dim)} .brh b{color:var(--amber);min-width:36px}
+.wnlist{display:grid;gap:8px;margin:0;padding-left:20px;font-size:16px;line-height:1.35} .wnlist li::marker{color:var(--amber)}
+.credits{display:grid;gap:10px} .credits div{display:grid} .credits span{font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase} .credits b{font-size:20px}
+#armbar{position:fixed;left:max(22px,env(safe-area-inset-left,0px));bottom:calc(max(22px,env(safe-area-inset-bottom,0px)) + 104px);width:260px;display:grid;gap:3px}
+#armbar .top{display:flex;gap:8px;align-items:baseline;font-size:11px;letter-spacing:.2em;color:#9ec3e8} #armbar .v{font-family:var(--mono);color:var(--ink)} #armbar .track{height:6px;background:rgba(0,0,0,.5);border:1px solid rgba(158,195,232,.4)} #armbar .fill{height:100%;background:linear-gradient(90deg,#3a6fa8,#9ec3e8)}
+body.mobile #armbar{bottom:auto;top:calc(126px + env(safe-area-inset-top,0px));width:180px}
+#equip{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(max(22px,env(safe-area-inset-bottom,0px)) + 96px);display:flex;gap:6px;align-items:baseline;font-size:12px;letter-spacing:.18em;color:var(--dim);text-shadow:0 1px 3px #000} #equip b{font-family:var(--mono);color:var(--ink);font-size:16px} #equip kbd{font-family:var(--mono);color:var(--amber);font-size:11px} #equip em{font-style:normal;font-size:10px;opacity:.6} #equip.empty b{color:var(--red)}
+body.mobile #equip em{display:none} @media (max-width:1100px){#equip em{display:none}}
+#streaks{position:fixed;right:max(24px,env(safe-area-inset-right,0px));top:calc(max(22px,env(safe-area-inset-top,0px)) + 170px);display:grid;gap:3px;justify-items:end;font-size:11px;letter-spacing:.14em;text-shadow:0 1px 3px #000}
+#streaks div{display:flex;gap:6px;align-items:baseline;color:var(--dim)} #streaks kbd{font-family:var(--mono);color:var(--amber)} #streaks b{font-family:var(--mono);color:var(--ink)} #streaks .off{opacity:.55} #streaks .rdy{color:var(--amber)} #streaks .rdy b{color:var(--green)}
+body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
+#dnums{position:fixed;inset:0;pointer-events:none;overflow:hidden} .dnum{position:absolute;transform:translate(-50%,-50%);font-family:var(--mono);font-size:15px;color:var(--ink);text-shadow:0 1px 3px #000;animation:dnum .8s ease-out forwards} .dnum.hd{color:var(--amber);font-size:19px}
+@keyframes dnum{from{opacity:1;margin-top:0}to{opacity:0;margin-top:-38px}}
+#gradecard{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:4px;text-shadow:0 2px 10px #000;pointer-events:none;animation:gcard 3.2s ease forwards}
+#gradecard b{font-size:120px;line-height:.9;font-weight:700;color:var(--ink)} #gradecard.gS b{color:#ffd23d} #gradecard.gA b{color:#8fd18a} #gradecard span{font-family:var(--mono);letter-spacing:.3em;color:var(--amber)} #gradecard i{font-style:normal;font-family:var(--mono);font-size:13px;color:var(--dim)}
+@keyframes gcard{0%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}10%{opacity:1;transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}
+#lens{position:fixed;inset:0;pointer-events:none;opacity:.5;background:radial-gradient(circle at 12% 22%,rgba(255,255,255,.18) 0 3px,transparent 4px),radial-gradient(circle at 78% 14%,rgba(255,255,255,.16) 0 2px,transparent 3px),radial-gradient(circle at 63% 71%,rgba(255,255,255,.14) 0 4px,transparent 5px),radial-gradient(circle at 31% 83%,rgba(255,255,255,.15) 0 2px,transparent 3px),radial-gradient(circle at 88% 58%,rgba(255,255,255,.13) 0 3px,transparent 4px),radial-gradient(circle at 45% 35%,rgba(255,255,255,.1) 0 2px,transparent 3px);background-size:420px 380px;animation:lens 4s linear infinite}
+@keyframes lens{from{background-position:0 0}to{background-position:0 380px}}
+#fpsc,#srun{position:fixed;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:12px;color:var(--dim);text-shadow:0 1px 2px #000;pointer-events:none} #fpsc{bottom:6px} #srun{top:calc(4px + env(safe-area-inset-top,0px));color:var(--amber);font-size:14px}
+#brhud{position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;align-items:baseline;font-family:var(--mono);text-shadow:0 1px 3px #000;pointer-events:none;max-width:90vw}
+#brhud b{font-size:20px;color:var(--ink)} #brhud span{font-size:10px;letter-spacing:.16em;color:var(--dim);margin-right:8px} #brhud i{font-style:normal;flex-basis:100%;text-align:center;font-size:12px;color:var(--amber)} #brhud em{font-style:normal;flex-basis:100%;text-align:center;color:var(--red);font-size:14px;letter-spacing:.14em;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.3}}
+#sub{font-size:calc(21px * var(--subscale,1))} #sub b{font-size:calc(15px * var(--subscale,1))}
+.tb{scale:var(--btnscale,1)}
+#t-equip{width:50px;height:50px;right:calc(200px + env(safe-area-inset-right,0px));bottom:calc(310px + env(safe-area-inset-bottom,0px));font-size:10px}
+#t-eqcycle{width:34px;height:34px;right:calc(256px + env(safe-area-inset-right,0px));bottom:calc(318px + env(safe-area-inset-bottom,0px));font-size:14px}
+#t-streak{width:56px;height:56px;right:calc(110px + env(safe-area-inset-right,0px));bottom:calc(350px + env(safe-area-inset-bottom,0px));font-size:10px;border-color:var(--amber);color:var(--amber)}
 </style>
 
 <canvas id="game" aria-label="Game view"></canvas>
@@ -289,8 +341,15 @@ body.mobile #amag{font-size:30px}
 <div id="hud" class="layer" hidden>
   <div id="compass"><div id="compass-strip"></div><div id="compass-obj" hidden></div></div>
   <div id="timer" hidden></div>
-  <div id="boss" hidden><div class="row"><span class="nm">THE JACKAL</span><span class="ph"></span></div><div class="bar"><div class="ghost"></div><div class="fill"></div><div class="tick" style="left:65%"></div><div class="tick" style="left:30%"></div></div></div>
+  <div id="boss" hidden><div class="row"><span class="nm">THE JACKAL</span><span class="ph"></span></div><div class="bar"><div class="ghost"></div><div class="fill"></div></div></div>
 
+  <div id="armbar" hidden><div class="top"><span class="lb">ARMOUR</span><span class="v">0</span></div><div class="track"><div class="fill"></div></div></div>
+  <div id="equip" hidden><span>FLASHBANG</span><b>2</b><kbd>K</kbd><em>J to switch</em></div>
+  <div id="streaks" hidden></div>
+  <div id="dnums"></div>
+  <div id="gradecard" hidden></div>
+  <div id="lens" hidden></div>
+  <div id="fpsc" hidden></div><div id="srun" hidden></div>
   <div id="obj" hidden><span class="k">OBJECTIVE</span><span class="v" id="objtext"></span></div>
   <div id="feed"></div>
   <div id="ammo"><div class="row"><span id="amag"></span><span id="ares"></span></div><div id="wname"></div><div id="firemode"></div><div id="nades"><span>FRAG</span><b>2</b><kbd>G</kbd></div></div>
@@ -323,24 +382,104 @@ body.mobile #amag{font-size:30px}
 
 <div id="title" class="ov screen" hidden>
   <div class="stack">
-    <span class="eyebrow">FIVE CHAPTERS · 58 PARTS</span>
+    <span class="eyebrow" id="titlebrow">VERSION 1.0 · MISSION 1 · TEN CHAPTERS</span>
     <h1>Survival Protocol</h1>
-    <p class="lede">Algeria. A base that went dark years ago, a hostage nobody can name, and a squad dropped half a mile out. You are Pvt. Jake Sarton. All five chapters are out, ending with the fight against the Jackal himself.</p>
+    <p class="lede">Algeria. A base that went dark years ago, a hostage nobody can name, and a squad dropped half a mile out. You are Pvt. Jake Sarton. Mission 1, "The Jackal", runs from the forgotten base to the gates of Qasr Ibn Awa.</p>
+    <span id="rankline" class="rankline"></span>
     <div class="menu">
       <button class="mb" id="btn-cont" type="button">Continue</button>
-      <button class="mb" id="btn-new" type="button">New game</button>
-      <button class="mb" id="btn-parts" type="button">Choose a part</button>
+      <button class="mb" id="btn-new" type="button">New game · Mission select</button>
+      <button class="mb" id="btn-modes" type="button">Freeplay · Battle Royale · Horde</button>
+      <button class="mb" id="btn-parts" type="button" hidden>Choose a part</button>
       <button class="mb" id="btn-armory" type="button">Armory</button>
       <button class="mb" id="btn-career" type="button">Career</button>
       <button class="mb" id="btn-set" type="button">Settings</button>
+      <button class="mb" id="btn-wn" type="button">What's new in 1.0</button>
+      <button class="mb" id="btn-cred" type="button">Credits</button>
       <button class="mb" id="btn-install" type="button" hidden>Install app</button>
     </div>
     <div id="daily"></div>
     <div class="keys">
       <span><b>WASD</b> Move</span><span><b>Mouse</b> Look</span><span><b>Click</b> Fire</span><span><b>Right click</b> Aim</span>
       <span><b>Shift</b> Sprint</span><span><b>C / Ctrl</b> Crouch</span><span><b>Space</b> Jump</span><span><b>R</b> Reload</span>
-      <span><b>E</b> Interact</span><span><b>Hold F</b> Weapon wheel</span><span><b>F</b> Takedown</span><span><b>1–8</b> Weapons</span><span><b>T</b> Flashlight</span><span><b>Q</b> Dash*</span><span><b>X</b> Adrenaline*</span><span><b>G</b> Grenade</span><span><b>V</b> Knife</span><span><b>B</b> Fire mode</span><span><b>Z</b> Tag enemy</span><span><b>N</b> Night vision</span><span><b>I</b> Inspect</span><span><b>H</b> Hide HUD</span><span><b>*</b> Unlock in the Armory</span>
+      <span><b>E</b> Interact</span><span><b>Hold F</b> Weapon wheel</span><span><b>F</b> Takedown</span><span><b>1–8</b> Weapons</span><span><b>T</b> Flashlight</span><span><b>Q</b> Dash*</span><span><b>X</b> Adrenaline*</span><span><b>G</b> Grenade</span><span><b>V</b> Knife</span><span><b>J</b> Pick equipment</span><span><b>K</b> Use equipment</span><span><b>9 / 0 / -</b> Killstreaks</span><span><b>B</b> Fire mode</span><span><b>Z</b> Tag enemy</span><span><b>N</b> Night vision</span><span><b>I</b> Inspect</span><span><b>H</b> Hide HUD</span><span><b>*</b> Unlock in the Armory</span>
     </div>
+  </div>
+</div>
+
+<div id="missions" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">NEW GAME</span>
+    <h2>Mission select</h2>
+    <p class="lede">Every part unlocks when you finish the one before it. Every chapter unlocks when you finish the chapter before it.</p>
+    <div id="missiongrid"></div>
+    <div class="menu"><button class="mb" id="mis-back" type="button">Back</button></div>
+  </div>
+</div>
+
+<div id="modes" class="ov screen" hidden>
+  <div class="stack" style="width:min(720px,100%)">
+    <span class="eyebrow">MODES</span>
+    <h2>Play your way</h2>
+    <div id="mode-lb" class="modelb"></div>
+    <div class="modecard">
+      <div class="mh"><b>Freeplay</b><span>Any map, any time of day, any weather. Enemies keep coming, or none at all.</span></div>
+      <div class="set mset">
+        <label for="fp-map">Map<select id="fp-map"></select></label>
+        <label for="fp-env">Time of day<select id="fp-env"></select></label>
+        <label for="fp-wx">Weather<select id="fp-wx"></select></label>
+        <label for="fp-en">Enemies<select id="fp-en"></select></label>
+      </div>
+      <span class="h4">Mutators</span>
+      <div id="fp-mut" class="achips"></div>
+      <div class="menu row"><button class="mb" id="m-free" type="button">Start freeplay</button><button class="mb" id="m-horde" type="button">Start Horde (endless waves)</button></div>
+    </div>
+    <div class="modecard">
+      <div class="mh"><b>Battle Royale</b><span>24 players in the Sahara basin. Loot crates by rarity, a closing zone, supply drops. Last one standing.</span></div>
+      <div class="set mset"><label for="br-drop">Drop zone<select id="br-drop"></select></label></div>
+      <div class="menu row"><button class="mb" id="m-br" type="button">Drop in</button></div>
+    </div>
+    <div class="modecard">
+      <div class="mh"><b>Firing range</b><span>Every gun in the game on one rack. Targets from 10 to 220 metres. Try before you buy.</span></div>
+      <div class="menu row"><button class="mb" id="m-range" type="button">Go to the range</button></div>
+    </div>
+    <div class="menu"><button class="mb" id="mode-back" type="button">Back</button></div>
+  </div>
+</div>
+
+<div id="brend" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">BATTLE ROYALE</span>
+    <h2 id="br-title">#1</h2>
+    <p class="lede" id="br-sub"></p>
+    <div id="br-stats" class="brstats"></div>
+    <div id="br-hist"></div>
+    <div class="menu"><button class="mb" id="br-again" type="button">Play again</button><button class="mb" id="br-menu" type="button">Modes</button></div>
+  </div>
+</div>
+
+<div id="whatsnew" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">SURVIVAL PROTOCOL · VERSION 1.0</span>
+    <h2>What's new</h2>
+    <ul id="wn-list" class="wnlist"></ul>
+    <div class="menu"><button class="mb" id="wn-back" type="button">Back</button></div>
+  </div>
+</div>
+
+<div id="credits" class="ov screen" hidden>
+  <div class="stack">
+    <span class="eyebrow">CREDITS</span>
+    <h2>Survival Protocol</h2>
+    <div class="credits">
+      <div><span>A game by</span><b>RamPaceCorp</b></div>
+      <div><span>Story and direction</span><b>RamPaceCorp</b></div>
+      <div><span>Programming, maps and art</span><b>Built with Claude</b></div>
+      <div><span>Engine</span><b>three.js</b></div>
+      <div><span>Fonts</span><b>Barlow Condensed · Share Tech Mono</b></div>
+      <div><span>Thanks to</span><b>Everyone who played since Chapter 1</b></div>
+    </div>
+    <div class="menu"><button class="mb" id="cr-back" type="button">Back</button></div>
   </div>
 </div>
 
@@ -452,10 +591,16 @@ body.mobile #amag{font-size:30px}
   </div>
 </div>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="cb-prot"><feColorMatrix type="matrix" values="0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0"/></filter>
+<filter id="cb-deut"><feColorMatrix type="matrix" values="0.625 0.375 0 0 0  0.7 0.3 0 0 0  0 0.3 0.7 0 0  0 0 0 1 0"/></filter>
+<filter id="cb-trit"><feColorMatrix type="matrix" values="0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0"/></filter>
+<filter id="cb-mono"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.35" intercept="-0.12"/><feFuncG type="linear" slope="1.35" intercept="-0.12"/><feFuncB type="linear" slope="1.35" intercept="-0.12"/></feComponentTransfer></filter>
+</defs></svg>
 <div id="touch" hidden>
   <div id="t-stick"></div><div id="t-look"></div><div id="t-base" hidden><div id="t-knob"></div></div>
   <div class="tb" id="t-fire">FIRE</div><div class="tb" id="t-aim">AIM</div><div class="tb" id="t-jump">JUMP</div><div class="tb" id="t-crouch">DUCK</div>
-  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-nade" hidden>NADE</div><div class="tb" id="t-knife" hidden>KNIFE</div><div class="tb" id="t-nvg" hidden>NVG</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
+  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-nade" hidden>NADE</div><div class="tb" id="t-knife" hidden>KNIFE</div><div class="tb" id="t-equip" hidden>EQUIP</div><div class="tb" id="t-eqcycle" hidden>⟳</div><div class="tb" id="t-streak" hidden>STREAK</div><div class="tb" id="t-nvg" hidden>NVG</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
 </div>
 
 <div id="chapterend" class="ov" hidden><div class="stack"><span class="eyebrow">END OF CHAPTER 1</span><h1>Left Behind</h1></div></div>
@@ -468,7 +613,7 @@ body.mobile #amag{font-size:30px}
 <div id="boot" class="ov"><div class="load"><span id="boottext">SURVIVAL PROTOCOL · BUILDING THE WORLD</span><div class="bar"><div id="bootbar"></div></div></div></div>
 <style>@keyframes lb{from{opacity:.25}to{opacity:1}}</style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/three.min.js"></script>
 <script src="js/core.js"></script>
 <script src="js/models.js"></script>
 <script src="js/game.js"></script>
@@ -480,14 +625,21 @@ body.mobile #amag{font-size:30px}
 <script src="js/parts3.js"></script>
 <script src="js/mission.js"></script>
 <script src="js/maps3.js"></script>
+<script src="js/maps4.js"></script>
+<script src="js/guns.js"></script>
+<script src="js/kits.js"></script>
 <script src="js/ch3.js"></script>
 <script src="js/ch4.js"></script>
 <script src="js/ch5.js"></script>
+<script src="js/ch6to9.js"></script>
+<script src="js/chX.js"></script>
 <script src="js/progress.js"></script>
 <script src="js/detail.js"></script>
 <script src="js/touch.js"></script>
 <script src="js/main.js"></script>
 <script src="js/features.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/features2.js"></script>
 <script>
 /* installable app (Chromebook, Windows, Android): offline cache + Install button */
 (function(){
@@ -502,5 +654,3 @@ body.mobile #amag{font-size:30px}
 (function(){ const s=document.getElementById('compass-strip'); const L={0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'};
   for(let d=-360; d<=720; d+=15){ const n=((d%360)+360)%360; if(L[n]!==undefined){ const b=document.createElement('b'); b.textContent=L[n]; b.style.left=(d*4)+'px'; s.append(b);} else { const i=document.createElement('i'); i.style.left=(d*4)+'px'; if(d%45===0) i.className='big'; s.append(i);} } })();
 </script>
-
-</body></html>

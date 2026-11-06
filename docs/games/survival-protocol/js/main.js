@@ -39,9 +39,20 @@ let ctx = null, paused = true, running = false, curPart = 0, curCh = 1;
 SP.CHAPTERS = [
   { n: 1, name: 'The Forgotten Base', parts: SP.PARTS },
   { n: 2, name: "The Jackal's Road", parts: SP.PARTS2 || [] },
-  { n: 3, name: 'The Leak', parts: SP.PARTS3 || [] }, { n: 4, name: 'Iron Desert', parts: SP.PARTS4 || [] }, { n: 5, name: 'The Jackal', parts: SP.PARTS5 || [] }];
+  { n: 3, name: 'The Leak', parts: SP.PARTS3 || [] }, { n: 4, name: 'Iron Desert', parts: SP.PARTS4 || [] }, { n: 5, name: 'The Jackal', parts: SP.PARTS5 || [] },
+  { n: 6, name: 'Ghost of Algiers', parts: SP.PARTS6 || [] }, { n: 7, name: 'Black Snow', parts: SP.PARTS7 || [] }, { n: 8, name: 'Broken Arrow', parts: SP.PARTS8 || [] },
+  { n: 9, name: 'The Long Night', parts: SP.PARTS9 || [] }, { n: 10, label: 'X', name: 'The Jackal', parts: SP.PARTSX || [] }];
+SP.CHAPTERS.forEach(C => { C.label = C.label || String(C.n); if (C.parts && C.parts.endTitle) C.endTitle = C.parts.endTitle; });
+SP.chapterDone = ch => { const C = SP.CHAPTERS[ch - 1]; if (!C || !C.parts.length) return false; for (let i = 1; i <= C.parts.length; i++) if (!SP.isDone(ch, i)) return false; return true; };
+SP.isUnlocked = (ch, n) => { if (SP.settings && SP.settings.unlockAll) return true; if (n > 1) return SP.isDone(ch, n - 1) || SP.isDone(ch, n); return ch === 1 || SP.chapterDone(ch - 1) || SP.isDone(ch, 1); };
+SP.MISSIONS = [
+  { n: 1, name: 'The Jackal', sub: 'Algeria · Ten chapters', chapters: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  { n: 2, name: 'Classified', sub: 'Mission 2 · In production', soon: true },
+  { n: 3, name: 'Classified', sub: 'Mission 3 · In production', soon: true }];
+{ const tb = document.getElementById('titlebrow'); if (tb) tb.textContent = 'VERSION 1.0 · MISSION 1 · TEN CHAPTERS · ' + SP.CHAPTERS.reduce((a, C) => a + C.parts.length, 0) + ' PARTS'; }
 SP.PARTS.endTitle = 'Houser is still out there'; SP.PARTS.endText = 'The laptop, the manifests and Elena Moreau made it out. Sgt. Houser did not. Chapter 2 starts with getting him back.';
-const chParts = ch => (SP.CHAPTERS[ch - 1] && SP.CHAPTERS[ch - 1].parts) || [];
+const chParts = ch => ch === 0 ? [SP.modePart].filter(Boolean) : (SP.CHAPTERS[ch - 1] && SP.CHAPTERS[ch - 1].parts) || [];
+SP.loadMode = part => { SP.modePart = part; curCh = 0; return SP.loadPart(1, 0); };
 SP.state = 'menu';
 function teardown() {
   if (ctx) { ctx.dead = true; ctx.timers.forEach(t => t.rej(ABORT)); ctx.timers = []; ctx.untils.forEach(u => u.rej(ABORT)); ctx.untils = []; }
@@ -73,9 +84,9 @@ function makeCtx(part) {
 }
 SP.SQUAD_LOOK = { 'SGT. HOUSER': { head: 'cap', beard: true, skin: 0xc79a7a, seed: 11 }, 'CPL. RAMIREZ': { radio: true, skin: 0xa8775a, seed: 22 }, 'PVT. DAWSON': { skin: 0xd8ad8e, seed: 33 }, 'OKAFOR': { skin: 0x5c3a28, seed: 44, goggles: false }, 'DOC LEE': { medic: true, skin: 0xc9a07e, seed: 55 }, 'PVT. HALE': { seed: 66 }, 'PVT. BROOKS': { seed: 77, skin: 0x7a5038 }, 'PVT. VEGA': { seed: 88, skin: 0xa8775a }, 'PVT. MITCHELL': { seed: 99 } };
 SP.loadPart = async function (n, ch) {
-  ch = ch || curCh || 1; teardown(); SP.state = 'loading'; showScreen(null); $('#loading').hidden = false; $('#loadtext').textContent = 'Loading Chapter ' + ch + ' · Part ' + n; $('#touch').hidden = true;
+  ch = ch === 0 ? 0 : (ch || curCh || 1); teardown(); SP.state = 'loading'; showScreen(null); $('#loading').hidden = false; $('#loadtext').textContent = ch === 0 ? 'Loading ' + ((SP.modePart && SP.modePart.name) || 'mode') : 'Loading Chapter ' + ((SP.CHAPTERS[ch - 1] || {}).label || ch) + ' · Part ' + n; $('#touch').hidden = true;
   await new Promise(r => setTimeout(r, 40));
-  const part = chParts(ch)[n - 1]; curPart = n; curCh = ch; SP.curCh = ch; SP.save.last = n; SP.save.lastCh = ch; SP.persist();
+  const part = chParts(ch)[n - 1]; curPart = n; curCh = ch; SP.curCh = ch; if (ch) { SP.save.last = n; SP.save.lastCh = ch; SP.persist(); }
   const scene = SP.scene = G.scene = new T.Scene(); const W = SP.W = new SP.World(scene);
   G.initLights(scene); const info = SP.Maps[part.map](W, part) || {}; SP.setEnv(scene, part.env || 'dusk', part.envOver || {});
   scene.add(camera);
@@ -95,11 +106,12 @@ SP.loadPart = async function (n, ch) {
   part.run(ctx, W, P).catch(e => { if (e !== ABORT) console.error(e); });
 };
 function introCard(part, n, ch) {
-  const el = $('#intro'); el.innerHTML = ''; el.hidden = false; const lines = [`CHAPTER ${ch} · PART ${n} · ${part.name.toUpperCase()}`, part.place, part.time, 'Pvt. Jake Sarton · U.S. Army Rangers'];
+  const el = $('#intro'); el.innerHTML = ''; el.hidden = false; const lines = [ch === 0 ? (part.modeTitle || 'FREEPLAY') + ' · ' + part.name.toUpperCase() : `CHAPTER ${(SP.CHAPTERS[ch - 1] || {}).label || ch} · PART ${n} · ${part.name.toUpperCase()}`, part.place, part.time, 'Pvt. Jake Sarton · U.S. Army Rangers'];
   lines.forEach((l, i) => { const d = document.createElement('div'); d.className = i === 0 ? 'h' : ''; el.append(d); let k = 0; setTimeout(function ty() { if (k <= l.length) { d.textContent = l.slice(0, k++) + (k <= l.length ? '▌' : ''); if (k % 2 === 0) A.click(2400, 0.015); setTimeout(ty, 28); } }, 600 + i * 900); });
   clearTimeout(SP.introT); SP.introT = setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.hidden = true; el.classList.remove('out'); }, 900); }, 7500);
 }
 async function partComplete(part) {
+  if (curCh === 0) { running = false; I.unlock(); if (part.onComplete) part.onComplete(); return; }
   const list = chParts(curCh); const n = list.indexOf(part) + 1; const key = curCh + '-' + n; if (!SP.save.dk.includes(key)) SP.save.dk.push(key); SP.save.done = SP.save.dk.filter(k => k.startsWith('1-')).map(k => +k.split('-')[1]); SP.persist();
   const rewards = SP.Progress.onPartComplete(curCh, n, n >= list.length); if (SP.Features) { SP.Features.onPartComplete(); if (n >= list.length) SP.Features.onChapterComplete(); }
   running = false; SP.fadeTarget = 1; SP.fadeRate = 1; await new Promise(r => setTimeout(r, 1100));
@@ -107,7 +119,7 @@ async function partComplete(part) {
   SP.loadPart(n + 1, curCh);
 }
 SP.onPlayerDeath = function () {
-  const P = SP.P; P.mode = 'locked'; SP.blurTarget = 0.6; G.addTrauma(0.6);
+  const P = SP.P; const cp = chParts(curCh)[curPart - 1]; if (cp && cp.onDeath) { P.mode = 'locked'; SP.blurTarget = 0.6; setTimeout(() => { if (SP.state !== 'play') return; running = false; I.unlock(); cp.onDeath(); }, 1800); return; } P.mode = 'locked'; SP.blurTarget = 0.6; G.addTrauma(0.6);
   setTimeout(() => { if (SP.state !== 'play') return; running = false; I.unlock(); $('#deadmsg').textContent = chParts(curCh)[curPart - 1].deathTip || 'Use cover. Your health comes back after a few seconds out of fire.'; showScreen('dead'); }, 1600);
 };
 SP.fail = function (msg) { if (SP.state !== 'play' || !running) return; running = false; paused = true; I.unlock(); $('#deadmsg').textContent = msg; $('#deadtitle').textContent = 'Mission failed'; showScreen('dead'); };
@@ -122,31 +134,47 @@ SP.onLockChange = (locked) => {
 };
 SP.onLockFail = () => { if (SP.state !== 'play') return; paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
 SP.onKey = (code) => { if (SP.Features && SP.Features.photo) return; if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
-function showScreen(id) { ['title', 'chapters', 'pause', 'dead', 'end', 'settings', 'platform', 'armory'].forEach(s => { $('#' + s).hidden = s !== id; }); if (id) $('#lockoverlay').hidden = true; }
-SP.showScreen = showScreen;
+function showScreen(id) { document.querySelectorAll('.ov.screen').forEach(el => { if (el.id !== 'lockoverlay') el.hidden = el.id !== id; }); if (id) { $('#lockoverlay').hidden = true; const el = $('#' + id); if (el) el.scrollTop = 0; } }
+SP.showScreen = showScreen; SP.teardownPart = () => { teardown(); running = false; SP.state = 'menu'; $('#hud').hidden = true; $('#cross').hidden = true; titleBackdrop(); };
 
 /* ---------- menus ---------- */
 let viewCh = 1;
 function buildChapters(ch) {
   viewCh = ch || viewCh || curCh || 1; const tabs = $('#chaptabs'); tabs.innerHTML = '';
-  SP.CHAPTERS.forEach(c => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ctab' + (c.n === viewCh ? ' on' : '') + (c.soon ? ' soon' : ''); b.innerHTML = `<span>CH ${c.n}</span><b></b>`; b.querySelector('b').textContent = c.name; b.addEventListener('click', () => buildChapters(c.n)); tabs.append(b); });
-  const C = SP.CHAPTERS[viewCh - 1]; $('#chapname').textContent = 'Chapter ' + C.n + ' · ' + C.name;
+  SP.CHAPTERS.forEach(c => { const lk = !SP.isUnlocked(c.n, 1); const dn = SP.chapterDone(c.n); const b = document.createElement('button'); b.type = 'button'; b.className = 'ctab' + (c.n === viewCh ? ' on' : '') + (lk ? ' lock' : '') + (dn ? ' dn' : ''); b.innerHTML = `<span>CH ${c.label}${lk ? ' 🔒' : dn ? ' ✓' : ''}</span><b></b>`; b.querySelector('b').textContent = c.name; b.addEventListener('click', () => buildChapters(c.n)); tabs.append(b); });
+  const C = SP.CHAPTERS[viewCh - 1]; const done = C.parts.filter((p, i) => SP.isDone(C.n, i + 1)).length;
+  $('#chapname').textContent = 'MISSION 1 · CHAPTER ' + C.label + ' · ' + C.name.toUpperCase() + ' · ' + done + '/' + C.parts.length;
   const g = $('#partgrid'); g.innerHTML = '';
-  if (C.soon) { const d = document.createElement('p'); d.className = 'lede'; d.textContent = C.count + ' parts. In production. Finish Chapter 2 to see where the story goes next.'; g.append(d); return; }
-  C.parts.forEach((p, i) => { const n = i + 1; const b = document.createElement('button'); b.className = 'part' + (SP.isDone(C.n, n) ? ' done' : ''); b.type = 'button'; b.innerHTML = `<span class="pn">${String(n).padStart(2, '0')}</span><span class="pt"></span><span class="pa"></span>`; b.querySelector('.pt').textContent = p.name; b.querySelector('.pa').textContent = p.act; b.addEventListener('click', () => { A.init(); SP.loadPart(n, C.n); }); g.append(b); });
+  if (!SP.isUnlocked(C.n, 1)) { const d = document.createElement('p'); d.className = 'lede'; d.textContent = 'Locked. Finish every part of Chapter ' + SP.CHAPTERS[C.n - 2].label + ' to open Chapter ' + C.label + '.'; g.append(d); }
+  C.parts.forEach((p, i) => { const n = i + 1; const lk = !SP.isUnlocked(C.n, n); const b = document.createElement('button'); b.className = 'part' + (SP.isDone(C.n, n) ? ' done' : '') + (lk ? ' lock' : ''); b.type = 'button'; b.disabled = lk; b.innerHTML = `<span class="pn">${String(n).padStart(2, '0')}${lk ? ' 🔒' : ''}</span><span class="pt"></span><span class="pa"></span>`; b.querySelector('.pt').textContent = lk ? 'Locked' : p.name; b.querySelector('.pa').textContent = lk ? 'Complete part ' + (n > 1 ? n - 1 : 'the previous chapter') + ' first' : (p.act || ''); if (!lk) b.addEventListener('click', () => { A.init(); SP.loadPart(n, C.n); }); g.append(b); });
 }
+function nextUnplayed() { for (const C of SP.CHAPTERS) for (let i = 1; i <= C.parts.length; i++) if (!SP.isDone(C.n, i)) return [C.n, i]; return [10, 1]; }
+function buildMissions() {
+  const g = $('#missiongrid'); g.innerHTML = '';
+  const tot = SP.CHAPTERS.reduce((a, C) => a + C.parts.length, 0), dn = SP.CHAPTERS.reduce((a, C) => a + C.parts.filter((p, i) => SP.isDone(C.n, i + 1)).length, 0);
+  SP.MISSIONS.forEach(M => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mcard' + (M.soon ? ' lock' : '');
+    const pct = M.soon ? 0 : Math.round(dn / tot * 100);
+    b.innerHTML = `<span class="mn">MISSION ${M.n}${M.soon ? ' · LOCKED 🔒' : ''}</span><b></b><span class="ms"></span><span class="mbar"><i style="width:${pct}%"></i></span><span class="mp"></span>`;
+    b.querySelector('b').textContent = M.name; b.querySelector('.ms').textContent = M.sub; b.querySelector('.mp').textContent = M.soon ? 'Finish Mission 1 to unlock' : dn + ' / ' + tot + ' parts · ' + pct + '%';
+    if (M.soon) b.disabled = true; else b.addEventListener('click', () => { const nx = nextUnplayed(); buildChapters(nx[0]); showScreen('chapters'); });
+    g.append(b);
+  });
+}
+SP.openMissions = () => { buildMissions(); showScreen('missions'); };
 function showEnd(ch, rewards) {
   $('#endreward').textContent = (rewards || []).join('   ·   '); $('#endreward').hidden = !(rewards && rewards.length);
   const C = SP.CHAPTERS[ch - 1], next = SP.CHAPTERS[ch];
-  $('#endeyebrow').textContent = 'END OF CHAPTER ' + ch; $('#endtitle').textContent = (C.endTitle || C.parts.endTitle) || 'Chapter complete'; $('#endtext').textContent = C.parts.endText || '';
-  const go = $('#e-again'); if (next && !next.soon) { go.textContent = 'Continue to Chapter ' + next.n; go.onclick = () => SP.loadPart(1, next.n); } else { go.textContent = 'Play Chapter ' + ch + ' again'; go.onclick = () => SP.loadPart(1, ch); }
+  $('#endeyebrow').textContent = 'END OF CHAPTER ' + C.label; $('#endtitle').textContent = (C.endTitle || C.parts.endTitle) || 'Chapter complete'; $('#endtext').textContent = C.parts.endText || '';
+  const go = $('#e-again'); if (next && !next.soon) { go.textContent = 'Continue to Chapter ' + next.label; go.onclick = () => SP.loadPart(1, next.n); } else { go.textContent = 'Play Chapter ' + ch + ' again'; go.onclick = () => SP.loadPart(1, ch); }
   showScreen('end');
 }
-$('#btn-new').addEventListener('click', () => { A.init(); SP.save.done = []; SP.save.dk = []; SP.persist(); SP.loadPart(1, 1); });
+$('#btn-new').addEventListener('click', () => { A.init(); SP.openMissions(); });
+$('#mis-back').addEventListener('click', () => showScreen('title'));
 $('#btn-cont').addEventListener('click', () => { A.init(); SP.loadPart(SP.save.last || 1, SP.save.lastCh || 1); });
-$('#btn-parts').addEventListener('click', () => { buildChapters(); showScreen('chapters'); });
+$('#btn-parts').addEventListener('click', () => SP.openMissions());
 $('#btn-set').addEventListener('click', () => { SP.setFrom = 'title'; openSettings(); });
-$('#chap-back').addEventListener('click', () => showScreen(SP.state === 'play' ? 'pause' : 'title'));
+$('#chap-back').addEventListener('click', () => { if (SP.state === 'play') showScreen('pause'); else SP.openMissions(); });
 $('#p-resume').addEventListener('click', () => { if (I.fallback) { paused = false; showScreen(null); } else I.lock(); });
 $('#p-restart').addEventListener('click', () => SP.loadPart(curPart, curCh));
 $('#p-parts').addEventListener('click', () => { buildChapters(curCh); showScreen('chapters'); });
