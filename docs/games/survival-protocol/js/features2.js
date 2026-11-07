@@ -316,9 +316,36 @@ function addSettings() {
   }, true);
   sync();
 }
+
+/* ======================= fullscreen (works in the Google Sites embed too) ======================= */
+function openTab() {
+  const gz = window.__SP_SRC_GZ;
+  const go = html => { const w = window.open('', '_blank'); if (w) { w.document.open(); w.document.write(html); w.document.close(); return true; } try { const u = URL.createObjectURL(new Blob([html], { type: 'text/html' })); if (window.open(u, '_blank')) return true; } catch (e) { } F.toast && F.toast('POP-UPS BLOCKED', 'Allow pop-ups for this page, then press Fullscreen again'); return false; };
+  if (gz && typeof DecompressionStream !== 'undefined') {
+    const bin = Uint8Array.from(atob(gz), c => c.charCodeAt(0));
+    const w = window.open('', '_blank'); if (w) w.document.write('<body style="background:#0b0b0a;color:#ece6da;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading Survival Protocol…</body>');
+    new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).blob().then(bl => { const u = URL.createObjectURL(new Blob([bl], { type: 'text/html' })); if (w) { try { w.location.href = u; } catch (e) { bl.text().then(go); } } else if (!window.open(u, '_blank')) bl.text().then(go); }).catch(() => F.toast && F.toast('FULLSCREEN', 'This browser cannot open the full window version'));
+    return;
+  }
+  if (/^https?:/.test(location.href) && !gz) { window.open(location.href, '_blank'); return; }
+  F.toast && F.toast('FULLSCREEN', 'Fullscreen is not available in this browser');
+}
+F2.fullscreen = function () {
+  const d = document, el = d.documentElement;
+  if (d.fullscreenElement || d.webkitFullscreenElement) { (d.exitFullscreen || d.webkitExitFullscreen).call(d); return; }
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  const enabled = d.fullscreenEnabled || d.webkitFullscreenEnabled;
+  if (req && enabled) { try { const p = req.call(el, { navigationUI: 'hide' }); if (p && p.then) p.then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }).catch(openTab); return; } catch (e) { } }
+  openTab();
+};
+function fsLabel() { const on = !!(document.fullscreenElement || document.webkitFullscreenElement); document.body.classList.toggle('isfs', on); document.querySelectorAll('.fsbtn').forEach(b => b.textContent = on ? 'Exit fullscreen' : (SP.framed && !(document.fullscreenEnabled || document.webkitFullscreenEnabled) ? 'Fullscreen (opens a full window)' : 'Fullscreen')); }
+document.addEventListener('fullscreenchange', fsLabel); document.addEventListener('webkitfullscreenchange', fsLabel);
 function wire() {
   addSettings(); applyS2(); eqHud(); streakHud(); buildWhatsNew(); dailyLogin();
   $('#btn-new2') && $('#btn-new2').addEventListener('click', () => SP.openMissions && SP.openMissions());
+  ['#btn-fs', '#p-fs'].forEach(id => { const b = $(id); if (b) b.addEventListener('click', e => { e.preventDefault(); F2.fullscreen(); }); });
+  const hf = $('#hudfs'); if (hf) { hf.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); F2.fullscreen(); }); hf.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); F2.fullscreen(); }, { passive: false }); }
+  if (SP.framed) document.body.classList.add('framed'); fsLabel();
   $('#btn-wn').addEventListener('click', () => SP.showScreen('whatsnew')); $('#wn-back').addEventListener('click', () => SP.showScreen('title'));
   $('#btn-cred').addEventListener('click', () => SP.showScreen('credits')); $('#cr-back').addEventListener('click', () => SP.showScreen('title'));
   // toggle-aim latch on right mouse

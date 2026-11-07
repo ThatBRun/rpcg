@@ -1,5 +1,5 @@
 /* Survival Protocol — offline cache so the installed app works without internet */
-const VERSION = 'sp-v1.0.1';
+const VERSION = 'sp-v1.0.2';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './js/core.js', './js/models.js', './js/game.js', './js/view.js', './js/maps.js', './js/parts.js', './js/parts2.js', './js/maps2.js', './js/parts3.js', './js/mission.js', './js/maps3.js', './js/maps4.js', './js/guns.js', './js/kits.js', './js/ch3.js', './js/ch4.js', './js/ch5.js', './js/ch6to9.js', './js/chX.js', './js/progress.js', './js/detail.js', './js/touch.js', './js/main.js', './js/features.js', './js/modes.js', './js/features2.js',

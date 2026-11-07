@@ -132,7 +132,10 @@ SP.onLockChange = (locked) => {
   if (locked) { $('#lockoverlay').hidden = true; if (SP.state === 'play') { paused = false; showScreen(null); } }
   else if (SP.state === 'play' && running && !I.fallback) { paused = true; showScreen('pause'); }
 };
-SP.onLockFail = () => { if (SP.state !== 'play') return; paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
+SP.framed = (() => { try { return window.top !== window.self; } catch (e) { return true; } })();
+SP.onLockFail = () => { if (SP.state !== 'play') return; SP.lockFails = (SP.lockFails || 0) + 1;
+  if (SP.framed || SP.lockFails >= 2) { I.fallback = true; $('#lockoverlay').hidden = true; paused = false; showScreen(null); G.hud.feed(SP.framed ? 'MOUSE LOCK IS BLOCKED IN THIS EMBED · PRESS FULLSCREEN (TITLE OR PAUSE MENU) FOR FULL MOUSE CONTROL' : 'MOUSE LOCK UNAVAILABLE · MOVE THE MOUSE OVER THE GAME TO LOOK', 'gold'); return; }
+  paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
 SP.onKey = (code) => { if (SP.Features && SP.Features.photo) return; if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
 function showScreen(id) { document.querySelectorAll('.ov.screen').forEach(el => { if (el.id !== 'lockoverlay') el.hidden = el.id !== id; }); if (id) { $('#lockoverlay').hidden = true; const el = $('#' + id); if (el) el.scrollTop = 0; } }
 SP.showScreen = showScreen; SP.teardownPart = () => { teardown(); running = false; SP.state = 'menu'; $('#hud').hidden = true; $('#cross').hidden = true; titleBackdrop(); };

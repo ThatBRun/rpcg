@@ -38,14 +38,21 @@ const UPGRADES = [
   { id: 'mag', name: 'Magazine', per: '+25%', costs: [200, 400, 700] },
   { id: 'rel', name: 'Reload', per: '-12%', costs: [200, 400, 700] },
 ];
-const SLOT_COSTS = { 4: 700, 6: 1200 }; // upgrade from 4 to 6, from 6 to 8
+const MAX_SLOTS = 12; const SLOT_COSTS = { 4: 700, 6: 1200, 8: 1800, 10: 2600 }; // +2 slots per purchase, 4 → 12
 
 /* ---------------- profile ---------------- */
 const PR = SP.Progress = { coins: 0, spent: 0, skills: {}, owned: { m4: true, pistol: true }, up: {}, wheel: [], slots: 4, chapterPaid: {}, partPaid: {}, migrated: false };
 try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) Object.assign(PR, s); } catch (e) { }
 if (!PR.knifeAdded) { PR.knifeAdded = true; if (!PR.wheel.includes('knife')) PR.wheel.push('knife'); PR.owned.knife = true; }
+/* positional wheel: PR.wheel[i] is the weapon in slot i (null = empty), 12 slots, PR.slots of them unlocked */
+if (!PR.wheelPos) { const old = (PR.wheel || []).filter((w, i, a) => w && PR.owned[w] && a.indexOf(w) === i); if (!old.length) old.push('m4', 'pistol', 'knife'); PR.wheel = Array(MAX_SLOTS).fill(null); old.slice(0, MAX_SLOTS).forEach((w, i) => PR.wheel[i] = w); PR.wheelPos = true; }
+while (PR.wheel.length < MAX_SLOTS) PR.wheel.push(null); PR.wheel.length = MAX_SLOTS; PR.slots = Math.min(MAX_SLOTS, Math.max(4, PR.slots || 4));
+PR.inWheel = w => PR.wheel.indexOf(w);
+PR.wheelAdd = w => { if (PR.wheel.indexOf(w) >= 0) return PR.wheel.indexOf(w); for (let i = 0; i < PR.slots; i++) if (!PR.wheel[i]) { PR.wheel[i] = w; return i; } return -1; };
+PR.wheelRemove = w => { const i = PR.wheel.indexOf(w); if (i >= 0) PR.wheel[i] = null; };
+PR.wheelPut = (w, i) => { const j = PR.wheel.indexOf(w); if (j >= 0) PR.wheel[j] = PR.wheel[i] && j < PR.slots ? PR.wheel[i] : null; PR.wheel[i] = w; };
 PR.att = PR.att || {}; PR.camo = PR.camo || {}; PR.knives = PR.knives || { combat: true }; PR.knife = PR.knife || 'combat';
-PR.save = () => { try { const o = {}; ['coins', 'spent', 'skills', 'owned', 'up', 'wheel', 'slots', 'chapterPaid', 'partPaid', 'migrated', 'knifeAdded', 'att', 'camo', 'knives', 'knife', 'wkills', 'wxp'].forEach(k => o[k] = PR[k]); localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { } };
+PR.save = () => { try { const o = {}; ['coins', 'spent', 'skills', 'owned', 'up', 'wheel', 'slots', 'chapterPaid', 'partPaid', 'migrated', 'knifeAdded', 'wheelPos', 'att', 'camo', 'knives', 'knife', 'wkills', 'wxp'].forEach(k => o[k] = PR[k]); localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { } };
 PR.points = () => Object.keys(PR.partPaid).length - PR.spent;
 SP.skill = id => !!PR.skills[id];
 
@@ -96,10 +103,13 @@ PR.beforeLoad = function () { PR.migrate(); PR.buildStats(); };
 PR.afterLoadout = function (P, part) {
   P.maxHp = PR.maxHp(); P.hp = P.maxHp; P.secondWind = false; P.dashCd = 0; SP.slowmoT = 0; SP.slowCd = 0;
   const lo = part.loadout || ['m4'];
-  const stealthPistol = lo.length === 1 && lo[0] === 'pistol';
-  if (lo.length && !stealthPistol && !part.noExtras) {
-    const room = PR.slots - Object.keys(P.inv).length;
-    PR.wheel.filter(w => PR.owned[w] && !P.inv[w] && SP.WEAP[w]).slice(0, Math.max(0, room)).forEach(w => P.give(w));
+  W.useSlots = !!(lo.length && !part.noExtras);
+  if (W.useSlots) {
+    // your wheel loadout is always with you; weapons the part hands out go in extra MISSION slots after it
+    const old = P.inv, inv = {};
+    PR.wheel.slice(0, PR.slots).forEach(w => { if (w && PR.owned[w] && SP.WEAP[w]) inv[w] = old[w] || { mag: SP.WEAP[w].mag, res: SP.WEAP[w].mag * 4 }; });
+    Object.keys(old).forEach(w => { if (!inv[w]) inv[w] = old[w]; });
+    P.inv = inv; if (!P.cur || !P.inv[P.cur]) { P.cur = null; const f = Object.keys(inv)[0]; if (f) P.equip(f); }
   }
   P.updAmmo(); W.refreshButtons();
 };
@@ -130,20 +140,27 @@ PR.playerScale = () => (W.open ? 0.18 : 1);
 const W = SP.Wheel = { open: false, sel: -1, vx: 0, vy: 0, list: [] };
 const wheelEl = () => $('#wheel');
 function slotPos(i, n) { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [Math.cos(a), Math.sin(a), a]; }
+W.order = function () {
+  const P = SP.P; if (!P) return []; if (!W.useSlots) return Object.keys(P.inv);
+  const out = PR.wheel.slice(0, PR.slots).map(w => (w && P.inv[w]) ? w : null);
+  Object.keys(P.inv).forEach(w => { if (!out.includes(w)) out.push(w); });
+  return out;
+};
 W.build = function () {
   const P = SP.P, el = wheelEl(), ring = el.querySelector('.wslots'); ring.innerHTML = '';
-  const inv = Object.keys(P.inv); const n = Math.max(PR.slots, inv.length); W.list = [];
+  const order = W.order(); const n = Math.max(W.useSlots ? 0 : PR.slots, order.length); W.list = [];
+  el.querySelector('.wring').classList.toggle('many', n > 8); el.querySelector('.wring').classList.toggle('lots', n > 12);
   for (let i = 0; i < n; i++) {
-    const w = inv[i]; const b = document.createElement('button'); b.type = 'button'; b.className = 'wslot' + (w ? '' : ' empty') + (w === P.cur ? ' cur' : '');
-    const [x, y] = slotPos(i, n); b.style.left = (50 + x * 37) + '%'; b.style.top = (50 + y * 37) + '%';
-    if (w) { const s = P.inv[w]; b.innerHTML = `<span class="k">${i + 1}</span><b></b><span class="am"></span>`; b.querySelector('b').textContent = SP.WEAP[w].name; b.querySelector('.am').textContent = SP.WEAP[w].rocket ? s.mag + s.res + ' ROCKETS' : s.mag + ' / ' + s.res; }
-    else b.innerHTML = '<span class="k">' + (i + 1) + '</span><b>EMPTY</b><span class="am">BUY WEAPONS IN THE ARMORY</span>';
+    const w = order[i]; const extra = W.useSlots && i >= PR.slots; const b = document.createElement('button'); b.type = 'button'; b.className = 'wslot' + (w ? '' : ' empty') + (w === P.cur ? ' cur' : '') + (extra ? ' mis' : '');
+    const [x, y] = slotPos(i, n); const r = n > 8 ? 40 : 37; b.style.left = (50 + x * r) + '%'; b.style.top = (50 + y * r) + '%';
+    if (w) { const s = P.inv[w]; b.innerHTML = `<span class="k">${extra ? 'MISSION' : i + 1}</span><b></b><span class="am"></span>`; b.querySelector('b').textContent = SP.WEAP[w].name; b.querySelector('.am').textContent = SP.WEAP[w].melee ? 'MELEE' : SP.WEAP[w].rocket ? s.mag + s.res + ' ROCKETS' : s.mag + ' / ' + s.res; }
+    else b.innerHTML = '<span class="k">' + (i + 1) + '</span><b>EMPTY</b><span class="am">SET IN THE ARMORY</span>';
     const idx = i; b.addEventListener('click', e => { e.preventDefault(); if (!w) return; W.sel = idx; W.close(true); });
     b.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); if (!w) { W.close(false); return; } W.sel = idx; W.close(true); }, { passive: false });
     ring.append(b); W.list.push({ w, b });
   }
-  const lockedN = 8 - n; el.querySelector('.wlocked').textContent = lockedN > 0 ? lockedN + ' more slots in the Armory' : '';
-  W.sel = inv.indexOf(P.cur); W.mark();
+  const lockedN = MAX_SLOTS - PR.slots; el.querySelector('.wlocked').textContent = lockedN > 0 ? PR.slots + ' of 12 slots · unlock more in the Armory' : '12 of 12 slots';
+  W.sel = order.indexOf(P.cur); W.mark();
 };
 W.mark = function () { W.list.forEach((s, i) => s.b.classList.toggle('sel', i === W.sel)); const s = W.list[W.sel]; const c = wheelEl().querySelector('.wc'); if (s && s.w) { c.querySelector('b').textContent = SP.WEAP[s.w].name; const st = SP.WEAP[s.w]; c.querySelector('span').textContent = st.pellets ? 'SHOTGUN · ' + st.mag + ' SHELLS' : st.rocket ? 'LAUNCHER' : st.zoom ? 'SCOPED · ' + st.mag + ' ROUNDS' : (st.auto ? 'FULL AUTO · ' : 'SEMI · ') + st.mag + ' ROUNDS'; } else { c.querySelector('b').textContent = 'WEAPON WHEEL'; c.querySelector('span').textContent = ''; } };
 W.openW = function () {
@@ -198,19 +215,47 @@ function renderArmory() {
     });
   } else { renderWeapons(body); }
 }
-let wCls = 'ar', wSel = 'm4';
+let wCls = 'ar', wSel = 'm4', selSlot = null;
 function bars(st) {
   const rows = [['Damage', Math.min(1, (st.pellets ? st.dmg * st.pellets * 0.6 : st.rocket ? 400 : st.dmg) / 160)], ['Fire rate', Math.min(1, st.rpm / 1200)], ['Accuracy', 1 - Math.min(1, st.spreadA / 0.006)], ['Control', 1 - Math.min(1, st.kick / 0.08)], ['Magazine', Math.min(1, st.mag / 100)], ['Reload', 1 - Math.min(1, st.reload / 6)]];
   return '<div class="abars">' + rows.map(([n, v]) => `<div><span>${n}</span><i><u style="width:${Math.round(Math.max(0.04, v) * 100)}%"></u></i></div>`).join('') + '</div>';
 }
+function wheelButtons(act, id, name) {
+  const at = PR.inWheel(id); const inW = at >= 0 && at < PR.slots;
+  if (selSlot !== null) { const b = document.createElement('button'); b.type = 'button'; b.className = 'abuy'; b.textContent = 'Put in slot ' + (selSlot + 1); b.addEventListener('click', () => { PR.wheelPut(id, selSlot); toast(name + ' is in slot ' + (selSlot + 1) + '.'); selSlot = null; PR.save(); A.click(1100, 0.08); renderArmory(); }); act.append(b); }
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'atog' + (inW ? ' on' : '');
+  b.textContent = inW ? 'In slot ' + (at + 1) + ' ✓ · tap to remove' : 'Add to wheel';
+  b.addEventListener('click', () => { if (inW) PR.wheelRemove(id); else if (PR.wheelAdd(id) < 0) { toast('Your wheel is full. Tap a slot above, then Put in slot.'); return; } PR.save(); renderArmory(); });
+  act.append(b);
+}
 function renderWeapons(body) {
   body.className = 'awpn';
   const sl = document.createElement('div'); sl.className = 'aslots';
-  const next = PR.slots < 8 ? SLOT_COSTS[PR.slots] : null;
-  sl.innerHTML = `<div><b>Wheel slots</b><span>${PR.slots} of 8</span></div>`;
-  for (let i = 0; i < 8; i++) { const d = document.createElement('i'); d.className = i < PR.slots ? 'on' : ''; sl.append(d); }
-  if (next) { const b = document.createElement('button'); b.type = 'button'; b.className = 'abuy'; b.textContent = `Add 2 slots · ${next} coins`; b.addEventListener('click', () => { if (PR.coins < next) { toast('Not enough coins. Finish parts and chapters to earn more.'); return; } PR.coins -= next; PR.slots += 2; PR.save(); A.click(1200, 0.12); toast('Weapon wheel now has ' + PR.slots + ' slots.'); renderArmory(); }); sl.append(b); }
+  const next = PR.slots < MAX_SLOTS ? SLOT_COSTS[PR.slots] : null;
+  sl.innerHTML = `<div><b>Weapon wheel</b><span>${PR.slots} of 12 slots unlocked</span></div>`;
+  if (next) { const b = document.createElement('button'); b.type = 'button'; b.className = 'abuy'; b.textContent = `Unlock 2 slots · ${next} coins`; b.addEventListener('click', () => { if (PR.coins < next) { toast('Not enough coins. Finish parts and chapters to earn more.'); return; } PR.coins -= next; PR.slots = Math.min(MAX_SLOTS, PR.slots + 2); PR.save(); A.click(1200, 0.12); toast('Weapon wheel now has ' + PR.slots + ' slots.'); renderArmory(); }); sl.append(b); }
   body.append(sl);
+  const grid = document.createElement('div'); grid.className = 'wgrid';
+  for (let i = 0; i < MAX_SLOTS; i++) {
+    const w = PR.wheel[i], lock = i >= PR.slots; const b = document.createElement('button'); b.type = 'button';
+    b.className = 'wg' + (lock ? ' lock' : '') + (w && !lock ? ' full' : '') + (selSlot === i ? ' sel' : '');
+    b.innerHTML = `<span>${i + 1}</span><b></b>`; b.querySelector('b').textContent = lock ? 'Locked' : w ? (w === 'knife' ? SP.KNIVES[PR.knife].name : (SP.WEAP_BASE[w] || SP.WEAP[w]).name) : 'Empty';
+    if (lock) b.disabled = true;
+    else b.addEventListener('click', () => {
+      if (selSlot === null) selSlot = i;
+      else if (selSlot === i) selSlot = null;
+      else { const t = PR.wheel[i]; PR.wheel[i] = PR.wheel[selSlot]; PR.wheel[selSlot] = t; selSlot = null; PR.save(); A.click(900, 0.06); }
+      renderArmory();
+    });
+    grid.append(b);
+  }
+  body.append(grid);
+  const hint = document.createElement('div'); hint.className = 'wghint';
+  if (selSlot !== null) {
+    hint.innerHTML = `<span>Slot ${selSlot + 1} selected. Tap another slot to swap them, or pick a weapon below and press <b>Put in slot ${selSlot + 1}</b>.</span>`;
+    if (PR.wheel[selSlot]) { const c = document.createElement('button'); c.type = 'button'; c.className = 'atog'; c.textContent = 'Empty slot ' + (selSlot + 1); c.addEventListener('click', () => { PR.wheel[selSlot] = null; selSlot = null; PR.save(); renderArmory(); }); hint.append(c); }
+  } else hint.innerHTML = '<span>Tap a slot to move or change its weapon. Your wheel goes with you into every mission, chapter and part. Number keys 1–8 pick slots 1–8.</span>';
+  body.append(hint);
   const chips = document.createElement('div'); chips.className = 'achips';
   ['ar', 'smg', 'lmg', 'sniper', 'dmr', 'shotgun', 'pistol', 'launcher', 'melee'].forEach(c => { const b = document.createElement('button'); b.type = 'button'; b.className = 'achip' + (c === wCls ? ' on' : ''); const n = c === 'melee' ? Object.keys(SP.KNIVES).length : weaponList().filter(w => SP.WEAP[w.id] && SP.WEAP[w.id].cls === c).length; b.textContent = SP.CLASS_NAMES[c] + ' · ' + n; b.addEventListener('click', () => { wCls = c; const f = weaponList().find(w => SP.WEAP[w.id].cls === c); wSel = c === 'melee' ? 'knife' : f && f.id; renderArmory(); }); chips.append(b); });
   body.append(chips);
@@ -220,13 +265,13 @@ function renderWeapons(body) {
   if (wCls === 'melee') {
     Object.entries(SP.KNIVES).forEach(([k, K]) => { const own = !!PR.knives[k]; const b = document.createElement('button'); b.type = 'button'; b.className = 'arow' + (PR.knife === k ? ' sel' : '') + (own ? ' owned' : ''); b.innerHTML = `<b></b><span>${own ? (PR.knife === k ? 'EQUIPPED' : 'OWNED') : K.price + ' COINS'}</span>`; b.querySelector('b').textContent = K.name; b.addEventListener('click', () => { if (!own) { if (PR.coins < K.price) { toast('Not enough coins.'); return; } PR.coins -= K.price; PR.knives[k] = true; toast(K.name + ' bought.'); } PR.knife = k; PR.save(); PR.buildStats(); A.click(1200, 0.1); renderArmory(); }); list.append(b); });
     const K = SP.KNIVES[PR.knife]; det.innerHTML = `<h3></h3><p class="lede">Used by the V quick-knife and by the knife in your weapon wheel. Reach ${K.range.toFixed(1)} m · ${Math.round(60 / K.swing)} swings a minute.</p>`; det.querySelector('h3').textContent = K.name;
-    const inW = PR.wheel.includes('knife'); const tg = document.createElement('button'); tg.type = 'button'; tg.className = 'atog' + (inW ? ' on' : ''); tg.textContent = inW ? 'Knife in wheel ✓' : 'Add knife to wheel'; tg.addEventListener('click', () => { const i = PR.wheel.indexOf('knife'); if (i >= 0) PR.wheel.splice(i, 1); else PR.wheel.push('knife'); PR.save(); renderArmory(); }); det.append(tg);
+    const ab = document.createElement('div'); ab.className = 'aact'; det.append(ab); wheelButtons(ab, 'knife', 'Knife');
     return;
   }
   weaponList().filter(w => SP.WEAP[w.id] && SP.WEAP[w.id].cls === wCls).forEach(wd => {
     const st = SP.WEAP_BASE[wd.id] || SP.WEAP[wd.id]; const own = !!PR.owned[wd.id];
     const b = document.createElement('button'); b.type = 'button'; b.className = 'arow' + (wd.id === wSel ? ' sel' : '') + (own ? ' owned' : '');
-    b.innerHTML = `<b></b><span>${own ? (PR.wheel.includes(wd.id) ? 'IN WHEEL' : 'OWNED') : wd.price + ' COINS'}</span>`; b.querySelector('b').textContent = st.name;
+    b.innerHTML = `<b></b><span>${own ? (PR.inWheel(wd.id) >= 0 && PR.inWheel(wd.id) < PR.slots ? 'SLOT ' + (PR.inWheel(wd.id) + 1) : 'OWNED') : wd.price + ' COINS'}</span>`; b.querySelector('b').textContent = st.name;
     b.addEventListener('click', () => { wSel = wd.id; renderArmory(); }); list.append(b);
   });
   const wd = weaponList().find(w => w.id === wSel); if (!wd) return; const st = SP.WEAP_BASE[wd.id] || SP.WEAP[wd.id]; const own = !!PR.owned[wd.id]; const L = PR.up[wd.id] || (PR.up[wd.id] = {});
@@ -234,8 +279,8 @@ function renderWeapons(body) {
   det.innerHTML = `<h3></h3><p class="lede"></p>${bars(SP.WEAP[wd.id])}<div class="aact"></div><div class="aups"></div><div class="aatt"></div><div class="acamo"></div>`;
   det.querySelector('h3').textContent = st.name; det.querySelector('p').textContent = (BLURB[st.cls] || '') + (st.rocket ? '' : ` ${st.auto ? (st.defaultMode === 'burst' ? 'Burst' : 'Full auto') : 'Semi-auto'} · ${st.mag} rounds · ${kills} kills.`);
   const act = det.querySelector('.aact');
-  if (!own) { const b = document.createElement('button'); b.type = 'button'; b.className = 'abuy'; b.textContent = 'Buy · ' + wd.price; b.addEventListener('click', () => { if (PR.coins < wd.price) { toast('Not enough coins. Finish parts and chapters to earn more.'); return; } PR.coins -= wd.price; PR.owned[wd.id] = true; if (!PR.wheel.includes(wd.id)) PR.wheel.push(wd.id); PR.save(); A.click(1200, 0.12); toast(st.name + ' bought and added to your wheel.'); renderArmory(); }); act.append(b); return; }
-  if (wd.price) { const inW = PR.wheel.includes(wd.id); const b = document.createElement('button'); b.type = 'button'; b.className = 'atog' + (inW ? ' on' : ''); b.textContent = inW ? 'In wheel ✓' : 'Add to wheel'; b.addEventListener('click', () => { const i = PR.wheel.indexOf(wd.id); if (i >= 0) PR.wheel.splice(i, 1); else PR.wheel.push(wd.id); PR.save(); renderArmory(); }); act.append(b); }
+  if (!own) { const b = document.createElement('button'); b.type = 'button'; b.className = 'abuy'; b.textContent = 'Buy · ' + wd.price; b.addEventListener('click', () => { if (PR.coins < wd.price) { toast('Not enough coins. Finish parts and chapters to earn more.'); return; } PR.coins -= wd.price; PR.owned[wd.id] = true; const si = selSlot !== null ? (PR.wheelPut(wd.id, selSlot), selSlot) : PR.wheelAdd(wd.id); selSlot = null; PR.save(); A.click(1200, 0.12); toast(st.name + (si >= 0 ? ' bought and put in slot ' + (si + 1) + '.' : ' bought. Your wheel is full, so tap a slot above to make room.')); renderArmory(); }); act.append(b); return; }
+  wheelButtons(act, wd.id, st.name);
   const ups = det.querySelector('.aups'); ups.innerHTML = '<div class="h4">UPGRADES</div>';
   UPGRADES.forEach(u => {
     if (st.rocket && u.id === 'mag') return; const lv = L[u.id] || 0; const row = document.createElement('div'); row.className = 'aup';

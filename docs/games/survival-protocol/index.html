@@ -334,6 +334,18 @@ body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
 #t-equip{width:50px;height:50px;right:calc(200px + env(safe-area-inset-right,0px));bottom:calc(310px + env(safe-area-inset-bottom,0px));font-size:10px}
 #t-eqcycle{width:34px;height:34px;right:calc(256px + env(safe-area-inset-right,0px));bottom:calc(318px + env(safe-area-inset-bottom,0px));font-size:14px}
 #t-streak{width:56px;height:56px;right:calc(110px + env(safe-area-inset-right,0px));bottom:calc(350px + env(safe-area-inset-bottom,0px));font-size:10px;border-color:var(--amber);color:var(--amber)}
+
+.wgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px} @media (max-width:640px){.wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.wg{display:grid;gap:2px;text-align:left;background:rgba(14,14,13,.8);border:1px dashed var(--line);color:var(--dim);padding:7px 8px;cursor:pointer;font:inherit;min-height:52px}
+.wg span{font-family:var(--mono);font-size:11px;color:var(--amber)} .wg b{font-size:14px;line-height:1.1;font-weight:600}
+.wg.full{border-style:solid;color:var(--ink)} .wg.sel{border:1px solid var(--amber);background:rgba(242,179,61,.18);color:var(--amber)} .wg.lock{opacity:.35;cursor:not-allowed}
+.wghint{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--dim)} .wghint b{color:var(--amber)}
+#wheel .wring.many{width:min(640px,96vmin)} #wheel .wring.many .wslot{width:min(112px,21vmin);padding:6px 4px} #wheel .wring.many .wslot b{font-size:clamp(12px,2.1vmin,15px)} #wheel .wring.many .wslot .am{font-size:10px}
+#wheel .wring.lots .wslot{width:min(96px,18vmin)}
+.wslot.mis{border-color:rgba(158,195,232,.6)} .wslot.mis .k{color:#9ec3e8}
+
+#hudfs{position:fixed;right:calc(8px + env(safe-area-inset-right,0px));top:calc(8px + env(safe-area-inset-top,0px));width:34px;height:34px;display:grid;place-items:center;background:rgba(12,12,11,.6);border:1px solid var(--line);color:var(--ink);font-size:18px;cursor:pointer;z-index:6;padding:0}
+body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hudfs{right:190px} body.isfs #hudfs{opacity:.5}
 </style>
 
 <canvas id="game" aria-label="Game view"></canvas>
@@ -349,7 +361,7 @@ body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
   <div id="dnums"></div>
   <div id="gradecard" hidden></div>
   <div id="lens" hidden></div>
-  <div id="fpsc" hidden></div><div id="srun" hidden></div>
+  <button id="hudfs" type="button" aria-label="Fullscreen">⛶</button><div id="fpsc" hidden></div><div id="srun" hidden></div>
   <div id="obj" hidden><span class="k">OBJECTIVE</span><span class="v" id="objtext"></span></div>
   <div id="feed"></div>
   <div id="ammo"><div class="row"><span id="amag"></span><span id="ares"></span></div><div id="wname"></div><div id="firemode"></div><div id="nades"><span>FRAG</span><b>2</b><kbd>G</kbd></div></div>
@@ -394,6 +406,7 @@ body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
       <button class="mb" id="btn-armory" type="button">Armory</button>
       <button class="mb" id="btn-career" type="button">Career</button>
       <button class="mb" id="btn-set" type="button">Settings</button>
+      <button class="mb fsbtn" id="btn-fs" type="button">Fullscreen</button>
       <button class="mb" id="btn-wn" type="button">What's new in 1.0</button>
       <button class="mb" id="btn-cred" type="button">Credits</button>
       <button class="mb" id="btn-install" type="button" hidden>Install app</button>
@@ -506,6 +519,7 @@ body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
       <button class="mb" id="p-career" type="button">Career</button>
       <button class="mb" id="p-photo" type="button">Photo mode</button>
       <button class="mb" id="p-set" type="button">Settings</button>
+      <button class="mb fsbtn" id="p-fs" type="button">Fullscreen</button>
       <button class="mb" id="p-quit" type="button">Quit to title</button>
     </div>
   </div>

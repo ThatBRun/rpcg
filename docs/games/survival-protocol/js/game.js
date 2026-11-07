@@ -267,7 +267,7 @@ class Player {
       else { A.click(); this.fireCd = 0.25; if (s.res > 0) { this.reloadT = w.reload; this.updAmmo(); } }
     }
   }
-  cycle(i) { const list = Object.keys(this.inv); if (list[i] && list[i] !== this.cur) this.equip(list[i]); }
+  cycle(i) { const list = SP.Wheel && SP.Wheel.order ? SP.Wheel.order() : Object.keys(this.inv); if (list[i] && list[i] !== this.cur) this.equip(list[i]); }
   fire(w, s) {
     if (w.melee) { this.fireCd = w.swing || 0.6; SP.Features && SP.Features.knifeSwing && SP.Features.knifeSwing(w); return; }
     this.fireCd = 60 / w.rpm; s.mag--; this.updAmmo(); SP.onShot && SP.onShot(w, this.cur); this.noise = w.silent ? 0.5 : 1.6; G.lastShot = G.time;
