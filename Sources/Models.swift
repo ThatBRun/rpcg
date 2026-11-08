@@ -28,10 +28,14 @@ struct Game: Identifiable, Codable, Hashable {
     var featured: Bool?
     var landscape: Bool?         // hint shown before launching web games
     var updated: String?         // free text, e.g. "Nov 2026"
+    var homeScreen: Bool?        // true = show "Add to Home Screen" even for a "link" entry
+    var homeScreenFullScreen: Bool? // false = the Home Screen icon opens in Safari (keeps sign-ins)
 
     var playURL: URL? { AppConfig.resolve(url) }
     var isPlayable: Bool { playURL != nil }
-    var canAddToHomeScreen: Bool { launch == .web && isPlayable }
+    var canAddToHomeScreen: Bool { isPlayable && (launch == .web || homeScreen == true) }
+    /// Web games open fullscreen like an app; link entries open in Safari unless told otherwise.
+    var opensFullScreenFromHomeScreen: Bool { homeScreenFullScreen ?? (launch == .web) }
 
     var remoteIconURL: URL? { AppConfig.resolve(iconURL) }
     var remoteBannerURL: URL? { AppConfig.resolve(bannerURL) }

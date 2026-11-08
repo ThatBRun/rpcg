@@ -47,7 +47,7 @@ struct AddToHomeScreenGuide: View {
                         step(1, "Tap **Get Started**, then **Allow** to download the \(game.homeScreenLabel) profile, and tap **Done**.")
                         step(2, "Open the **Settings** app and tap **Profile Downloaded** near the top.")
                         step(3, "Tap **Install** (top right), enter your passcode, then **Install** and **Done**.")
-                        step(4, "\(game.homeScreenLabel) is now on your Home Screen. It opens fullscreen like a normal app.")
+                        step(4, game.opensFullScreenFromHomeScreen ? "\(game.homeScreenLabel) is now on your Home Screen. It opens fullscreen like a normal app." : "\(game.homeScreenLabel) is now on your Home Screen. It opens in Safari, so you stay signed in.")
                     }
                     .padding(18)
                     .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.06)))

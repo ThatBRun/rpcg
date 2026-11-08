@@ -22,7 +22,7 @@ enum WebClipProfile {
             "Label": game.homeScreenLabel,
             "URL": gameURL.absoluteString,
             "Icon": iconPNG,
-            "FullScreen": true,
+            "FullScreen": game.opensFullScreenFromHomeScreen,
             "IsRemovable": true,
             "IgnoreManifestScope": true,
             "Precomposed": true,
@@ -155,7 +155,7 @@ final class HomeScreenInstaller: ObservableObject {
 
     /// Builds the profile, starts the local server, and opens it in the in-app Safari view.
     func prepare(_ game: Game) async {
-        guard let gameURL = game.playURL, game.launch == .web else { return }
+        guard let gameURL = game.playURL, game.canAddToHomeScreen else { return }
         preparingGameID = game.id
         errorMessage = nil
         defer { preparingGameID = nil }
