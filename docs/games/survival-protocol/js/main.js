@@ -255,6 +255,8 @@ async function boot() {
   const keys = Object.keys(SP.TEX); const bar = $('#bootbar');
   for (let i = 0; i < keys.length; i++) { SP.TEX[keys[i]](); bar.style.width = ((i + 1) / keys.length * 100) + '%'; await new Promise(r => setTimeout(r, 0)); }
   titleBackdrop(); SP.state = 'menu'; $('#boot').hidden = true;
+  // RamPace store: iPhones and iPads always use Mobile (touch) mode
+  if ((/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))) && SP.settings.platform !== 'mobile') { SP.settings.platform = 'mobile'; SP.settings.quality = 'low'; }
   if (SP.settings.platform) { SP.Touch.enable(SP.settings.platform === 'mobile'); showScreen('title'); } else { const cros = /CrOS/.test(navigator.userAgent), guess = matchMedia('(pointer: coarse)').matches; $(cros ? '#plat-cb' : guess ? '#plat-mob' : '#plat-pc').classList.add('guess'); showScreen('platform'); }
   requestAnimationFrame(frame);
 }
