@@ -35,7 +35,7 @@ PARTS.push({
 /* ======================= PART 12 — DOWN ======================= */
 PARTS.push({
   name: 'Down', act: 'The Lab', map: 'interior', env: 'interior', place: 'Hangar, the Forgotten Base', time: '00:24 LOCAL', loadout: ['m4', 'pistol'],
-  deathTip: 'Aim for heads. You only have the pistol until Doc Lee reaches you.',
+  deathTip: 'Get behind the crates when the shooting starts, then pick them off one at a time. Doc Lee and Mitchell are covering you.',
   setup(c, W, P) {
     P.pos.set(6, 0, -14); P.yaw = 0.9; c.ally(DOC, { pos: V3(8, 0, -12) }); c.ally(MIT, { pos: V3(9, 0, -13) }); followPlayer(c, [DOC, MIT]);
     [[-12, -16], [-4, -19.4], [6, -21.2], [-16, -24]].forEach(([x, z]) => corpse(c, V3(x, 0, z)));
@@ -46,23 +46,20 @@ PARTS.push({
     await c.until(() => P.pos.x < -4 || P.pos.z < -24);
     const sg = c.foe({ pos: V3(-10.5, 0, -27), weapon: 'shotgun', alert: 1, behavior: 'hold', acc: 3 }); sg.facePoint(P.pos.x, P.pos.z, 99, 1);
     await c.wait(0.4); A.gun('shotgun', sg.pos, 1.4); G.muzzle(sg.muzzle(), V3(1, 0, 0), 2, true);
-    // knocked down
-    P.mode = 'downed'; P.hp = 55; P.lastHit = G.time + 99; P.eye = 0.3; P.tilt = 0.5; G.addTrauma(0.9); SP.post.U.flash.value = 0.5; A.hurt(); SP.blurTarget = 0.7; SP.hbRate = 0.5;
-    P.equip('pistol'); P.inv.pistol.mag = 17; P.inv.pistol.res = 34;
-    P.lookLimit = { yaw: P.yaw + 0.3, yawR: 1.3, pMin: -0.2, pMax: 0.6 };
-    c.obj('Survive');
-    await c.say(DOC, 'Sarton! Jake, stay with me! Shoot back!', 2.4);
-    SP.blurTarget = 0.35; sg.acc = 0.3; sg.behavior = 'assault'; sg.stopDist = 8;
+    // ambush: the blast hits the armour plate, you stay on your feet and fight
+    P.hp = Math.min(P.hp, 75); G.addTrauma(0.6); SP.post.U.flash.value = 0.35; A.hurt(); SP.blurTarget = 0.25;
+    c.obj('Survive the ambush');
+    c.say(DOC, 'Contact! Sarton, you hit? Get to cover and shoot back!', 2.6);
+    setTimeout(() => { SP.blurTarget = 0; }, 900);
+    sg.acc = 0.3; sg.behavior = 'assault'; sg.stopDist = 8;
     const more = [V3(-18, 0, -21), V3(-18, 0, -24), V3(-14, 0, -34)].map((p, i) => { const u = c.foe({ pos: p, alert: 1, behavior: 'assault', acc: 0.35, hp: 70 }); u.stopDist = 9 + i * 2; return u; });
     const doc = c.squad[DOC], mit = c.squad[MIT]; doc.behavior = 'hold'; doc.holdFire = false; doc.acc = 1.4; mit.behavior = 'hold'; mit.acc = 1.4;
     const all = [sg, ...more];
-    let hb = 0; SP.onTick = dt => { interiorTick(dt); hb -= dt; if (hb <= 0) { hb = 0.55; A.heartbeat(0.6); } P.tilt = damp(P.tilt, 0.45 + Math.sin(G.time * 0.8) * 0.05, 2, dt); };
-    await c.until(() => all.every(u => u.dead), 30);
-    all.forEach(u => { if (!u.dead) u.die(false); });
-    doc.holdFire = false; await doc.moveTo(V3(P.pos.x + 0.8, 0, P.pos.z + 0.6), true);
-    await c.say(DOC, 'Not today, Sarton. Hold still.', 2.4);
-    await c.fade(0.85, 1.2); P.mode = 'walk'; P.hp = 100; P.eye = 1.62; P.tilt = 0; P.lookLimit = null; SP.blurTarget = 0; P.lastHit = -10; P.equip('m4'); await c.fade(0, 1.2);
-    await c.say(DOC, "Plate took most of it. You're gonna have a hell of a bruise.", 3.2);
+    await c.until(() => all.every(u => u.dead), 60);
+    if (!all.every(u => u.dead)) { all.forEach(u => { if (!u.dead) { u.tagged = true; u.stopDist = 4; u.goal2 = null; } }); c.say(MIT, 'Last one\'s still out there, I tagged him!', 2.2); await c.until(() => all.every(u => u.dead)); }
+    await c.say(MIT, 'Clear! Hangar\'s clear!', 1.8);
+    await c.say(DOC, "Let me see. Plate took most of it. You're gonna have a hell of a bruise.", 3.2);
+    P.hp = Math.max(P.hp, 100);
     c.complete();
   },
 });

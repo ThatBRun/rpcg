@@ -174,10 +174,11 @@ class Player {
   equip(w) {
     if (!this.inv[w]) return; this.cur = w; this.reloadT = 0; this.swapT = 0.45; SP.buildViewModel(w); A.mech(0.2); this.updAmmo();
   }
-  updAmmo() { if (this.mode === 'turret') { G.hud.ammo(this.turretName || 'M2 .50 CAL', this.overheat ? 'HOT' : Math.round(this.heat * 100) + '%', '∞'); return; } if (!this.cur) { G.hud.ammo('', '', ''); return; } const s = this.inv[this.cur]; if (WEAP[this.cur].melee) { G.hud.ammo(WEAP[this.cur].name, '', ''); return; } G.hud.ammo(WEAP[this.cur].name + (this.reloadT > 0 ? ' · RELOADING' : ''), s.mag, s.res); }
+  updAmmo() { if (this.mode === 'turret') { G.hud.ammo(this.turretName || 'M2 .50 CAL', this.overheat ? 'HOT' : Math.round(this.heat * 100) + '%', '∞'); return; } if (!this.cur) { G.hud.ammo('', '', ''); return; } const s = this.inv[this.cur]; if (WEAP[this.cur].melee) { G.hud.ammo(WEAP[this.cur].name, '', ''); return; } if (WEAP[this.cur].item) { G.hud.ammo(WEAP[this.cur].name + (SP.brUsing ? ' · USING' : ''), s.mag, ''); return; } G.hud.ammo(WEAP[this.cur].name + (this.reloadT > 0 ? ' · RELOADING' : ''), s.mag, s.res); }
   hurt(dmg, from) {
     if (!this.alive || this.god) return; if (this.mode === 'turret') dmg *= 0.6; if (this.mode === 'downed') dmg *= 0.35;
     this.hp -= dmg * (SP.difficulty || 1); this.lastHit = G.time; this.lastFrom = from ? from.clone() : null; this.lastKind = G._dmgKind || 'gunfire'; SP.onPlayerHurt && SP.onPlayerHurt(dmg, from); G.addTrauma(0.18); A.hurt(); G.hud.dmgDir(from);
+    if (this.hp <= 0 && SP.brKnock && SP.brKnock(this)) return;
     if (this.hp <= 0 && SP.skill && SP.skill('second') && !this.secondWind) { this.secondWind = true; this.hp = this.maxHp * 0.5; this.lastHit = G.time + 2; G.hud.feed('SECOND WIND', 'gold'); G.addTrauma(0.5); SP.post.U.flash.value = 0.6; return; }
     if (this.hp <= 0) { this.hp = 0; this.alive = false; SP.onPlayerDeath && SP.onPlayerDeath(); }
   }
@@ -193,7 +194,7 @@ class Player {
     if (this.mode === 'turret' && this.turret) { const t = this.turret; t.anchor.getWorldPosition(this.pos); this.pos.y -= this.eye; }
     if (this.mode === 'downed') { /* fixed position */ }
     // regen
-    const rg = SP.skill && SP.skill('regen'); if (this.alive && G.time - this.lastHit > (rg ? 2.2 : 3.5)) this.hp = Math.min(this.maxHp, this.hp + (rg ? 46 : 28) * dt);
+    const rg = SP.skill && SP.skill('regen'); if (this.alive && !SP.noRegen && G.time - this.lastHit > (rg ? 2.2 : 3.5)) this.hp = Math.min(this.maxHp, this.hp + (rg ? 46 : 28) * dt);
     this.weapon(dt);
     this.camera(dt);
     this.noise = Math.max(0, this.noise - dt * 2);
@@ -256,6 +257,7 @@ class Player {
     this.recoil = damp(this.recoil, 0, 9, dt); this.recoilYaw = damp(this.recoilYaw, 0, 9, dt); this.kick = damp(this.kick, 0, 11, dt);
     if (this.mode === 'turret') return this.turretFire(dt);
     if (!this.cur || this.mode === 'locked' || this.binocMode || (SP.Wheel && SP.Wheel.open)) return;
+    if (SP.brBlockFire && SP.brBlockFire()) return;
     const w = WEAP[this.cur], s = this.inv[this.cur];
     if (this.reloadT > 0) { this.reloadT -= dt; if (this.reloadT <= 0) { const need = w.mag - s.mag, take = Math.min(need, s.res); s.mag += take; s.res -= take; A.mech(0.3); this.updAmmo(); } }
     if (I.hit('KeyR') && this.reloadT <= 0 && s.mag < w.mag && s.res > 0) { this.reloadT = w.reload; A.mech(0.25); setTimeout(() => A.mech(0.2), 700); this.updAmmo(); }
@@ -269,6 +271,7 @@ class Player {
   }
   cycle(i) { const list = SP.Wheel && SP.Wheel.order ? SP.Wheel.order() : Object.keys(this.inv); if (list[i] && list[i] !== this.cur) this.equip(list[i]); }
   fire(w, s) {
+    if (w.item) { this.fireCd = 0.3; SP.brUseItem && SP.brUseItem(this.cur, w, s); return; }
     if (w.melee) { this.fireCd = w.swing || 0.6; SP.Features && SP.Features.knifeSwing && SP.Features.knifeSwing(w); return; }
     this.fireCd = 60 / w.rpm; s.mag--; this.updAmmo(); SP.onShot && SP.onShot(w, this.cur); this.noise = w.silent ? 0.5 : 1.6; G.lastShot = G.time;
     A.gun(w.sound, null, 0.85);

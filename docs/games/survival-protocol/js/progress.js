@@ -141,25 +141,25 @@ const W = SP.Wheel = { open: false, sel: -1, vx: 0, vy: 0, list: [] };
 const wheelEl = () => $('#wheel');
 function slotPos(i, n) { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [Math.cos(a), Math.sin(a), a]; }
 W.order = function () {
-  const P = SP.P; if (!P) return []; if (!W.useSlots) return Object.keys(P.inv);
+  const P = SP.P; if (!P) return []; if (SP.brOrder) return SP.brOrder(); if (!W.useSlots) return Object.keys(P.inv);
   const out = PR.wheel.slice(0, PR.slots).map(w => (w && P.inv[w]) ? w : null);
   Object.keys(P.inv).forEach(w => { if (!out.includes(w)) out.push(w); });
   return out;
 };
 W.build = function () {
   const P = SP.P, el = wheelEl(), ring = el.querySelector('.wslots'); ring.innerHTML = '';
-  const order = W.order(); const n = Math.max(W.useSlots ? 0 : PR.slots, order.length); W.list = [];
+  const order = W.order(); const n = SP.brOrder ? order.length : Math.max(W.useSlots ? 0 : PR.slots, order.length); W.list = [];
   el.querySelector('.wring').classList.toggle('many', n > 8); el.querySelector('.wring').classList.toggle('lots', n > 12);
   for (let i = 0; i < n; i++) {
     const w = order[i]; const extra = W.useSlots && i >= PR.slots; const b = document.createElement('button'); b.type = 'button'; b.className = 'wslot' + (w ? '' : ' empty') + (w === P.cur ? ' cur' : '') + (extra ? ' mis' : '');
     const [x, y] = slotPos(i, n); const r = n > 8 ? 40 : 37; b.style.left = (50 + x * r) + '%'; b.style.top = (50 + y * r) + '%';
     if (w) { const s = P.inv[w]; b.innerHTML = `<span class="k">${extra ? 'MISSION' : i + 1}</span><b></b><span class="am"></span>`; b.querySelector('b').textContent = SP.WEAP[w].name; b.querySelector('.am').textContent = SP.WEAP[w].melee ? 'MELEE' : SP.WEAP[w].rocket ? s.mag + s.res + ' ROCKETS' : s.mag + ' / ' + s.res; }
-    else b.innerHTML = '<span class="k">' + (i + 1) + '</span><b>EMPTY</b><span class="am">SET IN THE ARMORY</span>';
+    else b.innerHTML = '<span class="k">' + (i + 1) + '</span><b>EMPTY</b><span class="am">' + (SP.brOrder ? 'PICK UP LOOT' : 'SET IN THE ARMORY') + '</span>';
     const idx = i; b.addEventListener('click', e => { e.preventDefault(); if (!w) return; W.sel = idx; W.close(true); });
     b.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); if (!w) { W.close(false); return; } W.sel = idx; W.close(true); }, { passive: false });
     ring.append(b); W.list.push({ w, b });
   }
-  const lockedN = MAX_SLOTS - PR.slots; el.querySelector('.wlocked').textContent = lockedN > 0 ? PR.slots + ' of 12 slots · unlock more in the Armory' : '12 of 12 slots';
+  const lockedN = MAX_SLOTS - PR.slots; el.querySelector('.wlocked').textContent = SP.brOrder ? 'BATTLE ROYALE · 8 SLOTS' : lockedN > 0 ? PR.slots + ' of 12 slots · unlock more in the Armory' : '12 of 12 slots';
   W.sel = order.indexOf(P.cur); W.mark();
 };
 W.mark = function () { W.list.forEach((s, i) => s.b.classList.toggle('sel', i === W.sel)); const s = W.list[W.sel]; const c = wheelEl().querySelector('.wc'); if (s && s.w) { c.querySelector('b').textContent = SP.WEAP[s.w].name; const st = SP.WEAP[s.w]; c.querySelector('span').textContent = st.pellets ? 'SHOTGUN · ' + st.mag + ' SHELLS' : st.rocket ? 'LAUNCHER' : st.zoom ? 'SCOPED · ' + st.mag + ' ROUNDS' : (st.auto ? 'FULL AUTO · ' : 'SEMI · ') + st.mag + ' ROUNDS'; } else { c.querySelector('b').textContent = 'WEAPON WHEEL'; c.querySelector('span').textContent = ''; } };

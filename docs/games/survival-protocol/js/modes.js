@@ -244,8 +244,7 @@ function buildModes() {
   opt('#fp-wx', { auto: 'Match the time of day', none: 'Clear', rain: 'Rain', snow: 'Snow', thunder: 'Thunder and rain' }, FP.weather);
   opt('#fp-en', { none: 'None (explore)', light: 'Light', medium: 'Medium', heavy: 'Heavy', insane: 'Insane' }, FP.enemies);
   const mu = $('#fp-mut'); mu.innerHTML = ''; MUTATORS.forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'achip sm' + (FP.mut[k] ? ' on' : ''); b.textContent = l; b.addEventListener('click', () => { FP.mut[k] = !FP.mut[k]; b.classList.toggle('on', !!FP.mut[k]); }); mu.append(b); });
-  opt('#br-drop', Object.assign({ random: 'Random' }, Object.fromEntries(SP.BR_POI.map(p => [p.name, p.name]))), BR.drop);
-  $('#mode-lb').innerHTML = `<span>BR wins <b>${LB.br.wins}</b></span><span>BR best <b>${LB.br.games ? '#' + LB.br.best : '—'}</b></span><span>BR kills <b>${LB.br.kills}</b></span><span>Horde best <b>${LB.horde.best ? 'Wave ' + LB.horde.best : '—'}</b></span>`;
+  const L2 = (SP.BR && SP.BR.LB) || { wins: 0, games: 0, best: 99, kills: 0 }; $('#mode-lb').innerHTML = `<span>BR wins <b>${L2.wins}</b></span><span>BR best <b>${L2.games ? '#' + L2.best : '—'}</b></span><span>BR kills <b>${L2.kills}</b></span><span>Horde best <b>${LB.horde.best ? 'Wave ' + LB.horde.best : '—'}</b></span>`;
 }
 function readFP() { FP.map = $('#fp-map').value; FP.env = $('#fp-env').value; FP.weather = $('#fp-wx').value; FP.enemies = $('#fp-en').value; }
 function wire() {
@@ -253,7 +252,7 @@ function wire() {
   $('#mode-back').addEventListener('click', () => SP.showScreen('title'));
   $('#m-free').addEventListener('click', () => { readFP(); SP.Audio.init(); SP.loadMode(freeplayPart(false)); });
   $('#m-horde').addEventListener('click', () => { readFP(); if (FP.enemies === 'none') FP.enemies = 'medium'; SP.Audio.init(); SP.loadMode(freeplayPart(true)); });
-  $('#m-br').addEventListener('click', () => { BR.drop = $('#br-drop').value; SP.Audio.init(); SP.loadMode(brPart()); });
+  $('#m-br').addEventListener('click', () => { SP.Audio.init(); SP.openBRLobby(); });
   $('#m-range').addEventListener('click', () => { SP.Audio.init(); SP.loadMode(rangePart()); });
   $('#br-again').addEventListener('click', () => SP.loadMode(brPart()));
   $('#br-menu').addEventListener('click', () => { SP.teardownPart(); buildModes(); SP.showScreen('modes'); });

@@ -346,6 +346,49 @@ body.mobile #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
 
 #hudfs{position:fixed;right:calc(8px + env(safe-area-inset-right,0px));top:calc(8px + env(safe-area-inset-top,0px));width:34px;height:34px;display:grid;place-items:center;background:rgba(12,12,11,.6);border:1px solid var(--line);color:var(--ink);font-size:18px;cursor:pointer;z-index:6;padding:0}
 body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hudfs{right:190px} body.isfs #hudfs{opacity:.5}
+
+/* ---- Battle Royale ---- */
+.blteam{display:flex;gap:12px;align-items:center;background:rgba(14,14,13,.8);border:1px solid var(--line);padding:12px 14px} .blteam em{font-style:normal;font-size:42px;line-height:1} .blteam b{font-size:28px;letter-spacing:.04em} .blteam span{flex-basis:100%;font-size:12px;color:var(--dim);margin-top:-6px;margin-left:54px}
+.blteam{flex-wrap:wrap}
+.blsquad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px} @media (max-width:600px){.blsquad{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.blslot{display:grid;gap:2px;background:rgba(14,14,13,.8);border:1px solid var(--line);padding:9px 10px} .blslot i{font-style:normal;font-family:var(--mono);color:var(--amber);font-size:11px} .blslot b{font-size:16px} .blslot span{font-size:10px;letter-spacing:.14em;color:var(--dim)} .blslot.human{border-color:var(--green)} .blslot.human span{color:var(--green)}
+.blhelp{font-size:13px;color:var(--dim);line-height:1.5} .blhelp b{color:var(--amber);margin-right:6px}
+body.brmode #killfeed{top:calc(150px + env(safe-area-inset-top,0px))}
+#brx{position:fixed;inset:0;pointer-events:none;z-index:4}
+#bl-play{background:var(--amber);color:#14110c;padding:10px 26px} #bl-back{padding:10px 18px}
+#brtop{position:fixed;left:50%;transform:translateX(-50%);top:calc(48px + env(safe-area-inset-top,0px));display:flex;gap:16px;align-items:baseline;font-family:var(--mono);text-shadow:0 1px 3px #000;flex-wrap:wrap;justify-content:center;max-width:92vw}
+#brtop div{display:flex;gap:5px;align-items:baseline} #brtop b{font-size:22px;color:var(--ink)} #brtop span{font-size:10px;letter-spacing:.18em;color:var(--dim)} #brtop .z{flex-basis:100%;justify-content:center;font-size:13px;color:#7ab0ff;letter-spacing:.1em} #brtop .z.out{color:#ff6a5a;animation:blink 1s steps(2) infinite}
+#brsquad{position:fixed;left:max(14px,env(safe-area-inset-left,0px));top:calc(84px + env(safe-area-inset-top,0px));display:grid;gap:5px;width:190px;text-shadow:0 1px 2px #000}
+#brsquad .tn{font-size:12px;letter-spacing:.16em;color:var(--amber);margin-bottom:2px} .sq{display:grid;grid-template-columns:1fr auto;gap:2px 6px;align-items:center} .sq b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .sq em{font-style:normal;font-size:9px;letter-spacing:.14em;color:#ff9a3a} .sq .bars{grid-column:1/-1;display:grid;gap:1px} .sq .bars i,.sq .bars u{display:block;height:4px;background:#5ad46a;max-width:100%} .sq .bars u{background:#4a9aff;height:3px} .sq.knocked b{color:#ff9a3a} .sq.dead{opacity:.45} .sq.dead em{color:#ff5a4a}
+#brmini{position:fixed;right:max(14px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));width:170px;height:170px;border-radius:50%;border:2px solid rgba(236,230,218,.35);box-shadow:0 2px 12px rgba(0,0,0,.5)}
+body.brmode #streaks{top:calc(200px + env(safe-area-inset-top,0px))}
+#brmats{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(max(22px,env(safe-area-inset-bottom,0px)) + 124px);display:flex;gap:10px;font-family:var(--mono);font-size:13px;color:var(--ink);text-shadow:0 1px 2px #000}
+#brmats span{display:flex;gap:4px;align-items:center;padding:2px 5px} #brmats span.sel{outline:1px solid var(--amber)} #brmats i{display:inline-block;width:10px;height:10px} #brmats i.wood{background:#a8743a} #brmats i.stone{background:#9a9690} #brmats i.metal{background:#7a8288} #brmats .gold{color:#f2c14a}
+#brbuild{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom,0px)) + 64px);display:flex;gap:10px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.1em;text-shadow:0 1px 2px #000;white-space:nowrap}
+#brbuild.on{color:var(--ink)} #brbuild b{color:#7ab0ff} #brbuild .sel{color:var(--amber);text-decoration:underline}
+#brjump,#bralt{position:fixed;left:50%;top:58%;transform:translateX(-50%);font-family:var(--mono);font-size:20px;letter-spacing:.18em;color:var(--amber);text-shadow:0 2px 8px #000}
+#brknock{position:fixed;left:0;right:0;bottom:30%;display:grid;justify-items:center;gap:4px;text-shadow:0 2px 8px #000} #brknock b{font-size:44px;color:#ff6a3a;letter-spacing:.2em} #brknock span{font-family:var(--mono);font-size:14px;color:var(--ink)}
+body.brmode #hud:has(#brknock:not([hidden]))::after{content:'';position:fixed;inset:0;background:radial-gradient(circle,transparent 30%,rgba(140,20,10,.45));pointer-events:none}
+#bruse{position:fixed;left:50%;bottom:32%;transform:translateX(-50%);display:grid;gap:5px;justify-items:center;font-family:var(--mono);font-size:13px;color:var(--ink);text-shadow:0 1px 3px #000} #bruse .t{width:220px;height:6px;background:rgba(0,0,0,.5)} #bruse i{display:block;height:100%;background:#5ad46a}
+#brspec{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);display:grid;gap:8px;justify-items:center;pointer-events:auto} #brspec b{font-family:var(--mono);font-size:16px;letter-spacing:.2em;color:var(--amber);text-shadow:0 1px 4px #000}
+#brmapov{position:fixed;inset:0;z-index:30;background:rgba(6,8,10,.82);display:grid;place-items:center;align-content:center;gap:8px} #brmapov canvas{width:min(92vmin,900px);height:min(92vmin,900px);border:2px solid rgba(236,230,218,.4);cursor:crosshair} #brmapov .maphint{font-family:var(--mono);font-size:12px;color:var(--dim)}
+#brlb{position:fixed;inset:0;z-index:30;background:rgba(6,8,10,.8);display:grid;place-items:center;pointer-events:none} #brlb .in,.brlbl{width:min(560px,94vw);max-height:84vh;overflow-y:auto;display:grid;gap:2px;font-size:13px}
+.brlbl{max-height:46vh;-webkit-overflow-scrolling:touch}
+.lbh{display:flex;justify-content:space-between;font-family:var(--mono);color:var(--amber);padding:4px 6px;letter-spacing:.1em} .lbr{display:grid;grid-template-columns:34px 26px 1fr auto 34px 74px;gap:6px;align-items:center;background:rgba(20,20,18,.85);padding:3px 6px} .lbr i{font-style:normal;font-family:var(--mono);color:var(--dim)} .lbr em{font-style:normal} .lbr s{text-decoration:none;font-family:var(--mono);text-align:right} .lbr small{font-size:9px;letter-spacing:.14em;color:#5ad46a;text-align:right} .lbr.out{opacity:.5} .lbr.out small{color:#ff6a5a} .lbr.me{outline:1px solid var(--amber);background:rgba(242,179,61,.16)}
+.pips{display:flex;gap:3px} .pips u{width:9px;height:9px;display:block;border-radius:2px;text-decoration:none} .pips .a{background:#5ad46a} .pips .k{background:#ff9a3a} .pips .d{background:#5a2420;outline:1px solid #a33}
+#brshop{position:fixed;inset:0;z-index:31;background:rgba(6,8,10,.7);display:grid;place-items:center} #brshop .shop{width:min(460px,94vw);background:rgba(16,16,15,.97);border:1px solid var(--line);display:grid;gap:8px;padding:14px}
+#brshop .top{display:flex;gap:10px;align-items:center} #brshop .top b{font-size:22px;flex:1} #brshop .gold{font-family:var(--mono);color:#f2c14a} #brshop .x{background:none;border:1px solid var(--line);color:var(--ink);width:34px;height:34px;cursor:pointer}
+#brshop .list{display:grid;gap:5px} .shoprow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;background:rgba(30,30,28,.9);border:1px solid var(--line);color:var(--ink);padding:8px 10px;cursor:pointer;font:inherit} .shoprow b{font-size:16px} .shoprow span{grid-row:2;font-size:10px;letter-spacing:.14em;color:var(--dim)} .shoprow em{grid-row:1/3;grid-column:2;align-self:center;font-style:normal;font-family:var(--mono);color:#f2c14a} .shoprow:disabled{opacity:.45;cursor:not-allowed}
+.tb.br{display:none} body.brmode.mobile .tb.br{display:grid}
+#t-build{left:calc(14px + env(safe-area-inset-left,0px));top:calc(250px + env(safe-area-inset-top,0px));width:58px;height:36px;font-size:11px}
+#t-place{left:calc(78px + env(safe-area-inset-left,0px));top:calc(250px + env(safe-area-inset-top,0px));width:58px;height:36px;font-size:11px;border-color:#7ab0ff;color:#7ab0ff}
+#t-piece{left:calc(142px + env(safe-area-inset-left,0px));top:calc(250px + env(safe-area-inset-top,0px));width:52px;height:36px;font-size:10px}
+#t-mat{left:calc(200px + env(safe-area-inset-left,0px));top:calc(250px + env(safe-area-inset-top,0px));width:48px;height:36px;font-size:10px}
+#t-map{left:calc(14px + env(safe-area-inset-left,0px));top:calc(292px + env(safe-area-inset-top,0px));width:52px;height:32px;font-size:10px}
+#t-lb{left:calc(72px + env(safe-area-inset-left,0px));top:calc(292px + env(safe-area-inset-top,0px));width:58px;height:32px;font-size:10px}
+#t-drop{left:calc(136px + env(safe-area-inset-left,0px));top:calc(292px + env(safe-area-inset-top,0px));width:52px;height:32px;font-size:10px}
+#t-skyjump{left:50%;transform:translateX(-50%);top:66%;width:120px;height:46px;font-size:13px;border-color:var(--amber);color:var(--amber)}
+body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;left:calc(14px + env(safe-area-inset-left,0px));bottom:auto;top:calc(222px + env(safe-area-inset-top,0px));font-size:11px;gap:4px} body.mobile #brsquad{width:140px;top:calc(150px + env(safe-area-inset-top,0px));gap:2px} body.mobile #brsquad .tn{display:none} body.mobile .sq b{font-size:11px} body.mobile #brtop{top:calc(44px + env(safe-area-inset-top,0px));gap:10px} body.mobile #brtop b{font-size:16px} body.brmode.mobile #t-skyjump{display:none} body.brmode.mobile.inheli #t-skyjump{display:grid} body.brmode.mobile.inheli #t-place,body.brmode.mobile.inheli #t-build,body.brmode.mobile.inheli #t-piece,body.brmode.mobile.inheli #t-mat{display:none} body.brmode.mobile:not(.building) #t-place,body.brmode.mobile:not(.building) #t-piece,body.brmode.mobile:not(.building) #t-mat{display:none} body.mobile #brbuild{display:none}
 </style>
 
 <canvas id="game" aria-label="Game view"></canvas>
@@ -448,9 +491,8 @@ body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hu
       <div class="menu row"><button class="mb" id="m-free" type="button">Start freeplay</button><button class="mb" id="m-horde" type="button">Start Horde (endless waves)</button></div>
     </div>
     <div class="modecard">
-      <div class="mh"><b>Battle Royale</b><span>24 players in the Sahara basin. Loot crates by rarity, a closing zone, supply drops. Last one standing.</span></div>
-      <div class="set mset"><label for="br-drop">Drop zone<select id="br-drop"></select></label></div>
-      <div class="menu row"><button class="mb" id="m-br" type="button">Drop in</button></div>
+      <div class="mh"><b>Battle Royale · Squads</b><span>50 teams of 4, one country each, on a 2.4 km island with 16 named places. Drop from helicopters, open chests, buy from arms dealers, hire mercenaries, build, revive your squad and outlast the blue zone. Online squads with real players; empty spots are filled with bots.</span></div>
+      <div class="menu row"><button class="mb" id="m-br" type="button">Find a match</button></div>
     </div>
     <div class="modecard">
       <div class="mh"><b>Firing range</b><span>Every gun in the game on one rack. Targets from 10 to 220 metres. Try before you buy.</span></div>
@@ -468,6 +510,32 @@ body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hu
     <div id="br-stats" class="brstats"></div>
     <div id="br-hist"></div>
     <div class="menu"><button class="mb" id="br-again" type="button">Play again</button><button class="mb" id="br-menu" type="button">Modes</button></div>
+  </div>
+</div>
+
+<div id="brlobby" class="ov screen" hidden>
+  <div class="stack" style="width:min(680px,100%)">
+    <span class="eyebrow">BATTLE ROYALE · SQUADS · ISLA CORONA</span>
+    <h2>Matchmaking</h2>
+    <div id="bl-team" class="blteam"></div>
+    <div id="bl-squad" class="blsquad"></div>
+    <p class="lede" id="bl-status"></p><p class="lede" id="bl-count"></p>
+    <div class="menu row"><button class="mb" id="bl-play" type="button">Play now</button><button class="mb" id="bl-back" type="button">Back</button></div>
+    <div class="blhelp"><b>Controls</b> Space jump from the helicopter · WASD steer · Y build mode (1 wall, 2 floor, 3 ramp, R material, click to place) · E open chests, loot, revive, buy · M map (click to ping) · Tab teams · Backspace drop item · hold F inventory wheel</div>
+    <div id="bl-lb"></div>
+  </div>
+</div>
+
+<div id="brend2" class="ov screen" hidden>
+  <div class="stack" style="width:min(760px,100%)">
+    <span class="eyebrow">BATTLE ROYALE · SQUADS</span>
+    <h2 id="bre-title">#1</h2>
+    <p class="lede" id="bre-sub"></p>
+    <div id="bre-stats" class="brstats"></div>
+    <div id="bre-squad"></div>
+    <div class="menu row"><button class="mb" id="bre-again" type="button">Play again</button><button class="mb" id="bre-menu" type="button">Main menu</button></div>
+    <span class="h4">Final standings</span>
+    <div id="bre-lb" class="brlbl"></div>
   </div>
 </div>
 
@@ -611,10 +679,20 @@ body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hu
 <filter id="cb-trit"><feColorMatrix type="matrix" values="0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0"/></filter>
 <filter id="cb-mono"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.35" intercept="-0.12"/><feFuncG type="linear" slope="1.35" intercept="-0.12"/><feFuncB type="linear" slope="1.35" intercept="-0.12"/></feComponentTransfer></filter>
 </defs></svg>
+<div id="brx" hidden>
+    <div id="brtop"></div><div id="brsquad"></div><canvas id="brmini" width="170" height="170"></canvas>
+    <div id="brmats"></div><div id="brbuild"></div><div id="brjump" hidden></div><div id="bralt" hidden></div>
+    <div id="brknock" hidden><b>KNOCKED</b><span></span></div>
+    <div id="bruse" hidden><span></span><div class="t"><i></i></div></div>
+    <div id="brspec" hidden><b></b><button type="button" class="mb leave">Leave match</button></div>
+  </div>
+<div id="brmapov" hidden><canvas id="brmapcv" width="900" height="900"></canvas><div class="maphint">Click the map to ping a spot · M or click outside to close</div></div>
+<div id="brlb" hidden><div class="in"></div></div>
+<div id="brshop" hidden><div class="shop"><div class="top"><b>ARMS DEALER</b><span class="gold"></span><button type="button" class="x">✕</button></div><div class="list"></div></div></div>
 <div id="touch" hidden>
   <div id="t-stick"></div><div id="t-look"></div><div id="t-base" hidden><div id="t-knob"></div></div>
   <div class="tb" id="t-fire">FIRE</div><div class="tb" id="t-aim">AIM</div><div class="tb" id="t-jump">JUMP</div><div class="tb" id="t-crouch">DUCK</div>
-  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-nade" hidden>NADE</div><div class="tb" id="t-knife" hidden>KNIFE</div><div class="tb" id="t-equip" hidden>EQUIP</div><div class="tb" id="t-eqcycle" hidden>⟳</div><div class="tb" id="t-streak" hidden>STREAK</div><div class="tb" id="t-nvg" hidden>NVG</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
+  <div class="tb" id="t-reload">RLD</div><div class="tb" id="t-use">USE</div><div class="tb" id="t-swap">SWAP</div><div class="tb" id="t-light">LIGHT</div><div class="tb" id="t-pause">II</div><div class="tb" id="t-wheel">WHEEL</div><div class="tb" id="t-nade" hidden>NADE</div><div class="tb" id="t-knife" hidden>KNIFE</div><div class="tb br" id="t-build">BUILD</div><div class="tb br" id="t-place">PLACE</div><div class="tb br" id="t-piece">PIECE</div><div class="tb br" id="t-mat">MAT</div><div class="tb br" id="t-map">MAP</div><div class="tb br" id="t-lb">TEAMS</div><div class="tb br" id="t-skyjump">JUMP OUT</div><div class="tb br" id="t-drop">DROP</div><div class="tb" id="t-equip" hidden>EQUIP</div><div class="tb" id="t-eqcycle" hidden>⟳</div><div class="tb" id="t-streak" hidden>STREAK</div><div class="tb" id="t-nvg" hidden>NVG</div><div class="tb" id="t-dash" hidden>DASH</div><div class="tb" id="t-focus" hidden>FOCUS</div>
 </div>
 
 <div id="chapterend" class="ov" hidden><div class="stack"><span class="eyebrow">END OF CHAPTER 1</span><h1>Left Behind</h1></div></div>
@@ -642,6 +720,7 @@ body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hu
 <script src="js/maps4.js"></script>
 <script src="js/guns.js"></script>
 <script src="js/kits.js"></script>
+<script src="js/brmap.js"></script>
 <script src="js/ch3.js"></script>
 <script src="js/ch4.js"></script>
 <script src="js/ch5.js"></script>
@@ -654,6 +733,8 @@ body:not(.mobile):not(.framed) #hudfs{display:none} body.framed:not(.mobile) #hu
 <script src="js/features.js"></script>
 <script src="js/modes.js"></script>
 <script src="js/features2.js"></script>
+<script src="js/br.js"></script>
+<script src="js/brnet.js"></script>
 <script>
 /* installable app (Chromebook, Windows, Android): offline cache + Install button */
 (function(){

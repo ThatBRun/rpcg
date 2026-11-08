@@ -209,7 +209,7 @@ function frame(now) {
   if (SP.state === 'menu' && SP.menuTick) { SP.menuTick(dt); SP.post.render(SP.scene, camera, dt); return; }
   if (SP.state !== 'play' || !SP.scene) { $('#touch').hidden = true; return; }
   if (paused) { $('#touch').hidden = true; SP.Features && SP.Features.pausedTick(dt); }
-  if (!paused) {
+  if (!paused || SP.noPauseSim) {
     const rdt = dt; dt *= SP.Progress.worldScale(); G.time += dt; const P = SP.P;
     if (SP.W.surfaceFn) P.surfaceUnder = SP.W.surfaceFn(P.pos.x, P.pos.z);
     SP.Features && SP.Features.pre(rdt);
