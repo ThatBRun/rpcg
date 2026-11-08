@@ -389,6 +389,11 @@ body.brmode #hud:has(#brknock:not([hidden]))::after{content:'';position:fixed;in
 #t-drop{left:calc(136px + env(safe-area-inset-left,0px));top:calc(292px + env(safe-area-inset-top,0px));width:52px;height:32px;font-size:10px}
 #t-skyjump{left:50%;transform:translateX(-50%);top:66%;width:120px;height:46px;font-size:13px;border-color:var(--amber);color:var(--amber)}
 body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;left:calc(14px + env(safe-area-inset-left,0px));bottom:auto;top:calc(222px + env(safe-area-inset-top,0px));font-size:11px;gap:4px} body.mobile #brsquad{width:140px;top:calc(150px + env(safe-area-inset-top,0px));gap:2px} body.mobile #brsquad .tn{display:none} body.mobile .sq b{font-size:11px} body.mobile #brtop{top:calc(44px + env(safe-area-inset-top,0px));gap:10px} body.mobile #brtop b{font-size:16px} body.brmode.mobile #t-skyjump{display:none} body.brmode.mobile.inheli #t-skyjump{display:grid} body.brmode.mobile.inheli #t-place,body.brmode.mobile.inheli #t-build,body.brmode.mobile.inheli #t-piece,body.brmode.mobile.inheli #t-mat{display:none} body.brmode.mobile:not(.building) #t-place,body.brmode.mobile:not(.building) #t-piece,body.brmode.mobile:not(.building) #t-mat{display:none} body.mobile #brbuild{display:none}
+
+#scope .chev{display:none}
+#scope.acog{background:radial-gradient(circle at 50% 50%,transparent 0 40vmin,rgba(0,0,0,.55) 40.4vmin,#050505 42vmin)}
+#scope.acog .sr,#scope.acog .sv{background:rgba(0,0,0,.55)} #scope.acog .sr{left:20%;right:20%} #scope.acog .sv{top:50%;bottom:20%}
+#scope.acog .sd{display:none} #scope.acog .chev{display:block;position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-2px 0 0 -7px;border-left:2px solid #ff8a2a;border-top:2px solid #ff8a2a;transform:rotate(45deg);filter:drop-shadow(0 0 3px #ff6a1a)}
 </style>
 
 <canvas id="game" aria-label="Game view"></canvas>
@@ -421,7 +426,7 @@ body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;lef
 <div id="killfeed"></div><div id="streak"><b></b><span></span></div><div id="scorepop"></div><div id="alerts"></div><div id="toasts"></div>
 <div id="photo" hidden><b>PHOTO MODE</b><div class="k"><span><b>WASD</b>Move</span><span><b>DRAG / MOUSE</b>Look</span><span><b>E / Q</b>Up / down</span><span><b>[ ]</b>Zoom</span><span><b>F</b>Filter</span><span><b>X</b>Save picture</span><span><b>ESC</b>Exit</span></div><div class="row"><span>FILTER <span id="ph-filter">NONE</span></span><span>FOV <span id="ph-fov">60°</span></span><span id="ph-msg"></span></div><div class="row"><button id="ph-snap" type="button">Save picture</button><button id="ph-exit" type="button">Exit photo mode</button></div></div>
 <div id="wheel" hidden><div class="wbg"></div><div class="wring"><div class="wlocked"></div><div class="wslots"></div><div class="wc"><b>WEAPON WHEEL</b><span></span></div><div class="whint">MOVE TO PICK · RELEASE F TO EQUIP</div></div></div>
-<div id="scope" hidden><div class="sr"></div><div class="sv"></div><div class="sd"></div></div>
+<div id="scope" hidden><div class="sr"></div><div class="sv"></div><div class="sd"></div><div class="chev"></div></div>
 <div id="binoc" hidden><div class="ret"></div><div class="ret2"></div><div class="rd">x 8.0 · CLICK TO TAG</div></div>
 <div id="cross" hidden><i></i><i></i><i></i><i></i></div>
 <div id="hitm"></div>

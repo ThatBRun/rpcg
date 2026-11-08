@@ -203,6 +203,7 @@ G50.forEach(([id, name, cls, over, look, kind]) => {
   const st = Object.assign({ name, cls }, B[cls], over);
   st.model = (att) => kind === 'p' ? Mods.pistolX(look, att || SP.gunAtt(id)) : kind === 'l' ? Mods.launcherX(look) : Mods.gun(look, att || SP.gunAtt(id));
   if (st.burst) { st.auto = true; st.defaultMode = 'burst'; }
+  if (look.optic === 'acog' && !st.zoom) { st.zoom = 28; st.scopeType = 'acog'; }
   SP.WEAP[id] = st; SP.GUNS.push({ id, cls, price: st.price, look });
 });
 // the originals get a class too

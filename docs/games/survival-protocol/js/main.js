@@ -231,7 +231,7 @@ function frame(now) {
     for (const u of G.units) { if (u.team !== 'ally' || u.dead || !u.name) continue; const d = u.pos.distanceTo(P.pos); if (d > 30 || d < 1) continue; const to = V3(u.pos.x, u.pos.y + 1.5, u.pos.z).sub(P.eyePos()).normalize(); if (to.dot(f) > 0.992) { shown = u; break; } }
     if (shown) { const v = V3(shown.pos.x, shown.pos.y + 2.05, shown.pos.z).project(camera); nameEl.hidden = false; nameEl.textContent = shown.name; nameEl.style.transform = `translate(${(v.x * 0.5 + 0.5) * innerWidth}px,${(-v.y * 0.5 + 0.5) * innerHeight}px)`; } else nameEl.hidden = true;
     $('#touch').hidden = !SP.Touch.on;
-    { const zw = P.cur && SP.WEAP[P.cur] && SP.WEAP[P.cur].zoom && P.mode === 'walk'; const on = !!zw && P.adsT > 0.82; $('#scope').hidden = !on; if (zw) SP.hideVM(on); }
+    { const zw = P.cur && SP.WEAP[P.cur] && SP.WEAP[P.cur].zoom && P.mode === 'walk'; const on = !!zw && P.adsT > 0.82; const sc = $('#scope'); sc.hidden = !on; if (on) sc.classList.toggle('acog', SP.WEAP[P.cur].scopeType === 'acog'); if (zw) SP.hideVM(on); }
     $('#cross').hidden = !((P.cur && P.mode !== 'locked' && P.mode !== 'seat' && P.adsT < 0.5 && !P.binoc) || P.mode === 'turret');
     I.endFrame();
   }
