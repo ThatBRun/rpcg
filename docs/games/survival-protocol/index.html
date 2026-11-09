@@ -789,7 +789,7 @@ body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;lef
 <script>
 /* installable app (Chromebook, Windows, Android): offline cache + Install button */
 (function(){
-  try { if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.top === window.self) navigator.serviceWorker.register('sw.js').catch(()=>{}); } catch(e) {}
+  try { if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.top === window.self) navigator.serviceWorker.register('sw.js').then(r=>{try{r.update();}catch(e){}}).catch(()=>{}); if (navigator.serviceWorker.controller) { let rl=false; navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(rl) return; rl=true; if(!(window.SP&&SP.state==='play')) location.reload(); }); } } catch(e) {}
   let deferred = null; const btn = document.getElementById('btn-install');
   addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
   btn.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch(e) {} deferred = null; btn.hidden = true; });
