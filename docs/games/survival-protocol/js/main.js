@@ -138,7 +138,7 @@ SP.onLockFail = () => { if (SP.state !== 'play') return; SP.lockFails = (SP.lock
   paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
 SP.onKey = (code) => { if (SP.Features && SP.Features.photo) return; if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
 function showScreen(id) { document.querySelectorAll('.ov.screen').forEach(el => { if (el.id !== 'lockoverlay') el.hidden = el.id !== id; }); if (id) { $('#lockoverlay').hidden = true; const el = $('#' + id); if (el) el.scrollTop = 0; } }
-SP.showScreen = showScreen; SP.teardownPart = () => { teardown(); running = false; SP.state = 'menu'; $('#hud').hidden = true; $('#cross').hidden = true; titleBackdrop(); };
+SP.setRunning = v => { running = v; }; SP.showScreen = showScreen; SP.teardownPart = () => { teardown(); running = false; SP.state = 'menu'; $('#hud').hidden = true; $('#cross').hidden = true; titleBackdrop(); };
 
 /* ---------- menus ---------- */
 let viewCh = 1;
@@ -255,8 +255,6 @@ async function boot() {
   const keys = Object.keys(SP.TEX); const bar = $('#bootbar');
   for (let i = 0; i < keys.length; i++) { SP.TEX[keys[i]](); bar.style.width = ((i + 1) / keys.length * 100) + '%'; await new Promise(r => setTimeout(r, 0)); }
   titleBackdrop(); SP.state = 'menu'; $('#boot').hidden = true;
-  // RamPace store: iPhones and iPads always use Mobile (touch) mode
-  if ((/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))) && SP.settings.platform !== 'mobile') { SP.settings.platform = 'mobile'; SP.settings.quality = 'low'; }
   if (SP.settings.platform) { SP.Touch.enable(SP.settings.platform === 'mobile'); showScreen('title'); } else { const cros = /CrOS/.test(navigator.userAgent), guess = matchMedia('(pointer: coarse)').matches; $(cros ? '#plat-cb' : guess ? '#plat-mob' : '#plat-pc').classList.add('guess'); showScreen('platform'); }
   requestAnimationFrame(frame);
 }

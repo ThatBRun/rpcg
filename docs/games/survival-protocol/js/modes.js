@@ -63,6 +63,7 @@ function freeplayPart(horde) {
         if (wave % 5 === 0) { list.push(spawnFoe(c, SP.pick(ar), { kind: 'jugg' })); G.hud.feed('JUGGERNAUT INBOUND', 'red'); }
         const label = () => { const left = list.filter(u => !u.dead).length; G.hud.objective('Wave ' + wave + ' · ' + left + ' enemies left'); return left === 0; };
         await c.until(label);
+        SP.addXP && SP.addXP(150 + wave * 10, 'WAVE ' + wave); SP.Pass && SP.Pass.track && SP.Pass.track('hordeWaves');
         if (horde) { if (wave > (LB.horde.best || 0)) { LB.horde.best = wave; LB.horde.bestMap = MAP_NAMES[map]; saveLB(); G.hud.feed('NEW BEST WAVE · ' + wave, 'gold'); } SP.Progress.coins += 40 + wave * 10; SP.Progress.save(); }
         list.forEach(u => setTimeout(() => !c.dead && u.remove(), 6000));
         P.hp = P.maxHp; Object.values(P.inv).forEach(s => { s.res = Math.max(s.res, (s.mag || 1) * 3); }); P.updAmmo();

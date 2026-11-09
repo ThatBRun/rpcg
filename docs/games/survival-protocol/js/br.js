@@ -1,4 +1,4 @@
-/* Survival Protocol 1.0 — BATTLE ROYALE: SQUADS
+/* Survival Protocol 1.2 — BATTLE ROYALE: SQUADS
    50 teams of 4 (one country each), helicopter drop, blue zone, chests, arms dealers and mercenaries,
    knock + revive, building with wood/stone/metal, 8-slot inventory, live leaderboard, full colour map,
    online squads (see brnet.js). Everything far from players is simulated cheaply; near players it is real AI. */
@@ -29,7 +29,8 @@ Object.entries(ITEMS).forEach(([id, it]) => { SP.WEAP[id] = { name: it.name, cls
 function itemModel(col) { const g = new T.Group(); const m = new T.Mesh(SP.geo.box(0.11, 0.07, 0.08), SP.flat(col, 0.6)); g.add(m); const c = new T.Mesh(SP.geo.box(0.04, 0.072, 0.012), SP.flat(0xffffff, 0.5)); c.position.z = 0.041; g.add(c); g.userData.muzzle = V3(0, 0, -0.1); return g; }
 
 /* =============================== STATE =============================== */
-const BR = SP.BR = { on: false, ents: [], teams: [], me: null, myTeam: 0, net: null, t: 0 };
+const BR = SP.BR = { on: false, ents: [], teams: [], me: null, myTeam: 0, net: null, t: 0, hooks: [], netX: {} };
+BR.track = (k, n = 1) => { SP.Pass && SP.Pass.track && SP.Pass.track(k, n); };
 const LB_KEY = 'survival_protocol_br2';
 let LB = { games: 0, wins: 0, kills: 0, best: 99, hist: [] };
 try { Object.assign(LB, JSON.parse(localStorage.getItem(LB_KEY) || '{}')); } catch (e) { }
@@ -64,18 +65,18 @@ BR.COUNTRIES = COUNTRIES;
 /* helicopters: 10 flight lines across the island, 5 teams in each */
 function makeHelis(seedRand) {
   const H = []; for (let i = 0; i < 10; i++) {
-    const a = seedRand() * Math.PI * 2, off = (seedRand() - 0.5) * 700; const dx = Math.cos(a), dz = Math.sin(a); const nx = -dz, nz = dx;
-    const ax = nx * off - dx * 1350, az = nz * off - dz * 1350, bx = nx * off + dx * 1350, bz = nz * off + dz * 1350;
-    H.push({ i, ax, az, bx, bz, alt: 230 + seedRand() * 40, speed: 70, t0: 4 + i * 1.5, mesh: null });
+    const a = seedRand() * Math.PI * 2, off = (seedRand() - 0.5) * 2200; const dx = Math.cos(a), dz = Math.sin(a); const nx = -dz, nz = dx; const E = 3200;
+    const ax = nx * off - dx * E, az = nz * off - dz * E, bx = nx * off + dx * E, bz = nz * off + dz * E;
+    H.push({ i, ax, az, bx, bz, alt: 300 + seedRand() * 40, speed: 105, t0: 4 + i * 1.5, mesh: null });
   }
   return H;
 }
 function heliPos(h, t) { const L = Math.hypot(h.bx - h.ax, h.bz - h.az); const k = clamp((t - h.t0) * h.speed / L, 0, 1); return { x: lerp(h.ax, h.bx, k), z: lerp(h.az, h.bz, k), y: h.alt, k, yaw: Math.atan2(-(h.bx - h.ax), -(h.bz - h.az)) }; }
 
 /* =============================== ZONE =============================== */
-const ZPH = [[820, 70, 55, 1], [520, 70, 45, 2], [320, 60, 40, 3], [180, 50, 35, 5], [95, 45, 30, 7], [45, 35, 25, 9], [15, 30, 22, 12], [0, 20, 30, 15]];
-function zoneInit() { const Z = { cx: rand(-60, 60), cz: rand(-60, 60), r: 1450, ph: -1, t: 75, shrink: false, dps: 0.5 }; zoneNext(Z); return Z; }
-function zoneNext(Z) { const p = ZPH[Math.min(Z.ph + 1, ZPH.length - 1)]; const room = Math.max(0, Z.r - p[0]); const a = rand(0, 6.28), d = rand(0, room * 0.75); let tx = Z.cx + Math.cos(a) * d, tz = Z.cz + Math.sin(a) * d; const rr = Math.hypot(tx, tz); if (rr > 850) { tx *= 850 / rr; tz *= 850 / rr; } Z.tx = tx; Z.tz = tz; Z.tr = p[0]; }
+const ZPH = [[1900, 95, 80, 1], [1250, 85, 70, 2], [800, 75, 60, 3], [480, 65, 50, 4], [270, 55, 42, 6], [140, 45, 34, 8], [65, 38, 28, 10], [22, 30, 22, 12], [0, 20, 30, 15]];
+function zoneInit() { const Z = { cx: rand(-150, 150), cz: rand(-150, 150), r: 3500, ph: -1, t: 110, shrink: false, dps: 0.5 }; zoneNext(Z); return Z; }
+function zoneNext(Z) { const p = ZPH[Math.min(Z.ph + 1, ZPH.length - 1)]; const room = Math.max(0, Z.r - p[0]); const a = rand(0, 6.28), d = rand(0, room * 0.75); let tx = Z.cx + Math.cos(a) * d, tz = Z.cz + Math.sin(a) * d; const rr = Math.hypot(tx, tz), ZR = (SP.BR_ZR || 850) - p[0] * 0.5; if (rr > ZR) { tx *= ZR / rr; tz *= ZR / rr; } Z.tx = tx; Z.tz = tz; Z.tr = p[0]; }
 function zoneTick(Z, dt) {
   Z.t -= dt;
   if (Z.t <= 0) {
@@ -172,7 +173,7 @@ function knockEnt(e, by) {
 function killEnt(e, by, head) {
   if (e.st === 'dead') return; const wasKnock = e.st === 'knocked'; e.st = 'dead'; e.hp = 0; e.knock = 0; e.deadT = BR.t;
   const killer = by || e.knockBy; if (killer && killer.team !== e.team) { killer.kills++; BR.teams[killer.team].kills++; }
-  if (killer && killer.me) BR.myKills++;
+  if (killer && killer.me) { BR.myKills++; BR.track('brKills'); if (head) BR.track('brHeadshots'); }
   feed((killer ? nameOf(killer) + (head ? ' ⌖ ' : ' ✕ ') : '') + e.name + (wasKnock ? ' (finished)' : ''), killer && killer.team === BR.myTeam ? 'gold' : e.team === BR.myTeam ? 'red' : '');
   // drop a loot pile (guns, mats, essentials)
   const items = []; e.guns.forEach(g => items.push({ k: 'gun', id: g.id, mag: g.mag, res: g.res })); MATS.forEach(m => { if (e.mats[m] > 0) items.push({ k: 'mat', id: m, n: e.mats[m] }); }); Object.keys(e.meds).forEach(m => { if (e.meds[m] > 0) items.push({ k: 'item', id: m, n: e.meds[m] }); }); if (e.gold > 0) items.push({ k: 'gold', n: e.gold }); items.push({ k: 'ammo', n: 1 });
@@ -244,7 +245,7 @@ function simTick(dt) {
       // move: wander loot area, then toward the zone
       const dz = Math.hypot(e.x - Z.tx, e.z - Z.tz);
       if (!e.goal || Math.hypot(e.goal.x - e.x, e.goal.z - e.z) < 6 || (dz > Z.tr * 0.85 && (Z.shrink || Z.t < 45) && Math.hypot(e.goal.x - Z.tx, e.goal.z - Z.tz) > Z.tr * 0.8)) { const inZ = dz < Z.tr * 0.8; const a = rand(0, 6.28), r = rand(0, Z.tr * 0.6); e.goal = inZ && Math.random() < 0.6 ? { x: e.x + rand(-80, 80), z: e.z + rand(-80, 80) } : { x: Z.tx + Math.cos(a) * r, z: Z.tz + Math.sin(a) * r }; }
-      const gx = e.goal.x - e.x, gz = e.goal.z - e.z, gl = Math.hypot(gx, gz) || 1; const sp = 4.6 * dt; e.x += gx / gl * Math.min(sp, gl); e.z += gz / gl * Math.min(sp, gl); e.y = SP.W.heightAt(e.x, e.z);
+      const gx = e.goal.x - e.x, gz = e.goal.z - e.z, gl = Math.hypot(gx, gz) || 1; const sp = (dz > Z.tr * 1.1 ? 9.5 : 4.6) * dt; e.x += gx / gl * Math.min(sp, gl); e.z += gz / gl * Math.min(sp, gl); e.y = SP.W.heightAt(e.x, e.z);
       // heal between fights
       if (BR.t - (e.hurtT || -99) > 12) { if (e.hp < 100 && e.meds.medkit > 0) { e.meds.medkit--; e.hp = 100; } else e.hp = Math.min(100, e.hp + dt * 2); }
     }
@@ -266,7 +267,7 @@ function simTick(dt) {
   }
 }
 function bestGun(e) { let bi = 0, bs = -1; e.guns.forEach((g, i) => { const s = ({ common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5 })[gunRar(g.id)] + (clsOf(g.id) === 'launcher' ? -1 : 0); if (s > bs) { bs = s; bi = i; } }); return bi; }
-function revive(k, by) { k.st = 'alive'; k.hp = 30; k.knock = 0; k.revT = 0; if (k.u) { k.u.knocked = false; k.u.holdFire = false; k.u.rig.root.rotation.x = 0; } feed((by ? nameOf(by) : 'A teammate') + ' revived ' + (k.me ? 'YOU' : k.name), k.team === BR.myTeam ? 'gold' : ''); if (k.me) playerRevived(); if (k.human && !k.me && BR.net) BR.net.revivedPeer && BR.net.revivedPeer(k); BR.net && BR.net.event && BR.net.event({ t: 'revive', id: k.id }); }
+function revive(k, by) { k.st = 'alive'; k.hp = 30; k.knock = 0; k.revT = 0; if (k.u) { k.u.knocked = false; k.u.holdFire = false; k.u.rig.root.rotation.x = 0; } if (by && by.me) BR.track('revives'); feed((by ? nameOf(by) : 'A teammate') + ' revived ' + (k.me ? 'YOU' : k.name), k.team === BR.myTeam ? 'gold' : ''); if (k.me) playerRevived(); if (k.human && !k.me && BR.net) BR.net.revivedPeer && BR.net.revivedPeer(k); BR.net && BR.net.event && BR.net.event({ t: 'revive', id: k.id }); }
 BR.revive = revive; BR.entDamage = entDamage; BR.killEnt = killEnt; BR.knockEnt = knockEnt; BR.checkTeam = checkTeam;
 
 /* =============================== PLAYER: knock, revive, heal, inventory =============================== */
@@ -303,7 +304,7 @@ function invAdd(id, a = {}) {
 }
 function invRemove(id) { const P = SP.P; const i = INV.slots.indexOf(id); if (i > 0) INV.slots[i] = null; delete P.inv[id]; if (P.cur === id) { P.cur = null; P.equip('knife'); } P.updAmmo(); }
 function addAmmo(mult = 2) { const P = SP.P; for (const id in P.inv) { const W = SP.WEAP[id]; if (W.melee || W.item) continue; P.inv[id].res += Math.round(W.mag * mult); } P.updAmmo(); }
-BR.invAdd = invAdd;
+BR.invAdd = invAdd; BR.resetInv = invReset;
 // using medkits and shields (hold still; taking damage cancels)
 SP.brUseItem = function (id, w, s) {
   const P = SP.P; const it = ITEMS[id]; if (!it || BR.using) return;
@@ -322,11 +323,12 @@ function useTick(dt) {
 let chestMesh = null, lidMesh = null;
 function buildChests(W) {
   const pts = W.loot; const n = pts.length; BR.chests = [];
-  const body = new T.InstancedMesh(new T.BoxGeometry(0.9, 0.5, 0.6), new T.MeshStandardMaterial({ color: SP.lin(0x7a4a22), roughness: 0.6 }), n);
-  const lid = new T.InstancedMesh(new T.BoxGeometry(0.94, 0.14, 0.64), new T.MeshStandardMaterial({ color: SP.lin(0xd8a83a), roughness: 0.3, metalness: 0.8, emissive: SP.lin(0x6a4a10), emissiveIntensity: 0.6 }), n);
+  const body = new T.InstancedMesh(new T.BoxGeometry(0.9, 0.5, 0.6), new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0.3 }), n);
+  const lid = new T.InstancedMesh(new T.BoxGeometry(0.94, 0.14, 0.64), new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.8, emissive: SP.lin(0x6a4a10), emissiveIntensity: 0.6 }), n);
+  const cBrown = SP.lin(0x7a4a22), cBrass = SP.lin(0xd8a83a), cGold = SP.lin(0xffc830), cGold2 = SP.lin(0xfff0a0); let gs = (BR.seed || 1) >>> 0; const grand = () => { gs = (gs * 1664525 + 1013904223) >>> 0; return gs / 4294967296; };
   const o = new T.Object3D();
   pts.forEach((p, i) => { o.position.set(p.x, p.y + 0.25, p.z); o.rotation.set(0, (i * 1.7) % 6.28, 0); o.scale.set(1, 1, 1); o.updateMatrix(); body.setMatrixAt(i, o.matrix); o.position.y += 0.31; o.updateMatrix(); lid.setMatrixAt(i, o.matrix);
-    const c = { i, pos: V3(p.x, p.y, p.z), open: false }; c.it = G.addInteract({ pos: V3(p.x, p.y + 0.5, p.z), text: 'Open chest', hold: 0.45, radius: 2.2, onUse: () => openChest(c, true) }); BR.chests.push(c); });
+    const c = { i, pos: V3(p.x, p.y, p.z), open: false, gold: grand() < 0.07 }; body.setColorAt(i, c.gold ? cGold : cBrown); lid.setColorAt(i, c.gold ? cGold2 : cBrass); c.it = G.addInteract({ pos: V3(p.x, p.y + 0.5, p.z), text: c.gold ? 'Open GOLDEN chest' : 'Open chest', hold: c.gold ? 0.8 : 0.45, radius: 2.2, onUse: () => openChest(c, true) }); BR.chests.push(c); });
   body.userData.noMerge = lid.userData.noMerge = true; body.castShadow = true; SP.scene.add(body); SP.scene.add(lid); chestMesh = body; lidMesh = lid;
 }
 function hideChest(c) { c.open = true; if (c.it) c.it.enabled = false; const o = new T.Object3D(); o.scale.set(0, 0, 0); o.updateMatrix(); chestMesh.setMatrixAt(c.i, o.matrix); lidMesh.setMatrixAt(c.i, o.matrix); chestMesh.instanceMatrix.needsUpdate = lidMesh.instanceMatrix.needsUpdate = true; }
@@ -334,7 +336,8 @@ function openChest(c, mine) {
   if (c.open) return; hideChest(c);
   if (mine) { BR.net && BR.net.send && BR.net.role !== 'off' && BR.net.event({ t: 'chest', i: c.i }); A.click(1500, 0.12); setTimeout(() => A.click(1900, 0.1), 90);
     for (let k = 0; k < 10; k++) G.particle({ pos: c.pos.clone().add(V3(0, 0.8, 0)), vel: V3(rand(-2, 2), rand(2, 5), rand(-2, 2)), life: 0.8, size: 0.12, color: new T.Color(6, 4.5, 1.2), additive: true, kind: 'spark', gravity: 6 });
-    const items = [{ k: 'gun', id: rollGun(rollRarity(Math.min(0.35, BR.t / 1500))) }, { k: 'ammo', n: 1 }]; if (Math.random() < 0.55) items.push({ k: 'item', id: SP.pick(['bandage', 'bandage', 'medkit', 'minishield', 'minishield', 'shieldpot']), n: SP.randi(1, 3) }); if (Math.random() < 0.18) items.push({ k: 'gun', id: rollGun(rollRarity()) }); items.push({ k: 'gold', n: SP.randi(20, 60) }); if (Math.random() < 0.2) items.push({ k: 'nade', n: 1 });
+    BR.track('chests'); if (c.gold) BR.track('goldChests');
+    const items = c.gold ? [{ k: 'gun', id: rollGun(Math.random() < 0.45 ? 'legendary' : 'epic') }, { k: 'item', id: 'shieldpot', n: 2 }, { k: 'ammo', n: 2 }, { k: 'mat', id: SP.pick(['wood', 'stone', 'metal']), n: 60 }] : [{ k: 'gun', id: rollGun(rollRarity(Math.min(0.35, BR.t / 1500))) }, { k: 'ammo', n: 1 }]; if (Math.random() < 0.55) items.push({ k: 'item', id: SP.pick(['bandage', 'bandage', 'medkit', 'minishield', 'minishield', 'shieldpot']), n: SP.randi(1, 3) }); if (Math.random() < 0.18) items.push({ k: 'gun', id: rollGun(rollRarity()) }); items.push({ k: 'gold', n: SP.randi(20, 60) }); if (Math.random() < 0.2) items.push({ k: 'nade', n: 1 });
     const left = takeItems(items); if (left.length) makePile(c.pos.clone().add(V3(0.8, 0, 0.6)), left, 'chest', null);
   }
 }
@@ -470,21 +473,22 @@ function hire(V) {
 /* =============================== HUD, MAP, LEADERBOARD =============================== */
 let mapImg = null;
 function mapImage() {
-  if (mapImg) return mapImg; const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'); const img = x.createImageData(N, N);
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const wx = (i / N - 0.5) * 2400, wz = (j / N - 0.5) * 2400; const col = SP.brMapColor(wx, wz); const shade = (() => { const h0 = SP.brTerrainH(wx, wz), h1 = SP.brTerrainH(wx + 6, wz + 6); return clamp(1 + (h0 - h1) * 0.05, 0.75, 1.2); })(); const o = (j * N + i) * 4; img.data[o] = clamp(col[0] * shade * 255, 0, 255); img.data[o + 1] = clamp(col[1] * shade * 255, 0, 255); img.data[o + 2] = clamp(col[2] * shade * 255, 0, 255); img.data[o + 3] = 255; }
+  if (mapImg) return mapImg; const N = 400, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'); const img = x.createImageData(N, N);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const wx = (i / N - 0.5) * SPAN, wz = (j / N - 0.5) * SPAN; const col = SP.brMapColor(wx, wz); const shade = (() => { const h0 = SP.brTerrainH(wx, wz), h1 = SP.brTerrainH(wx + 6, wz + 6); return clamp(1 + (h0 - h1) * 0.05, 0.75, 1.2); })(); const o = (j * N + i) * 4; img.data[o] = clamp(col[0] * shade * 255, 0, 255); img.data[o + 1] = clamp(col[1] * shade * 255, 0, 255); img.data[o + 2] = clamp(col[2] * shade * 255, 0, 255); img.data[o + 3] = 255; }
   x.putImageData(img, 0, 0); mapImg = c; return c;
 }
-const w2m = (v, S) => (v / 2400 + 0.5) * S;
+const SPAN = SP.BR_SPAN || 2400; const w2m = (v, S) => (v / SPAN + 0.5) * S;
 function drawMap(cv, full) {
   const S = cv.width; const x = cv.getContext('2d'); x.imageSmoothingEnabled = true; x.drawImage(mapImage(), 0, 0, S, S);
   const Z = BR.zone; const P = SP.P;
   // blue zone: everything outside the white circle tinted blue
-  if (Z) { x.save(); x.fillStyle = 'rgba(40,90,255,0.33)'; x.beginPath(); x.rect(0, 0, S, S); x.arc(w2m(Z.cx, S), w2m(Z.cz, S), Z.r / 2400 * S, 0, 6.29, true); x.fill('evenodd'); x.restore();
-    x.strokeStyle = 'rgba(90,150,255,0.95)'; x.lineWidth = 2; x.beginPath(); x.arc(w2m(Z.cx, S), w2m(Z.cz, S), Z.r / 2400 * S, 0, 6.29); x.stroke();
-    x.strokeStyle = '#fff'; x.setLineDash([5, 4]); x.beginPath(); x.arc(w2m(Z.tx, S), w2m(Z.tz, S), Z.tr / 2400 * S, 0, 6.29); x.stroke(); x.setLineDash([]); }
-  if (full) { x.font = '600 ' + Math.round(S / 46) + 'px "Barlow Condensed",sans-serif'; x.textAlign = 'center'; for (const p of SP.BRPOI) { x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillText(p.name.toUpperCase(), w2m(p.x, S) + 1, w2m(p.z, S) + 1); x.fillStyle = '#fff'; x.fillText(p.name.toUpperCase(), w2m(p.x, S), w2m(p.z, S)); }
+  if (Z) { x.save(); x.fillStyle = 'rgba(40,90,255,0.33)'; x.beginPath(); x.rect(0, 0, S, S); x.arc(w2m(Z.cx, S), w2m(Z.cz, S), Z.r / SPAN * S, 0, 6.29, true); x.fill('evenodd'); x.restore();
+    x.strokeStyle = 'rgba(90,150,255,0.95)'; x.lineWidth = 2; x.beginPath(); x.arc(w2m(Z.cx, S), w2m(Z.cz, S), Z.r / SPAN * S, 0, 6.29); x.stroke();
+    x.strokeStyle = '#fff'; x.setLineDash([5, 4]); x.beginPath(); x.arc(w2m(Z.tx, S), w2m(Z.tz, S), Z.tr / SPAN * S, 0, 6.29); x.stroke(); x.setLineDash([]); }
+  if (full) { x.font = '600 ' + Math.round(S / 62) + 'px "Barlow Condensed",sans-serif'; x.textAlign = 'center'; for (const p of SP.BRPOI) { x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillText(p.name.toUpperCase(), w2m(p.x, S) + 1, w2m(p.z, S) + 1); x.fillStyle = '#fff'; x.fillText(p.name.toUpperCase(), w2m(p.x, S), w2m(p.z, S)); }
     (BR.vendors || []).forEach(v => { x.fillStyle = v.arms ? '#f2c14a' : '#7ad4ff'; x.beginPath(); x.arc(w2m(v.pos.x, S), w2m(v.pos.z, S), S / 160, 0, 6.29); x.fill(); }); }
   if (BR.helis && (BR.me.st === 'heli')) { const h = BR.helis[BR.myHeli]; x.strokeStyle = 'rgba(255,255,255,0.8)'; x.lineWidth = 2; x.setLineDash([8, 6]); x.beginPath(); x.moveTo(w2m(h.ax, S), w2m(h.az, S)); x.lineTo(w2m(h.bx, S), w2m(h.bz, S)); x.stroke(); x.setLineDash([]); }
+  BR.hooks.forEach(h => h.drawMap && h.drawMap(x, S, w2m, full));
   if (BR.ping) { x.fillStyle = '#ffcf4a'; x.beginPath(); x.arc(w2m(BR.ping.x, S), w2m(BR.ping.z, S), S / 110, 0, 6.29); x.fill(); }
   // teammates + me
   for (const e of BR.ents) if (e.team === BR.myTeam && !e.me && e.st !== 'dead') { const px = e.u ? e.u.pos : V3(e.x, 0, e.z); x.fillStyle = e.st === 'knocked' ? '#ff9a3a' : '#5ad46a'; x.beginPath(); x.arc(w2m(px.x, S), w2m(px.z, S), S / 120, 0, 6.29); x.fill(); }
@@ -514,7 +518,7 @@ function hudTick(force, dt = 0) {
   const mm = $('#brmini'); if (mm && !mm.hidden) drawMini(mm);
 }
 function drawMini(cv) { // 300 m radar of the colour map around the player
-  const S = cv.width, x = cv.getContext('2d'), P = SP.P; const span = 600; const img = mapImage(); const sx = (P.pos.x - span / 2) / 2400 * 256 + 128, sz = (P.pos.z - span / 2) / 2400 * 256 + 128, sw = span / 2400 * 256;
+  const S = cv.width, x = cv.getContext('2d'), P = SP.P; const span = 800; const img = mapImage(); const IN = img.width; const sx = (P.pos.x - span / 2) / SPAN * IN + IN / 2, sz = (P.pos.z - span / 2) / SPAN * IN + IN / 2, sw = span / SPAN * IN;
   x.save(); x.clearRect(0, 0, S, S); x.beginPath(); x.arc(S / 2, S / 2, S / 2, 0, 6.29); x.clip(); x.drawImage(img, sx, sz, sw, sw, 0, 0, S, S);
   const Z = BR.zone; const k = S / span; if (Z) { x.strokeStyle = '#5a96ff'; x.lineWidth = 2; x.beginPath(); x.arc((Z.cx - P.pos.x) * k + S / 2, (Z.cz - P.pos.z) * k + S / 2, Z.r * k, 0, 6.29); x.stroke(); x.strokeStyle = '#fff'; x.setLineDash([4, 3]); x.beginPath(); x.arc((Z.tx - P.pos.x) * k + S / 2, (Z.tz - P.pos.z) * k + S / 2, Z.tr * k, 0, 6.29); x.stroke(); x.setLineDash([]); }
   for (const e of BR.ents) if (e.team === BR.myTeam && !e.me && e.st !== 'dead') { const p = e.u ? e.u.pos : V3(e.x, 0, e.z); x.fillStyle = e.st === 'knocked' ? '#ff9a3a' : '#5ad46a'; x.beginPath(); x.arc((p.x - P.pos.x) * k + S / 2, (p.z - P.pos.z) * k + S / 2, 4, 0, 6.29); x.fill(); }
@@ -525,7 +529,7 @@ function drawMini(cv) { // 300 m radar of the colour map around the player
 /* =============================== THE MODE =============================== */
 function brPart(opt = {}) {
   return {
-    name: 'Isla Corona', modeTitle: 'BATTLE ROYALE · SQUADS', map: 'br2', env: opt.env || 'afternoon', envOver: { fogD: 0.00085, atmDen: 0.0012 }, place: '50 teams · 200 players', time: 'Drop in. Last squad standing.', loadout: ['knife'], noExtras: true, noIntel: true, seed: opt.seed,
+    name: 'Isla Corona', modeTitle: 'BATTLE ROYALE · SQUADS', map: 'br2', env: opt.env || 'afternoon', envOver: { fogD: 0.0006, atmDen: 0.0009 }, place: '50 teams · 200 players · 6 km island', time: 'Drop in. Last squad standing.', loadout: ['knife'], noExtras: true, noIntel: true, seed: opt.seed,
     setup(c, W, P) {
       SP.forceWeather = null; SP.Modes && SP.Modes.applyMutators(false); SP.noRegen = true; SP.brAcc = 1; SP.noPauseSim = true; document.body.classList.add('brmode');
       BR.on = true; BR.c = c; BR.W = W; BR.zone = zoneInit(); const sr = SP.seeded ? (() => { let s = (BR.seed || 1) >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; })() : Math.random; BR.helis = makeHelis(sr);
@@ -533,12 +537,12 @@ function brPart(opt = {}) {
       P.brTeam = BR.myTeam; P.armor = 0; P.hp = 100; P.brKnocked = false; invReset();
       // teams into helis: 5 per heli, mine in heli 0 (clients get theirs from the host)
       BR.myHeli = 0; BR.teams.forEach(t => { t.heli = t.id % 10; }); BR.myHeli = BR.teams[BR.myTeam].heli;
-      for (const e of BR.ents) { e.st = 'heli'; e.heli = BR.teams[e.team].heli; if (!e.human) { const h = BR.helis[e.heli]; const cands = SP.BRPOI.map(p => ({ p, d: segDist(p.x, p.z, h) })).sort((a, b) => a.d - b.d).slice(0, 6); const pick = Math.random() < 0.85 ? SP.pick(cands).p : null; const L = Math.hypot(h.bx - h.ax, h.bz - h.az); const tx = pick ? pick.x + rand(-pick.r, pick.r) * 0.7 : lerp(h.ax, h.bx, rand(0.25, 0.75)) + rand(-200, 200), tz = pick ? pick.z + rand(-pick.r, pick.r) * 0.7 : lerp(h.az, h.bz, rand(0.25, 0.75)) + rand(-200, 200); const k = clamp(((tx - h.ax) * (h.bx - h.ax) + (tz - h.az) * (h.bz - h.az)) / (L * L), 0.08, 0.92); e.jumpT = h.t0 + k * L / h.speed + rand(-1, 2); e.dropAt = { x: tx, z: tz }; e.dropT = 20 + Math.hypot(tx - lerp(h.ax, h.bx, k), tz - lerp(h.az, h.bz, k)) / 18; }
+      for (const e of BR.ents) { e.st = 'heli'; e.heli = BR.teams[e.team].heli; if (!e.human) { const h = BR.helis[e.heli]; const cands = SP.BRPOI.map(p => ({ p, d: segDist(p.x, p.z, h) })).filter(o => o.d < 650).sort((a, b) => a.d - b.d).slice(0, 8); if (!cands.length) cands.push({ p: SP.BRPOI[0] }); const pick = Math.random() < 0.85 ? SP.pick(cands).p : null; const L = Math.hypot(h.bx - h.ax, h.bz - h.az); const tx = pick ? pick.x + rand(-pick.r, pick.r) * 0.7 : lerp(h.ax, h.bx, rand(0.3, 0.7)) + rand(-420, 420), tz = pick ? pick.z + rand(-pick.r, pick.r) * 0.7 : lerp(h.az, h.bz, rand(0.3, 0.7)) + rand(-420, 420); const k = clamp(((tx - h.ax) * (h.bx - h.ax) + (tz - h.az) * (h.bz - h.az)) / (L * L), 0.08, 0.92); e.jumpT = h.t0 + k * L / h.speed + rand(-1, 2); e.dropAt = { x: tx, z: tz }; e.dropT = 18 + Math.hypot(tx - lerp(h.ax, h.bx, k), tz - lerp(h.az, h.bz, k)) / 24; }
         // squadmates (bots) follow my jump
         if (e.team === BR.myTeam && !e.human) e.followJump = true; }
       // heli meshes
       BR.helis.forEach(h => { const m = SP.Models.heli(); m.scale.setScalar(1.6); m.userData.noMerge = true; SP.scene.add(m); h.mesh = m; });
-      buildChests(W); spawnVendors(W);
+      buildChests(W); spawnVendors(W); BR.hooks.forEach(h => h.setup && h.setup(W, P));
       // blue zone wall
       const wall = new T.Mesh(new T.CylinderGeometry(1, 1, 600, 128, 1, true), new T.MeshBasicMaterial({ color: new T.Color(0.25, 0.5, 2.4), transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false })); wall.position.y = 150; wall.frustumCulled = false; wall.userData.noMerge = true; SP.scene.add(wall); BR.wall = wall;
       P.mode = 'walk'; BR.me.st = 'heli'; placeInHeli(P, 0);
@@ -584,12 +588,12 @@ function tick(dt) {
   document.body.classList.toggle('inheli', BR.me.st === 'heli'); document.body.classList.toggle('building', !!BUILD.on);
   if (BR.me.st === 'air') {
     const g = SP.W.groundAt(P.pos.x, P.pos.z, P.pos.y); const alt = P.pos.y - g; const K = I.keys; const fwd = K.KeyW || K.ArrowUp ? 1 : 0, back = K.KeyS || K.ArrowDown ? 1 : 0, lf = K.KeyA ? 1 : 0, rt = K.KeyD ? 1 : 0;
-    if (!BR.glide && alt < 110) { BR.glide = true; A.click(300, 0.15); G.hud.feed('GLIDER DEPLOYED', ''); }
-    const sp = BR.glide ? 17 : 32; const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = -Math.sin(P.yaw); const ix = rt - lf, iz = fwd - back; let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const ml = Math.hypot(mx, mz) || 1;
+    if (!BR.glide && alt < 110 && !(BR.boostT > 0)) { BR.glide = true; A.click(300, 0.15); G.hud.feed('GLIDER DEPLOYED', ''); }
+    const sp = BR.glide ? 23 : 44; const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = -Math.sin(P.yaw); const ix = rt - lf, iz = fwd - back; let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const ml = Math.hypot(mx, mz) || 1;
     const dive = !BR.glide && fwd && P.pitch < -0.6;
-    P.vel.x = lerp(P.vel.x, mx / ml * sp * (iz || ix ? 1 : 0.2), dt * 2); P.vel.z = lerp(P.vel.z, mz / ml * sp * (iz || ix ? 1 : 0.2), dt * 2); P.vel.y = BR.glide ? -8.5 : (dive ? -62 : -42);
+    P.vel.x = lerp(P.vel.x, mx / ml * sp * (iz || ix ? 1 : 0.2), dt * 2); P.vel.z = lerp(P.vel.z, mz / ml * sp * (iz || ix ? 1 : 0.2), dt * 2); if (BR.boostT > 0) { BR.boostT -= dt; P.vel.y = 55; } else P.vel.y = BR.glide ? -8.5 : (dive ? -62 : -42);
     $('#bralt').hidden = false; $('#bralt').textContent = Math.round(alt) + ' M' + (BR.glide ? ' · GLIDING' : dive ? ' · DIVING' : ' · FREEFALL');
-    if (P.onGround || alt < 0.6) { BR.me.st = 'alive'; $('#bralt').hidden = true; A.step('sand', 0.5); G.hud.feed('LANDED · OPEN CHESTS FOR WEAPONS', 'gold'); BR.c.obj('Survive · stay inside the circle', null);
+    if (!(BR.boostT > 0) && (P.onGround || alt < 0.6)) { BR.me.st = 'alive'; $('#bralt').hidden = true; A.step('sand', 0.5); G.hud.feed('LANDED · OPEN CHESTS FOR WEAPONS', 'gold'); BR.c.obj('Survive · stay inside the circle', null);
       // squadmates that followed land around me
       if (!BR.net || BR.net.role !== 'client') for (const e of BR.ents) if (e.followMe && e.st === 'air') { e.followMe = false; landAt(e, P.pos.x + rand(-8, 8), P.pos.z + rand(-8, 8)); spawnUnit(e); } }
   } else $('#bralt').hidden = true;
@@ -607,6 +611,7 @@ function tick(dt) {
   if (I.hit('KeyM')) toggleMap(); if (I.hit('Tab')) toggleLB(); if (I.hit('Backspace')) dropCurrent(); if (I.hit('Escape') && BR.shopOpen) closeShop();
   if (BR.shopOpen && BR.shopOpen.pos.distanceTo(P.pos) > 4) closeShop();
   buildTick(dt); useTick(dt);
+  BR.hooks.forEach(h => h.tick && h.tick(dt, P, Z));
   // sync my entity
   const me = BR.me; if (me.st === 'alive' || me.st === 'knocked' || me.st === 'air' || me.st === 'heli') { me.x = P.pos.x; me.y = P.pos.y; me.z = P.pos.z; me.yaw = P.yaw; me.hp = P.brKnocked ? 0 : P.hp; me.sh = P.armor || 0; me.knock = P.brKnocked ? P.hp : 0; me.guns = INV.slots.filter(id => id && !SP.WEAP[id].item && id !== 'knife').map(id => ({ id, mag: P.inv[id].mag, res: P.inv[id].res })); }
   // vendor nameplates
@@ -634,8 +639,8 @@ function specTick(dt) {
 function endMatch(win) {
   if (BR.over) return; BR.over = true; const tm = BR.teams[BR.myTeam]; const place = win ? 1 : tm.place || BR.teams.filter(t => !t.out).length + 1; BR.place = place;
   const kills = BR.myKills; const coins = kills * 40 + Math.max(0, 51 - place) * 10 + (win ? 1000 : 0);
-  SP.Progress.coins += coins; SP.Progress.save();
-  LB.games++; LB.kills += kills; if (win) LB.wins++; LB.best = Math.min(LB.best || 99, place);
+  SP.Progress.coins += coins; SP.Progress.save(); SP.onBREnd && SP.onBREnd(win, place, kills);
+  LB.games++; LB.kills += kills; if (win) LB.wins++; LB.best = Math.min(LB.best || 99, place); if (place <= 10) LB.top10 = (LB.top10 || 0) + 1; LB.deaths = (LB.deaths || 0) + (win ? 0 : 1); LB.mostKills = Math.max(LB.mostKills || 0, kills); BR.track('brMatches'); if (place <= 10) BR.track('brTop10'); if (win) BR.track('brWins');
   LB.hist.unshift({ place, kills, team: tm.country, flag: tm.flag, squadKills: tm.kills, d: Date.now() }); LB.hist = LB.hist.slice(0, 30); saveLB();
   F().stat && F().stat('brGames'); if (win) F().stat && F().stat('brWins');
   BR.net && BR.net.event && BR.net.role === 'host' && BR.net.event({ t: 'end', winner: win ? BR.myTeam : BR.teams.find(t => !t.out)?.id });
@@ -645,9 +650,9 @@ function endMatch(win) {
 function showResults(win, place, coins) {
   const tm = BR.teams[BR.myTeam]; BR.on = false; SP.onTick = null; $('#brx').hidden = true; toggleMap(false); toggleLB(false); closeShop(); $('#brspec').hidden = true;
   $('#bre-title').textContent = win ? '#1 · LAST SQUAD STANDING' : '#' + place + ' OF 50';
-  $('#bre-sub').textContent = tm.flag + ' TEAM ' + tm.country.toUpperCase() + (win ? ' won the match on Isla Corona.' : ' was eliminated.');
+  $('#bre-sub').textContent = tm.flag + ' TEAM ' + tm.country.toUpperCase() + (win ? ' won the match on Isla Corona.' : ' was eliminated.'); SP.Pass && SP.Pass.resultsBar && SP.Pass.resultsBar('#bre-pass');
   const mates = BR.ents.filter(e => e.team === BR.myTeam);
-  $('#bre-stats').innerHTML = [['Placement', '#' + place], ['Your kills', BR.myKills], ['Squad kills', tm.kills], ['Coins', '+' + coins], ['Wins', LB.wins + ' / ' + LB.games], ['Best', '#' + LB.best]].map(r => `<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+  $('#bre-stats').innerHTML = [['Placement', '#' + place], ['Your kills', BR.myKills], ['Squad kills', tm.kills], ['Coins', '+' + coins], ['Wins', LB.wins + ' / ' + LB.games], ['Top 10s', LB.top10 || 0], ['K/D', (LB.kills / Math.max(1, LB.deaths || 0)).toFixed(2)], ['Best', '#' + LB.best], ['Pass XP', '+' + (BR.passXP || 0)]].map(r => `<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
   $('#bre-squad').innerHTML = mates.map(e => `<div class="brh"><b>${e.me ? 'YOU' : e.name}</b><span>${e.kills} kills</span><span>${e.st === 'dead' ? 'eliminated' : 'survived'}</span></div>`).join('');
   $('#bre-lb').innerHTML = lbHTML();
   SP.Input.unlock && SP.Input.unlock(); SP.showScreen('brend2');
@@ -660,14 +665,14 @@ BR.start = function (opt = {}) {
   BR.net = opt.net || null; newMatch(opt); if (opt.applyTeams) opt.applyTeams(BR);
   SP.Audio.init && SP.Audio.init(); return SP.loadMode(brPart({ seed: BR.seed, env: opt.env }));
 };
-BR.cleanup = function () { document.body.classList.remove('inheli', 'building'); SP.noPauseSim = false; SP.noStreaks = false; const lb = $('#armbar .lb'); if (lb) lb.textContent = 'ARMOUR'; document.body.classList.remove('brmode'); BR.on = false; BR.spectating = false; SP.brOrder = null; SP.noRegen = false; BUILD.on = false; BR.using = null; $('#brx') && ($('#brx').hidden = true); ['#brmapov', '#brlb', '#brshop', '#brspec', '#brknock', '#bruse'].forEach(s => { const el = $(s); if (el) el.hidden = true; }); const mm = $('#minimap'); if (mm) mm.style.visibility = ''; };
+BR.cleanup = function () { BR.hooks.forEach(h => { try { h.cleanup && h.cleanup(); } catch (e) { } }); document.body.classList.remove('inheli', 'building'); SP.noPauseSim = false; SP.noStreaks = false; const lb = $('#armbar .lb'); if (lb) lb.textContent = 'ARMOUR'; document.body.classList.remove('brmode'); BR.on = false; BR.spectating = false; SP.brOrder = null; SP.noRegen = false; BUILD.on = false; BR.using = null; $('#brx') && ($('#brx').hidden = true); ['#brmapov', '#brlb', '#brshop', '#brspec', '#brknock', '#bruse'].forEach(s => { const el = $(s); if (el) el.hidden = true; }); const mm = $('#minimap'); if (mm) mm.style.visibility = ''; };
 const tdBase = SP.teardownPart; SP.teardownPart = function () { BR.cleanup(); return tdBase && tdBase.apply(this, arguments); };
 const opl = SP.Features && SP.Features.onPartLoad;
 if (SP.Features) SP.Features.onPartLoad = function (part) { if (part.map !== 'br2') BR.cleanup(); return opl && opl.apply(this, arguments); };
 
 /* =============================== UI WIRING =============================== */
 function wire() {
-  $('#brmapov').addEventListener('click', e => { const cv = $('#brmapcv'); const r = cv.getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width - 0.5) * 2400, z = ((e.clientY - r.top) / r.height - 0.5) * 2400; if (e.target === cv) { BR.ping = { x, z }; if (BR.pingMk) G.removeMarker(BR.pingMk); BR.pingMk = G.marker(() => V3(x, SP.W.heightAt(x, z) + 3, z), 'PING', 'obj'); drawMap(cv, true); } else toggleMap(false); });
+  $('#brmapov').addEventListener('click', e => { const cv = $('#brmapcv'); const r = cv.getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width - 0.5) * SPAN, z = ((e.clientY - r.top) / r.height - 0.5) * SPAN; if (e.target === cv) { BR.ping = { x, z }; if (BR.pingMk) G.removeMarker(BR.pingMk); BR.pingMk = G.marker(() => V3(x, SP.W.heightAt(x, z) + 3, z), 'PING', 'obj'); drawMap(cv, true); } else toggleMap(false); });
   $('#brshop .x').addEventListener('click', closeShop);
   $('#bre-again').addEventListener('click', () => { SP.teardownPart(); SP.openBRLobby && SP.openBRLobby(); });
   $('#bre-menu').addEventListener('click', () => { SP.teardownPart(); SP.showScreen('title'); });
@@ -677,5 +682,5 @@ function wire() {
   tb('#t-map', () => toggleMap()); tb('#t-lb', () => toggleLB()); tb('#t-skyjump', () => { BR.tapJump = true; }); tb('#t-drop', dropCurrent);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
-BR.brPart = brPart; BR.ITEMS = ITEMS; BR.TEAMS = TEAMS; BR.PER = PER; BR.spawnUnit = spawnUnit; BR.openChest = openChest; BR.takePile = takePile; BR.zoneInit = zoneInit; BR.makeHelis = makeHelis; BR.heliPos = heliPos; BR.hudTick = hudTick; BR.lbHTML = lbHTML;
+BR.brPart = brPart; BR.takeItems = takeItems; BR.landAt = landAt; BR.RAR = RAR; BR.rollGun = rollGun; BR.rollRarity = rollRarity; BR.gunRar = gunRar; BR.feed = feed; BR.dropCurrent = dropCurrent; BR.invRemove = invRemove; BR.cancelUse = cancelUse; BR.teamStanding = teamStanding; BR.addAmmo = addAmmo; BR.segDist = segDist; BR.mapImage = mapImage; BR.w2m = w2m; BR.ITEMS = ITEMS; BR.TEAMS = TEAMS; BR.PER = PER; BR.spawnUnit = spawnUnit; BR.openChest = openChest; BR.takePile = takePile; BR.zoneInit = zoneInit; BR.makeHelis = makeHelis; BR.heliPos = heliPos; BR.hudTick = hudTick; BR.lbHTML = lbHTML;
 })();

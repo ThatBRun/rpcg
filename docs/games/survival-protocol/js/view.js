@@ -10,9 +10,11 @@ SP.vmSun = new T.DirectionalLight(0xffffff, 2); SP.vmScene.add(SP.vmSun); SP.vmS
 SP.vmHemi = new T.HemisphereLight(0xffffff, 0x444444, 0.5); SP.vmScene.add(SP.vmHemi);
 SP.vmFill = new T.PointLight(0xffb070, 0, 3); SP.vmCam.add(SP.vmFill); SP.vmFill.position.set(0.1, 0.05, -0.6);
 
+SP.vmSleeveMat = () => { const m = SP.mat('camo', { roughness: 0.92 }).clone(); SP.applySkin && SP.applySkin(m, 'sleeve'); return m; };
+SP.vmGloveMat = () => { const m = SP.flat(0x2e2a26, 0.75).clone(); SP.applySkin && SP.applySkin(m, 'glove'); return m; };
 function limb(a, b, r, mat, parent) { const l = a.distanceTo(b); const m = M(new T.CylinderGeometry(r * 0.9, r, l, 10), mat, 0, 0, 0, parent, false); m.position.copy(a).add(b).multiplyScalar(0.5); m.lookAt(b); m.rotateX(Math.PI / 2); return m; }
 function arms(g, rHand, lHand, rElbow, lElbow) {
-  const sleeve = SP.mat('camo', { roughness: 0.92 }), glove = SP.flat(0x2e2a26, 0.75), watch = SP.flat(0x111111, 0.4, 0.2);
+  const sleeve = SP.vmSleeveMat(), glove = SP.vmGloveMat(), watch = SP.flat(0x111111, 0.4, 0.2);
   limb(rElbow, rHand, 0.042, sleeve, g); limb(rElbow.clone().add(V3(0.08, -0.12, 0.25)), rElbow, 0.05, sleeve, g);
   M(geo.box(0.075, 0.1, 0.085), glove, rHand.x, rHand.y, rHand.z, g, false).rotation.x = 0.3;
   if (lHand) { limb(lElbow, lHand, 0.042, sleeve, g); limb(lElbow.clone().add(V3(-0.12, -0.1, 0.2)), lElbow, 0.05, sleeve, g); const lh = M(geo.box(0.08, 0.06, 0.1), glove, lHand.x, lHand.y - 0.02, lHand.z, g, false); M(geo.box(0.05, 0.05, 0.04), watch, lElbow.x * 0.25 + lHand.x * 0.75, lElbow.y * 0.25 + lHand.y * 0.75 - 0.03, lElbow.z * 0.25 + lHand.z * 0.75, g, false); }
@@ -32,8 +34,8 @@ SP.buildViewModel = function (w) {
   // see-through optic
   gun.traverse(m => { if (m.isMesh && m.material === SP.MAT.glassDark()) { m.material = new T.MeshStandardMaterial({ color: 0x9fb8c0, transparent: true, opacity: 0.12, roughness: 0.05, metalness: 0.5 }); } });
   gun.traverse(m => { if (m.isMesh && m.geometry.parameters && m.geometry.parameters.radiusTop === 0.024) { m.geometry = new T.CylinderGeometry(0.024, 0.024, 0.1, 18, 1, true); m.material = SP.flat(0x1a1a1a, 0.6, 0.1, { side: T.DoubleSide }); } });
-  const base = SP.WEAP[w].vmAs || w; const c = CFG[base] || CFG.m4; const h = c.hands; if (base === 'knife') { const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.06, 0.07, 0.09), glove, 0, 0, 0.04, gun, false); limb(V3(0.1, -0.25, 0.3), V3(0, 0, 0.04), 0.042, SP.mat('camo', {}), gun); gun.rotation.set(0.25, 0.15, -0.35); } else arms(gun, h[0], base === 'pistol' ? null : h[1], h[2], h[3]);
-  if (base === 'pistol') { const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.07, 0.08, 0.08), glove, -0.03, -0.08, 0.02, gun, false); limb(V3(-0.15, -0.3, 0.3), V3(-0.03, -0.08, 0.02), 0.042, SP.mat('camo', {}), gun); }
+  const base = SP.WEAP[w].vmAs || w; const c = CFG[base] || CFG.m4; const h = c.hands; if (base === 'knife') { const glove = SP.vmGloveMat(); M(geo.box(0.06, 0.07, 0.09), glove, 0, 0, 0.04, gun, false); limb(V3(0.1, -0.25, 0.3), V3(0, 0, 0.04), 0.042, SP.vmSleeveMat(), gun); gun.rotation.set(0.25, 0.15, -0.35); } else arms(gun, h[0], base === 'pistol' ? null : h[1], h[2], h[3]);
+  if (base === 'pistol') { const glove = SP.vmGloveMat(); M(geo.box(0.07, 0.08, 0.08), glove, -0.03, -0.08, 0.02, gun, false); limb(V3(-0.15, -0.3, 0.3), V3(-0.03, -0.08, 0.02), 0.042, SP.vmSleeveMat(), gun); }
   gun.traverse(m => { if (m.isMesh) { m.castShadow = false; m.receiveShadow = false; } });
   g.position.copy(c.hip); SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.cfg = c; VM.w = w; VM.drop = 0.5;
   const sight = gun.userData.sight || V3(0, 0.05, 0);
@@ -43,8 +45,8 @@ SP.buildViewModel = function (w) {
 SP.buildTurretVM = function (name) {
   if (VM.group) SP.vmCam.remove(VM.group);
   const g = new T.Group(); const gun = SP.Models.fiftyCal(); gun.position.set(0, -0.32, -0.5); g.add(gun);
-  const glove = SP.flat(0x2e2a26, 0.75); M(geo.box(0.07, 0.1, 0.08), glove, -0.15, -0.36, -0.08, g, false); M(geo.box(0.07, 0.1, 0.08), glove, 0.15, -0.36, -0.08, g, false);
-  limb(V3(-0.3, -0.6, 0.25), V3(-0.15, -0.36, -0.08), 0.045, SP.mat('camo', {}), g); limb(V3(0.3, -0.6, 0.25), V3(0.15, -0.36, -0.08), 0.045, SP.mat('camo', {}), g);
+  const glove = SP.vmGloveMat(); M(geo.box(0.07, 0.1, 0.08), glove, -0.15, -0.36, -0.08, g, false); M(geo.box(0.07, 0.1, 0.08), glove, 0.15, -0.36, -0.08, g, false);
+  limb(V3(-0.3, -0.6, 0.25), V3(-0.15, -0.36, -0.08), 0.045, SP.vmSleeveMat(), g); limb(V3(0.3, -0.6, 0.25), V3(0.15, -0.36, -0.08), 0.045, SP.vmSleeveMat(), g);
   SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.turret = gun; VM.w = 'turret';
 };
 SP.hideVM = function (h) { if (VM.group) VM.group.visible = !h; };

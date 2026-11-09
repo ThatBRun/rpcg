@@ -23,7 +23,7 @@ SP.CAMOS = CAMOS;
 Mods.gun = function (L, att) {
   att = att || {}; const g = new T.Group();
   const camo = att.camo && CAMOS[att.camo];
-  const body = camo ? (camo.metal ? SP.mat('metal', { color: camo.color, roughness: 0.3, metalness: 0.85 }) : SP.flat(camo.color, 0.7, 0.05)) : FIN[L.fin || 'black']();
+  const body = camo ? (camo.tex && SP.wrapMat ? SP.wrapMat(camo) : camo.metal ? SP.mat('metal', { color: camo.color, roughness: 0.3, metalness: 0.85 }) : SP.flat(camo.color, 0.7, 0.05)) : FIN[L.fin || 'black']();
   const accent = FIN[L.acc || 'metal'](), blk = MAT.polymer(), met = MAT.gunMetal();
   const len = L.len || 0.5, bar = L.bar || 0.2, bp = !!L.bullpup;
   const rz = bp ? 0.06 : -0.05;                                  // receiver centre
@@ -92,7 +92,7 @@ Mods.gun = function (L, att) {
 };
 Mods.pistolX = function (L, att) {
   att = att || {}; const g = new T.Group(); const camo = att.camo && CAMOS[att.camo];
-  const slide = camo ? SP.mat('metal', { color: camo.color, roughness: 0.3, metalness: camo.metal ? 0.85 : 0.2 }) : FIN[L.fin || 'metal'](), frame = FIN[L.frame || 'black']();
+  const slide = camo ? (camo.tex && SP.wrapMat ? SP.wrapMat(camo) : SP.mat('metal', { color: camo.color, roughness: 0.3, metalness: camo.metal ? 0.85 : 0.2 })) : FIN[L.fin || 'metal'](), frame = FIN[L.frame || 'black']();
   const len = L.len || 0.19, h = L.h || 0.035;
   M(geo.box(L.w || 0.032, h, len), slide, 0, 0.03, -0.05, g); M(geo.box((L.w || 0.032) - 0.002, 0.03, len * 0.9), frame, 0, 0.0, -0.045, g);
   M(geo.box(0.03, 0.125, 0.052), FIN[L.gripFin || L.frame || 'black'](), 0, -0.065, 0.03, g).rotation.x = 0.25;

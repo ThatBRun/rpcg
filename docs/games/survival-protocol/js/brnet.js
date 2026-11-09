@@ -115,7 +115,7 @@ const NET = { role: 'off' };
 function hostStart() {
   if (L.started) return; if (!L.host) return; L.started = true; clearInterval(cdT);
   const humans = L.humans.map((h, i) => ({ name: h.name, me: i === 0, peer: h.conn || null }));
-  const online = humans.length > 1; const seed = Math.random() * 1e9 | 0; const env = SP.pick(['afternoon', 'day', 'golden', 'dawn']);
+  const online = humans.length > 1; const seed = Math.random() * 1e9 | 0; const env = SP.pick(['afternoon', 'day', 'afternoon']);
   if (online) { L.conns.forEach(c => c.send({ t: 'start', seed, country: L.country, env, humans: humans.map(h => h.name) })); try { L.sig && L.sig.close(); } catch (e) { } }
   else { try { L.sig && L.sig.close(); } catch (e) { } }
   const net = online ? makeHost(L.conns.slice()) : null;
@@ -182,12 +182,13 @@ function hostMsg(N, c, m) {
     case 'unpile': { const p = BR.piles.find(q => q.id === m.id); if (p) BR.removePile(p); N.broadcast(m, c); break; }
     case 'build': BR.placePiece(m.s, m.mat, true); N.broadcast(m, c); break;
     case 'pdmg': { const p = BR.pieces.get(m.key); if (p) BR.damagePiece(p, m.d, true); N.broadcast(m, c); break; }
+    default: if (BR.netX && BR.netX[m.t]) { BR.netX[m.t](m, e, true); N.broadcast(m, c); }
   }
 }
 // ----- client -----
 function makeClient(conn) {
   const N = Object.assign(Object.create(NET), { role: 'client', conn, sendT: 0, last: 0 });
-  N.send = m => conn.send(m); N.event = m => { if (['knock', 'dead', 'jump', 'chest', 'pile', 'unpile', 'build', 'pdmg'].includes(m.t)) conn.send(m); };
+  N.send = m => conn.send(m); N.event = m => { if (['knock', 'dead', 'jump', 'chest', 'pile', 'unpile', 'build', 'pdmg', 'floor', 'sdopen', 'card', 'pad'].includes(m.t)) conn.send(m); };
   N.reviveReq = e => conn.send({ t: 'rev', id: e.id });
   N.onSetup = () => { for (const e of BR.ents) if (!e.me) e.puppet = true; };
   N.close = () => { try { conn.end(); } catch (e) { } };
@@ -225,13 +226,14 @@ function clientMsg(N, m) {
     case 'unpile': { const p = BR.piles.find(q => q.id === m.id); if (p) BR.removePile(p); break; }
     case 'build': BR.placePiece(m.s, m.mat, true); break;
     case 'pdmg': { const p = BR.pieces.get(m.key); if (p) BR.damagePiece(p, m.d, true); break; }
+    default: if (BR.netX && BR.netX[m.t]) BR.netX[m.t](m, null, false);
   }
 }
 function setKind(u, k) { const S = u.rig; if (S.gun) { S.gun.parent && S.gun.parent.remove(S.gun); S.gun = null; } if (k !== 'none') { const Mo = SP.Models; S.gun = k === 'ak' ? Mo.ak() : k === 'shotgun' ? Mo.shotgun() : k === 'pistol' ? Mo.pistol() : Mo.m4(true); S.chest.add(S.gun); } u.weapon = k === 'none' ? 'm4' : k; }
 
 /* ---------------- wiring ---------------- */
 function wire() {
-  $('#bl-play').addEventListener('click', () => { if (!L.host) return; if (L.offline || !L.sig) { L.started = true; closeLobby(); const net = null; BR.start({ seed: Math.random() * 1e9 | 0, country: L.country, env: SP.pick(['afternoon', 'day', 'golden', 'dawn']), humans: [{ name: L.name, me: true }], net }); } else hostStart(); });
+  $('#bl-play').addEventListener('click', () => { if (!L.host) return; if (L.offline || !L.sig) { L.started = true; closeLobby(); const net = null; BR.start({ seed: Math.random() * 1e9 | 0, country: L.country, env: SP.pick(['afternoon', 'day', 'afternoon']), humans: [{ name: L.name, me: true }], net }); } else hostStart(); });
   $('#bl-back').addEventListener('click', () => { L.started = true; closeLobby(); L.started = false; SP.showScreen('modes'); });
   $('#p-quit').addEventListener('click', () => { if (BR.net) { BR.net.close && BR.net.close(); BR.net = null; } BR.cleanup && BR.cleanup(); }, true);
 }
