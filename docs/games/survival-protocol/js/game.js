@@ -329,7 +329,7 @@ G.shoot = function (origin, dir, dmg, headMul, team, muzzlePos, tracer, vehDmg) 
   else if (dh) { end = dh.p; G.impact(end, dh.x.surf || 'metal'); dh.x.damage(dmg); }
   else if (wh) { end = wh.point; G.impact(end, wh.surf); SP.onWallHit && SP.onWallHit(wh, dir, team); }
   else end = origin.clone().addScaledVector(dir, 300);
-  if (tracer && Math.random() < (team === 'player' ? 0.5 : 0.85)) G.tracer(muzzlePos || origin, end, team === 'player' ? [8, 5.5, 2.2] : [9, 3.2, 1.2]);
+  if (tracer && Math.random() < (team === 'player' ? 0.5 : 0.85)) G.tracer(muzzlePos || origin, end, team === 'player' ? (SP.tracerCol ? SP.tracerCol() : [8, 5.5, 2.2]) : [9, 3.2, 1.2]);
   return end;
 };
 G.rocket = function (pos, dir, team) {

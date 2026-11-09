@@ -52,7 +52,7 @@ PR.wheelAdd = w => { if (PR.wheel.indexOf(w) >= 0) return PR.wheel.indexOf(w); f
 PR.wheelRemove = w => { const i = PR.wheel.indexOf(w); if (i >= 0) PR.wheel[i] = null; };
 PR.wheelPut = (w, i) => { const j = PR.wheel.indexOf(w); if (j >= 0) PR.wheel[j] = PR.wheel[i] && j < PR.slots ? PR.wheel[i] : null; PR.wheel[i] = w; };
 PR.att = PR.att || {}; PR.camo = PR.camo || {}; PR.knives = PR.knives || { combat: true }; PR.knife = PR.knife || 'combat';
-PR.save = () => { try { const o = {}; ['coins', 'spent', 'skills', 'owned', 'up', 'wheel', 'slots', 'chapterPaid', 'partPaid', 'migrated', 'knifeAdded', 'wheelPos', 'att', 'camo', 'knives', 'knife', 'wkills', 'wxp', 'bonusSP', 'wraps', 'pass'].forEach(k => o[k] = PR[k]); localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { } };
+PR.save = () => { try { const o = {}; ['coins', 'spent', 'skills', 'owned', 'up', 'wheel', 'slots', 'chapterPaid', 'partPaid', 'migrated', 'knifeAdded', 'wheelPos', 'att', 'camo', 'knives', 'knife', 'wkills', 'wxp', 'bonusSP', 'wraps', 'pass', 'tracer', 'banner'].forEach(k => o[k] = PR[k]); localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { } };
 PR.points = () => Object.keys(PR.partPaid).length + (PR.bonusSP || 0) - PR.spent;
 SP.skill = id => !!PR.skills[id];
 
