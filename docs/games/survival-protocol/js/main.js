@@ -125,7 +125,7 @@ SP.onPlayerDeath = function () {
 SP.fail = function (msg) { if (SP.state !== 'play' || !running) return; running = false; paused = true; I.unlock(); $('#deadmsg').textContent = msg; $('#deadtitle').textContent = 'Mission failed'; showScreen('dead'); };
 
 /* ---------- pointer lock / pause ---------- */
-function requestPlay() { paused = true; $('#lockoverlay').hidden = false; $('#lockoverlay h2').textContent = SP.Touch.on ? 'Tap to play' : 'Click to play'; }
+function requestPlay() { if (SP.Touch.on) { I.fallback = true; paused = false; $('#lockoverlay').hidden = true; return; } paused = true; $('#lockoverlay').hidden = false; $('#lockoverlay h2').textContent = SP.Touch.on ? 'Tap to play' : 'Click to play'; }
 $('#lockbtn').addEventListener('click', () => { A.init(); if (SP.Touch.on) { I.fallback = true; $('#lockoverlay').hidden = true; paused = false; return; } I.lock(); if (I.fallback) { $('#lockoverlay').hidden = true; paused = false; } });
 SP.pauseGame = () => { if (SP.state !== 'play') return; paused = true; showScreen('pause'); };
 SP.onLockChange = (locked) => {
@@ -133,7 +133,7 @@ SP.onLockChange = (locked) => {
   else if (SP.state === 'play' && running && !I.fallback) { paused = true; showScreen('pause'); }
 };
 SP.framed = (() => { try { return window.top !== window.self; } catch (e) { return true; } })();
-SP.onLockFail = () => { if (SP.state !== 'play') return; SP.lockFails = (SP.lockFails || 0) + 1;
+SP.onLockFail = () => { if (SP.state !== 'play') return; if (SP.Touch.on) { I.fallback = true; paused = false; $('#lockoverlay').hidden = true; return; } SP.lockFails = (SP.lockFails || 0) + 1;
   if (SP.framed || SP.lockFails >= 2) { I.fallback = true; $('#lockoverlay').hidden = true; paused = false; showScreen(null); G.hud.feed(SP.framed ? 'MOUSE LOCK IS BLOCKED IN THIS EMBED · PRESS FULLSCREEN (TITLE OR PAUSE MENU) FOR FULL MOUSE CONTROL' : 'MOUSE LOCK UNAVAILABLE · MOVE THE MOUSE OVER THE GAME TO LOOK', 'gold'); return; }
   paused = true; showScreen(null); $('#lockoverlay').hidden = false; $('#lockoverlay .lede').textContent = 'Click Play again to lock the mouse. If it does not lock, wait a second and click again.'; };
 SP.onKey = (code) => { if (SP.Features && SP.Features.photo) return; if (SP.onKeyChoice) SP.onKeyChoice(code); if (code === 'Escape' && SP.state === 'play' && I.fallback) { paused = !paused; showScreen(paused ? 'pause' : null); } if (code === 'KeyP' && SP.state === 'play') { I.unlock(); paused = true; showScreen('pause'); } };
@@ -193,7 +193,7 @@ $('#d-armory').addEventListener('click', () => SP.Progress.openArmory('dead'));
 function openSettings() { $('#s-sens').value = SP.settings.sens; $('#s-q').value = SP.settings.quality; $('#s-d').value = SP.settings.difficulty; $('#s-p').value = SP.settings.platform || 'pc'; showScreen('settings'); }
 $('#s-done').addEventListener('click', () => { SP.settings.sens = +$('#s-sens').value; SP.settings.quality = $('#s-q').value; SP.settings.difficulty = $('#s-d').value; SP.settings.platform = $('#s-p').value; SP.Touch.enable(SP.settings.platform === 'mobile'); applySettings(); showScreen(SP.setFrom === 'pause' ? 'pause' : 'title'); });
 $('#btn-cont').hidden = !(SP.save.last > 1 || SP.save.dk.length || SP.save.lastCh > 1);
-function choosePlatform(p) { SP.settings.platform = p; if (p === 'mobile') SP.settings.quality = 'low'; if (p === 'chromebook') SP.settings.quality = 'medium'; SP.Touch.enable(p === 'mobile'); applySettings(); A.init(); showScreen('title'); }
+function choosePlatform(p) { const prev = SP.settings.platform; SP.settings.platform = p; I.fallback = p === 'mobile' || !!SP.framed && I.fallback; if (p !== prev) { if (p === 'mobile') SP.settings.quality = 'low'; if (p === 'chromebook') SP.settings.quality = 'medium'; } SP.Touch.enable(p === 'mobile'); applySettings(); A.init(); showScreen('title'); }
 $('#plat-pc').addEventListener('click', () => choosePlatform('pc')); $('#plat-cb').addEventListener('click', () => choosePlatform('chromebook')); $('#plat-mob').addEventListener('click', () => choosePlatform('mobile'));
 
 /* ---------- main loop ---------- */
@@ -255,7 +255,10 @@ async function boot() {
   const keys = Object.keys(SP.TEX); const bar = $('#bootbar');
   for (let i = 0; i < keys.length; i++) { SP.TEX[keys[i]](); bar.style.width = ((i + 1) / keys.length * 100) + '%'; await new Promise(r => setTimeout(r, 0)); }
   titleBackdrop(); SP.state = 'menu'; $('#boot').hidden = true;
-  if (SP.settings.platform) { SP.Touch.enable(SP.settings.platform === 'mobile'); showScreen('title'); } else { const cros = /CrOS/.test(navigator.userAgent), guess = matchMedia('(pointer: coarse)').matches; $(cros ? '#plat-cb' : guess ? '#plat-mob' : '#plat-pc').classList.add('guess'); showScreen('platform'); }
+  { // ask for the device every time the game opens; highlight the last choice (or a good guess)
+    const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), cros = /CrOS/.test(ua), touch = ios || /Android/.test(ua) || (matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches);
+    const g = touch ? 'mobile' : SP.settings.platform || (cros ? 'chromebook' : 'pc'); $({ pc: '#plat-pc', chromebook: '#plat-cb', mobile: '#plat-mob' }[g] || '#plat-pc').classList.add('guess');
+    SP.Touch.enable(false); showScreen('platform'); }
   requestAnimationFrame(frame);
 }
 SP.isPaused = () => paused;

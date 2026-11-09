@@ -448,6 +448,9 @@ body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;lef
 @keyframes lktr{from{left:-40%}to{left:110%}}
 .pcard{width:min(320px,100%);display:grid;gap:2px;padding:14px 16px;border:1px solid rgba(255,255,255,.18);text-shadow:0 1px 3px #000;box-shadow:0 6px 20px rgba(0,0,0,.4)} .pcard b{font-size:20px;line-height:1.1} .pcard span{font-size:14px;color:#ffe08a} .pcard em{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.75)}
 #pcard-title{margin:6px 0 2px}
+
+#platform .plat.guess{order:-1;border-color:var(--amber)} #platform .plat b{overflow-wrap:anywhere}
+@media (max-height:520px){#platform h2{font-size:30px} #platform .lede{font-size:12px;margin:4px 0} #platform .opts{flex-wrap:nowrap;gap:8px} #platform .plat{padding:10px 12px;flex:1;min-width:0} #platform .plat b{font-size:20px} #platform .plat span{font-size:12px}}
 </style>
 
 <canvas id="game" aria-label="Game view"></canvas>
@@ -752,11 +755,11 @@ body.mobile #brmini{width:112px;height:112px} body.mobile #brmats{right:auto;lef
   <div class="stack">
     <span class="eyebrow">SURVIVAL PROTOCOL</span>
     <h2>Where are you playing?</h2>
-    <p class="lede">This sets up the controls. You can change it later in Settings.</p>
+    <p class="lede">This sets up the controls. The game asks every time it opens, so pick Mobile on your iPhone or iPad and PC on your computer.</p>
     <div class="opts">
       <button class="plat" id="plat-pc" type="button"><b>PC</b><span>Keyboard and mouse. Highest graphics.</span></button>
       <button class="plat" id="plat-cb" type="button"><b>Chromebook</b><span>Keyboard and trackpad. Balanced graphics for Chromebook hardware.</span></button>
-      <button class="plat" id="plat-mob" type="button"><b>Mobile</b><span>Phone or tablet. On-screen joystick and buttons, lighter graphics.</span></button>
+      <button class="plat" id="plat-mob" type="button"><b>Mobile</b><span>iPhone, iPad, Android. No mouse lock. On-screen joystick and buttons, lighter graphics.</span></button>
     </div>
   </div>
 </div>
