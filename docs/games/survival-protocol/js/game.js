@@ -417,12 +417,12 @@ class Unit {
     d.divideScalar(len); const s = Math.min(spd, len * 3); this.pos.x += d.x * s * dt; this.pos.z += d.z * s * dt; this.speed = damp(this.speed, s, 8, dt);
     // separation from other units
     for (const u of G.units) if (u !== this && !u.dead) { const dx = this.pos.x - u.pos.x, dz = this.pos.z - u.pos.z, dd = dx * dx + dz * dz; if (dd < 0.5 && dd > 1e-6) { const k = (0.71 - Math.sqrt(dd)) * 0.5; this.pos.x += dx / Math.sqrt(dd) * k; this.pos.z += dz / Math.sqrt(dd) * k; } }
-    SP.W.push(this.pos, 0.34, this.pos.y, 1.7); this.facePoint(target.x, target.z, 7, dt); return false;
+    SP.W.push(this.pos, 0.34, this.pos.y + (this.br ? 0.4 : 0), 1.7); this.facePoint(target.x, target.z, 7, dt); return false; // BR bots can step up ramps and build pieces
   }
   update(dt) {
     const S = this.rig;
     if (this.dead) { SP.animSoldier(S, dt, { dead: true }); S.root.position.copy(this.pos); S.root.rotation.y = this.yaw; return; }
-    const W = SP.W; if (!this.fixedY) this.pos.y = damp(this.pos.y, W.groundAt(this.pos.x, this.pos.z, this.pos.y + 0.6, 0.15), 14, dt);
+    const W = SP.W; if (!this.fixedY) { const gy = W.groundAt(this.pos.x, this.pos.z, this.pos.y + (this.br ? 0.95 : 0.6), 0.15); this.pos.y = gy > this.pos.y && this.br ? damp(this.pos.y, gy, 24, dt) : damp(this.pos.y, gy, 14, dt); }
     this.retarget -= dt; if (this.retarget <= 0) { this.retarget = rand(0.35, 0.7); this.target = (this.aware || this.team === 'ally') ? this.pickTarget() : null; }
     const tg = this.target && (this.target === 'player' ? (SP.P.alive ? 'player' : null) : (this.target.dead ? null : this.target));
     let moving = false;

@@ -28,8 +28,20 @@ const CFG = {
 };
 CFG.sup = CFG.m4;
 const VM = SP.VM = { group: null, gun: null, cfg: null, t: 0, kick: 0, swayX: 0, swayY: 0, lastYaw: 0, lastPitch: 0, shells: [], reloadPh: 0 };
-SP.buildViewModel = function (w) {
+// viewmodels are built once per gun + look and reused, so swapping guns never rebuilds meshes or materials
+const vmCache = new Map();
+function vmKey(w) { const PR = SP.Progress || {}; const PS = SP.Pass && SP.Pass.PS; return w + '|' + JSON.stringify((PR.att || {})[w] || '') + '|' + ((PR.camo || {})[w] || '') + '|' + (PS ? PS.skin : '') + '|' + (w === 'knife' ? PR.knife : ''); }
+function useCached(w) {
+  const k = vmKey(w), e = vmCache.get(k); if (!e) return false;
   if (VM.group) SP.vmCam.remove(VM.group);
+  const { g, gun, c } = e; g.position.copy(c.hip); g.rotation.set(0, 0, 0); g.visible = true; SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.cfg = c; VM.w = w; VM.drop = 0.5;
+  if (gun.userData.slide) gun.userData.slide.position.z = 0;
+  const sight = gun.userData.sight || V3(0, 0.05, 0); VM.adsPos = c.adsP ? c.adsP.clone() : V3(-sight.x, -sight.y, -0.2); VM.turret = null; return true;
+}
+SP.buildViewModel = function (w, warmOnly) {
+  if (!warmOnly && useCached(w)) return;
+  if (warmOnly && vmCache.has(vmKey(w))) return;
+  if (!warmOnly && VM.group) SP.vmCam.remove(VM.group);
   const g = new T.Group(); const gun = SP.WEAP[w].model(); g.add(gun);
   // see-through optic
   gun.traverse(m => { if (m.isMesh && m.material === SP.MAT.glassDark()) { m.material = new T.MeshStandardMaterial({ color: 0x9fb8c0, transparent: true, opacity: 0.12, roughness: 0.05, metalness: 0.5 }); } });
@@ -37,11 +49,21 @@ SP.buildViewModel = function (w) {
   const base = SP.WEAP[w].vmAs || w; const c = CFG[base] || CFG.m4; const h = c.hands; if (base === 'knife') { const glove = SP.vmGloveMat(); M(geo.box(0.06, 0.07, 0.09), glove, 0, 0, 0.04, gun, false); limb(V3(0.1, -0.25, 0.3), V3(0, 0, 0.04), 0.042, SP.vmSleeveMat(), gun); gun.rotation.set(0.25, 0.15, -0.35); } else arms(gun, h[0], base === 'pistol' ? null : h[1], h[2], h[3]);
   if (base === 'pistol') { const glove = SP.vmGloveMat(); M(geo.box(0.07, 0.08, 0.08), glove, -0.03, -0.08, 0.02, gun, false); limb(V3(-0.15, -0.3, 0.3), V3(-0.03, -0.08, 0.02), 0.042, SP.vmSleeveMat(), gun); }
   gun.traverse(m => { if (m.isMesh) { m.castShadow = false; m.receiveShadow = false; } });
-  g.position.copy(c.hip); SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.cfg = c; VM.w = w; VM.drop = 0.5;
+  g.position.copy(c.hip);
+  if (vmCache.size > 40) { const k0 = vmCache.keys().next().value; vmCache.delete(k0); }
+  vmCache.set(vmKey(w), { g, gun, c });
+  if (warmOnly) { // compile its shaders now (off-screen) so the first swap to it doesn't hitch
+    try { g.visible = true; SP.vmCam.add(g); const prev = VM.group; if (prev) prev.visible = false; SP.renderer.compile(SP.vmScene, SP.vmCam); if (prev) prev.visible = true; } catch (e) { }
+    SP.vmCam.remove(g); return;
+  }
+  SP.vmCam.add(g); VM.group = g; VM.gun = gun; VM.cfg = c; VM.w = w; VM.drop = 0.5;
   const sight = gun.userData.sight || V3(0, 0.05, 0);
   VM.adsPos = c.adsP ? c.adsP.clone() : V3(-sight.x, -sight.y, -0.2);
   VM.turret = null;
 };
+// warm a gun's viewmodel in the background (used when you pick a gun up)
+SP.warmViewModel = function (w) { if (!SP.WEAP[w] || !SP.WEAP[w].model) return; const run = () => { try { SP.buildViewModel(w, true); } catch (e) { } }; (window.requestIdleCallback || (f => setTimeout(f, 30)))(run); };
+SP.clearVMCache = () => vmCache.clear();
 SP.buildTurretVM = function (name) {
   if (VM.group) SP.vmCam.remove(VM.group);
   const g = new T.Group(); const gun = SP.Models.fiftyCal(); gun.position.set(0, -0.32, -0.5); g.add(gun);

@@ -241,3 +241,51 @@ BR.FL = FL; BR.SD = SD; BR.RB = RB; BR.launch = launch; BR.sdSpawn = sdSpawn; BR
   function wire() { const lb = $('#brlobby'); if (lb) new MutationObserver(() => { if (!lb.hidden) lobbyStats(); }).observe(lb, { attributes: true, attributeFilter: ['hidden'] }); lobbyStats(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();
+
+/* =============================== BOT BUILDING (1.2) ===============================
+   Live bots now build in fights: ramp rushes toward their target (and walk up them), cover walls,
+   and full box-ups when they're hurt. Host / offline only; pieces are sent to everyone like player builds. */
+(function () {
+  const BR = SP.BR, { V3, rand } = SP; const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  const auth = () => !BR.net || BR.net.role === 'host';
+  const matOf = e => BR.MATS.find(m => e.mats[m] >= 10);
+  function place(e, s) { const mat = matOf(e); if (!mat || BR.pieces.has(s.key)) return false; const p = BR.placePiece(s, mat, true); if (!p) return false; e.mats[mat] -= 10; if (BR.net && BR.net.role === 'host') BR.net.event({ t: 'build', s, mat }); return true; }
+  const qToward = (u, tp) => { const dx = tp.x - u.pos.x, dz = tp.z - u.pos.z; return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 1 : 3) : (dz > 0 ? 2 : 0); };
+  const C = () => BR.CELL;
+  function wallSlot(u, q, y) { const [dx, dz] = DIRS[q]; const ci = Math.floor(u.pos.x / C()), ck = Math.floor(u.pos.z / C()); const cx = (ci + 0.5) * C() + dx * C() / 2, cz = (ck + 0.5) * C() + dz * C() / 2; y = y != null ? y : Math.round(u.pos.y * 2) / 2; return { kind: 'wall', cx, cz, y, dir: q & 1, key: BR.pieceKey('wall', Math.round(cx * 2), Math.round(cz * 2), y, q & 1) }; }
+  function rampSlot(ci, ck, y, q) { return { kind: 'ramp', cx: (ci + 0.5) * C(), cz: (ck + 0.5) * C(), y, dir: q, key: BR.pieceKey('ramp', ci, ck, y, q) }; }
+  function floorSlot(ci, ck, y) { return { kind: 'floor', cx: (ci + 0.5) * C(), cz: (ck + 0.5) * C(), y, key: BR.pieceKey('floor', ci, ck, y) }; }
+  function tpos(u) { const t = u.target; if (!t) return null; if (t === 'player') return SP.P.pos; return t.pos || null; }
+  // ramp rush: a run of ramps toward the target, climbing as it goes
+  function rampRush(e, tp) {
+    const u = e.u; const q = qToward(u, tp); const [dx, dz] = DIRS[q]; let ci = Math.floor(u.pos.x / C()) + dx, ck = Math.floor(u.pos.z / C()) + dz; let y = Math.round(u.pos.y * 2) / 2;
+    const ws = wallSlot(u, q); const own = BR.pieces.get(ws.key); if (own) BR.damagePiece(own, 1e6); // open their own wall like an edit
+    const n = 1 + Math.floor(Math.random() * 3); let made = 0;
+    for (let k = 0; k < n; k++) { if (!place(e, rampSlot(ci, ck, y, q))) break; made++; ci += dx; ck += dz; y += C(); }
+    if (made) { u.rampRush = { x: (ci - dx + 0.5) * C() + dx * 1.6, z: (ck - dz + 0.5) * C() + dz * 1.6, t: 1.6 + made * 1.4 }; }
+    return made > 0;
+  }
+  function boxUp(e) { const u = e.u; const y = Math.round(u.pos.y * 2) / 2; let n = 0; for (let q = 0; q < 4; q++) if (place(e, wallSlot(u, q, y))) n++; if (Math.random() < 0.6) place(e, floorSlot(Math.floor(u.pos.x / C()), Math.floor(u.pos.z / C()), y + C())); u.crouch = true; return n > 0; }
+  BR.botRampRush = rampRush;
+  BR.botReact = function (e, from) { if (!e.u || !auth() || !matOf(e)) return; e.buildT = BR.t; if (e.hp < 55 && Math.random() < 0.6) boxUp(e); else if (Math.random() < 0.35 && from) rampRush(e, from); else BR.botWall(e, from); };
+  let thinkT = 0;
+  BR.hooks.push({
+    setup() { thinkT = 0; },
+    tick(dt) {
+      if (!auth()) return;
+      // bots following a ramp rush walk up their ramps
+      for (const e of BR.ents) { const u = e.u; if (!u || !u.rampRush || u.dead) continue; const r = u.rampRush; r.t -= dt; if (r.t <= 0 || u.knocked) { u.rampRush = null; continue; } u.steer(V3(r.x, u.pos.y, r.z), u.runSpeed || 5.2, dt); }
+      thinkT -= dt; if (thinkT > 0) return; thinkT = 0.5;
+      const late = BR.zone && BR.zone.ph >= 4;
+      for (const e of BR.ents) {
+        const u = e.u; if (!u || u.dead || u.puppet || e.human || e.merc || e.st !== 'alive' || u.knocked || !matOf(e)) continue;
+        if (e.nextBuild == null) e.nextBuild = BR.t + rand(2, 8); if (BR.t < e.nextBuild) continue;
+        const tp = tpos(u); const d = tp ? Math.hypot(tp.x - u.pos.x, tp.z - u.pos.z) : 1e9;
+        let did = false;
+        if (tp && d > 6 && d < 70) { const r = Math.random(); did = r < 0.45 ? rampRush(e, tp) : r < 0.7 ? boxUp(e) : place(e, wallSlot(u, qToward(u, tp))); }
+        else if (late && Math.random() < 0.25) did = boxUp(e);
+        e.nextBuild = BR.t + (did ? rand(4, 9) : rand(1.5, 4)); if (did) e.buildT = BR.t;
+      }
+    },
+  });
+})();

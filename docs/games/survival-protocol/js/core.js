@@ -435,11 +435,24 @@ SP.Input = {
     addEventListener('mouseup', e => { if (e.button === 0) this.mouse.l = false; if (e.button === 2) this.mouse.r = false; });
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     addEventListener('mousemove', e => { if (this.locked || this.fallback) { this.mouse.dx += e.movementX || 0; this.mouse.dy += e.movementY || 0; } });
-    document.addEventListener('pointerlockchange', () => { this.locked = document.pointerLockElement === canvas; if (SP.onLockChange) SP.onLockChange(this.locked); });
-    document.addEventListener('pointerlockerror', () => { if (SP.onLockFail) SP.onLockFail(); });
+    document.addEventListener('pointerlockchange', () => { this.locked = document.pointerLockElement === canvas; if (this.locked) { this.pending = false; SP.lockFails = 0; } else this.unlockedAt = performance.now(); if (SP.onLockChange) SP.onLockChange(this.locked); });
+    document.addEventListener('pointerlockerror', () => this.failed());
     canvas.addEventListener('click', () => { if (SP.state === 'play' && !this.locked && !this.fallback) this.lock(); });
+    // clicking anywhere on the game (HUD included) while playing grabs the mouse again
+    document.addEventListener('mousedown', e => { if (SP.state !== 'play' || this.locked || this.fallback || (SP.Touch && SP.Touch.on)) return; if (e.target.closest && e.target.closest('.ov.screen:not([hidden]), button, input, select, a, #lockoverlay')) return; if (SP.isPaused && SP.isPaused()) return; this.lock(); });
   },
-  lock() { if (!this.canvas.requestPointerLock) { this.fallback = true; SP.onLockChange && SP.onLockChange(true); return; } try { const p = this.canvas.requestPointerLock(); if (p && p.catch) p.catch(() => { SP.onLockFail && SP.onLockFail(); }); } catch (e) { SP.onLockFail && SP.onLockFail(); } },
+  lock() {
+    if (!this.canvas.requestPointerLock) { this.fallback = true; SP.onLockChange && SP.onLockChange(true); return; }
+    if (this.locked) return;
+    // browsers refuse a re-lock for about a second after the mouse was released: wait it out instead of failing
+    const since = performance.now() - (this.unlockedAt || -1e9);
+    if (since < 1150) { clearTimeout(this.retryT); this.pending = true; this.retryT = setTimeout(() => { this.auto = true; this.lock(); this.auto = false; }, 1160 - since); return; }
+    this.pending = true; this.attempt = (this.attempt || 0) + 1; const a = this.attempt; this.autoOf = this.autoOf || {}; this.autoOf[a] = !!this.auto;
+    const go = opts => { const p = this.canvas.requestPointerLock(opts); if (p && p.catch) return p; return null; };
+    try { const p = go({ unadjustedMovement: true }); if (p) p.catch(() => { try { const p2 = go(); if (p2) p2.catch(() => this.failed(a)); } catch (e) { this.failed(a); } }); }
+    catch (e) { try { go(); } catch (e2) { this.failed(a); } }
+  },
+  failed(a) { if (a != null && a !== this.attempt) return; if (this.lastFail === this.attempt) return; this.lastFail = this.attempt; this.pending = false; if (this.autoOf && this.autoOf[this.attempt]) { SP.onLockRetryFail && SP.onLockRetryFail(); return; } SP.onLockFail && SP.onLockFail(); },
   unlock() { if (document.exitPointerLock && this.locked) document.exitPointerLock(); },
   consume() { const d = [this.mouse.dx, this.mouse.dy]; this.mouse.dx = this.mouse.dy = 0; return d; },
   endFrame() { this.pressed = {}; this.mouse.lp = false; },

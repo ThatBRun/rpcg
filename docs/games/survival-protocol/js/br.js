@@ -159,7 +159,7 @@ function entDamage(e, d, by, head, from) {
   if (e.st === 'knocked') { e.knock -= d; if (e.knock <= 0) { killEnt(e, by, head); return true; } return false; }
   const s = Math.min(e.sh, d); e.sh -= s; d -= s; e.hp -= d; e.hurtT = BR.t;
   if (e.u && by && by.u !== undefined) e.u.aware = true;
-  if (e.u && !e.puppet && Math.random() < 0.3 && BR.t - (e.buildT || -99) > 7 && from) botWall(e, from);
+  if (e.u && !e.puppet && Math.random() < 0.65 && BR.t - (e.buildT || -99) > 2.5 && from) { if (BR.botReact) BR.botReact(e, from); else botWall(e, from); }
   if (e.hp <= 0) { e.hp = 0; if (teamStanding(e.team, e) > 0) { knockEnt(e, by); return true; } killEnt(e, by, head); return true; }
   return false;
 }
@@ -300,7 +300,7 @@ function invAdd(id, a = {}) {
   if (W.item) { if (P.inv[id]) { P.inv[id].mag = Math.min(ITEMS[id].max, P.inv[id].mag + (a.n || 1)); P.updAmmo(); return true; } const i = INV.slots.indexOf(null); if (i < 0) return false; INV.slots[i] = id; P.give(id); P.inv[id].mag = Math.min(ITEMS[id].max, a.n || 1); P.inv[id].res = 0; P.updAmmo(); return true; }
   if (P.inv[id]) { P.inv[id].res += a.res != null ? a.res + (a.mag || 0) : W.mag * 2; P.updAmmo(); return true; }
   const i = INV.slots.indexOf(null); if (i < 0) return false; INV.slots[i] = id; P.give(id); P.inv[id].mag = a.mag != null ? Math.min(a.mag, W.mag) : W.mag; P.inv[id].res = a.res != null ? a.res : W.mag * 3;
-  if (!P.cur || P.cur === 'knife' || SP.WEAP[P.cur].item) P.equip(id); P.updAmmo(); return true;
+  if (!P.cur || P.cur === 'knife' || SP.WEAP[P.cur].item) P.equip(id); else SP.warmViewModel && SP.warmViewModel(id); P.updAmmo(); return true;
 }
 function invRemove(id) { const P = SP.P; const i = INV.slots.indexOf(id); if (i > 0) INV.slots[i] = null; delete P.inv[id]; if (P.cur === id) { P.cur = null; P.equip('knife'); } P.updAmmo(); }
 function addAmmo(mult = 2) { const P = SP.P; for (const id in P.inv) { const W = SP.WEAP[id]; if (W.melee || W.item) continue; P.inv[id].res += Math.round(W.mag * mult); } P.updAmmo(); }
@@ -417,7 +417,7 @@ function damagePiece(p, d, remote) {
   if (p.hp <= 0) breakPiece(p);
 }
 function breakPiece(p) { BR.pieces.delete(p.key); SP.scene.remove(p.mesh); p.cols.forEach(c => SP.W.removeCollider(c)); const c = V3(p.s.cx, p.s.y + 2, p.s.cz); for (let k = 0; k < 14; k++) G.particle({ pos: c.clone().add(V3(rand(-1.5, 1.5), rand(-1.5, 1.5), rand(-1.5, 1.5))), vel: V3(rand(-3, 3), rand(1, 5), rand(-3, 3)), life: 1.2, size: 0.25, color: new T.Color(matCol[p.mat]).multiplyScalar(0.8), gravity: 12 }); A.impact && A.impact(c, p.mat === 'metal' ? 'metal' : 'wood'); }
-BR.placePiece = placePiece; BR.damagePiece = damagePiece;
+BR.placePiece = placePiece; BR.damagePiece = damagePiece; BR.pieceKey = pieceKey; BR.CELL = CELL; BR.MATS = MATS; BR.botWall = botWall;
 function buildTick(dt) {
   const P = SP.P;
   if (I.hit('KeyY') || I.hit('KeyQ') && BUILD.on) toggleBuild(!BUILD.on);
