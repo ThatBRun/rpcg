@@ -13,11 +13,20 @@ SP.vmFill = new T.PointLight(0xffb070, 0, 3); SP.vmCam.add(SP.vmFill); SP.vmFill
 SP.vmSleeveMat = () => { const m = SP.mat('camo', { roughness: 0.92 }).clone(); SP.applySkin && SP.applySkin(m, 'sleeve'); return m; };
 SP.vmGloveMat = () => { const m = SP.flat(0x2e2a26, 0.75).clone(); SP.applySkin && SP.applySkin(m, 'glove'); return m; };
 function limb(a, b, r, mat, parent) { const l = a.distanceTo(b); const m = M(new T.CylinderGeometry(r * 0.9, r, l, 10), mat, 0, 0, 0, parent, false); m.position.copy(a).add(b).multiplyScalar(0.5); m.lookAt(b); m.rotateX(Math.PI / 2); return m; }
+function hand(g, p, glove, rx, left) { // palm, wrapped fingers, thumb and knuckle pad
+  const h = new T.Group(); h.position.copy(p); h.rotation.x = rx; g.add(h);
+  M(geo.box(0.072, 0.085, 0.08), glove, 0, 0, 0, h, false); M(geo.box(0.07, 0.04, 0.05), glove, 0, -0.035, -0.045, h, false).rotation.x = 0.6;
+  for (let i = 0; i < 4; i++) M(geo.box(0.015, 0.018, 0.05), glove, -0.026 + i * 0.0175, 0.025, -0.05, h, false).rotation.x = -0.5;
+  M(geo.box(0.022, 0.02, 0.055), glove, (left ? 1 : -1) * 0.04, 0.0, -0.03, h, false).rotation.z = (left ? -1 : 1) * 0.4;
+  M(geo.box(0.06, 0.012, 0.035), SP.flat(0x1a1a1a, 0.6), 0, 0.044, -0.005, h, false);
+  return h;
+}
 function arms(g, rHand, lHand, rElbow, lElbow) {
-  const sleeve = SP.vmSleeveMat(), glove = SP.vmGloveMat(), watch = SP.flat(0x111111, 0.4, 0.2);
-  limb(rElbow, rHand, 0.042, sleeve, g); limb(rElbow.clone().add(V3(0.08, -0.12, 0.25)), rElbow, 0.05, sleeve, g);
-  M(geo.box(0.075, 0.1, 0.085), glove, rHand.x, rHand.y, rHand.z, g, false).rotation.x = 0.3;
-  if (lHand) { limb(lElbow, lHand, 0.042, sleeve, g); limb(lElbow.clone().add(V3(-0.12, -0.1, 0.2)), lElbow, 0.05, sleeve, g); const lh = M(geo.box(0.08, 0.06, 0.1), glove, lHand.x, lHand.y - 0.02, lHand.z, g, false); M(geo.box(0.05, 0.05, 0.04), watch, lElbow.x * 0.25 + lHand.x * 0.75, lElbow.y * 0.25 + lHand.y * 0.75 - 0.03, lElbow.z * 0.25 + lHand.z * 0.75, g, false); }
+  const sleeve = SP.vmSleeveMat(), glove = SP.vmGloveMat(), watch = SP.flat(0x111111, 0.4, 0.2), glow = SP.vmGlowMat ? SP.vmGlowMat() : null;
+  const cuff = (a, b, r) => { const c = a.clone().lerp(b, 0.12); const m = limb(a.clone().lerp(b, 0.06), c, r * 1.18, glow || SP.vmGloveMat(), g); return m; };
+  limb(rElbow, rHand, 0.042, sleeve, g); limb(rElbow.clone().add(V3(0.08, -0.12, 0.25)), rElbow, 0.05, sleeve, g); cuff(rHand, rElbow, 0.042);
+  hand(g, rHand, glove, 0.3, false);
+  if (lHand) { limb(lElbow, lHand, 0.042, sleeve, g); limb(lElbow.clone().add(V3(-0.12, -0.1, 0.2)), lElbow, 0.05, sleeve, g); cuff(lHand, lElbow, 0.042); hand(g, V3(lHand.x, lHand.y - 0.02, lHand.z), glove, 0.1, true); M(geo.box(0.05, 0.05, 0.04), watch, lElbow.x * 0.25 + lHand.x * 0.75, lElbow.y * 0.25 + lHand.y * 0.75 - 0.03, lElbow.z * 0.25 + lHand.z * 0.75, g, false); }
 }
 const CFG = {
   m4: { hip: V3(0.17, -0.185, -0.42), ads: (s) => V3(-s.x, -s.y, -0.2), hands: [V3(0, -0.11, 0.06), V3(0, -0.035, -0.42), V3(0.12, -0.3, 0.28), V3(-0.2, -0.24, -0.15)] },

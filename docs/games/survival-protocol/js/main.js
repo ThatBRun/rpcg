@@ -49,7 +49,7 @@ SP.MISSIONS = [
   { n: 1, name: 'The Jackal', sub: 'Algeria · Ten chapters', chapters: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
   { n: 2, name: 'Classified', sub: 'Mission 2 · In production', soon: true },
   { n: 3, name: 'Classified', sub: 'Mission 3 · In production', soon: true }];
-{ const tb = document.getElementById('titlebrow'); if (tb) tb.textContent = 'VERSION 1.2 · MISSION 1 · TEN CHAPTERS · ' + SP.CHAPTERS.reduce((a, C) => a + C.parts.length, 0) + ' PARTS'; }
+{ const tb = document.getElementById('titlebrow'); if (tb) tb.textContent = 'VERSION 1.3 · MISSION 1 · TEN CHAPTERS · ' + SP.CHAPTERS.reduce((a, C) => a + C.parts.length, 0) + ' PARTS'; }
 SP.PARTS.endTitle = 'Houser is still out there'; SP.PARTS.endText = 'The laptop, the manifests and Elena Moreau made it out. Sgt. Houser did not. Chapter 2 starts with getting him back.';
 const chParts = ch => ch === 0 ? [SP.modePart].filter(Boolean) : (SP.CHAPTERS[ch - 1] && SP.CHAPTERS[ch - 1].parts) || [];
 SP.loadMode = part => { SP.modePart = part; curCh = 0; return SP.loadPart(1, 0); };

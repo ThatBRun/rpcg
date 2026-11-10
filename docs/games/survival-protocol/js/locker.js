@@ -61,14 +61,14 @@ function pvLoop() {
   if (PV.obj) { if (PV.drag == null) PV.spin += 0.008; PV.obj.rotation.y = PV.spin; PV.obj.rotation.x = 0.12; }
   PV.r.render(PV.scene, PV.cam); PV.raf = requestAnimationFrame(pvLoop);
 }
+let pvOp = null, buyArm = null;
 function armModel() {
-  const S = SP.Models.soldier({ faction: 'foe', top: 0xff00fe, pants: 0x00fe01, seed: 7, helmet: true });
-  const topRef = SP.mat('fabric', { color: 0xff00fe, roughness: 0.95 }), pantsRef = SP.mat('fabric', { color: 0x00fe01, roughness: 0.95 }), gloveRef = SP.flat(0x2a2420, 0.8);
-  const sm = new T.MeshStandardMaterial({ roughness: 0.85, color: SP.lin(0x6a6a4a) }); SP.applySkin(sm, 'sleeve'); const pm = sm.clone(); if (!pm.map) pm.color.multiplyScalar(0.7); const gm = new T.MeshStandardMaterial({ roughness: 0.6 }); SP.applySkin(gm, 'glove');
-  S.root.traverse(o => { if (!o.isMesh) return; if (o.material === topRef) o.material = sm; else if (o.material === pantsRef) o.material = pm; else if (o.material === gloveRef) o.material = gm; });
-  try { const id = (PR.wheel || []).find(w => w && SP.WEAP[w] && SP.WEAP[w].model && !SP.WEAP[w].melee && !SP.WEAP[w].item) || 'm4'; if (S.chest) { const gun = SP.WEAP[id].model(); gun.scale.setScalar(1); S.chest.add(gun); } } catch (e) { }
+  const id = pvOp || SP.myOperator(); const gid = (PR.wheel || []).find(w => w && SP.WEAP[w] && SP.WEAP[w].model && !SP.WEAP[w].melee && !SP.WEAP[w].item) || 'm4';
+  const S = SP.Models.operator(id, { gid, seed: 3 }); if (S.root.children[0] && S.root.children[0].isMesh) S.root.remove(S.root.children.find(c => c.isMesh && c.material === SP.blobMat));
+  SP.animSoldier(S, 0.05, { speed: 0, aim: 0.55 }); for (let k = 0; k < 20; k++) SP.animSoldier(S, 0.05, { speed: 0, aim: 0.55 });
   return S.root;
 }
+const opOwned = k => k === 'default' || !!PS.skins[k];
 /* ---------------- UI ---------------- */
 let tab = 'operator', gunSel = null; let from = 'title';
 const TABS = [['operator', 'Operator'], ['wraps', 'Gun wraps'], ['knives', 'Knives'], ['crosshair', 'Crosshair'], ['tracers', 'Tracers'], ['titles', 'Titles'], ['banners', 'Banners']];
@@ -80,8 +80,11 @@ function render() {
   $('#lk-coins').textContent = '◆ ' + (PR.coins || 0).toLocaleString() + ' · TIER ' + PS.tier;
   const L = $('#lk-list'); let html = '', pv = null; const SK = SP.Pass.SKINS, WR = SP.Pass.WRAPS;
   if (tab === 'operator') {
-    html = Object.entries(SK).map(([k, S]) => { const own = !!PS.skins[k]; const t = tierOf('skin', k); return card({ k, on: PS.skin === k, lock: !own, name: S.name, sub: own ? (PS.skin === k ? 'EQUIPPED' : 'Owned') : 'Season Pass tier ' + t, bg: S.wrap ? WR[S.wrap].css : `linear-gradient(135deg,${S.sleeve == null ? '#6a6a4a' : hex(S.sleeve)} 60%,${hex(S.glove)} 60%)` }); }).join('');
-    pv = armModel; $('#lk-pvt').textContent = (SK[PS.skin] || SK.default).name;
+    const OP = SP.OPERATORS; const show = pvOp || SP.myOperator();
+    const cardOp = k => { const o = OP[k]; const own = opOwned(k); const t = tierOf('skin', k); const sub = own ? (PS.skin === k ? 'EQUIPPED' : 'Owned') : o.price ? (buyArm === k ? 'TAP AGAIN TO BUY · ' : '◆ ') + o.price + ' coins' : 'Season Pass tier ' + t; return card({ k, on: PS.skin === k || (show === k && !own), lock: !own, name: o.name, sub, bg: `linear-gradient(135deg,${hex(o.top)} 0 45%,${hex(o.top2 || o.top)} 45% 75%,${hex(o.glow || o.glove)} 75%)` }); };
+    const pass = Object.keys(OP).filter(k => !OP[k].price), store = Object.keys(OP).filter(k => OP[k].price);
+    html = '<div class="h4">Season Pass operators</div><div class="lkgrid">' + pass.map(cardOp).join('') + '</div><div class="h4">Operator store</div><div class="lkgrid">' + store.map(cardOp).join('') + '</div>';
+    pv = armModel; $('#lk-pvt').textContent = OP[show].name + (opOwned(show) ? '' : ' · preview');
   }
   if (tab === 'wraps') {
     const guns = ownedGuns(); if (!gunSel || !guns.includes(gunSel)) gunSel = guns[0];
@@ -122,7 +125,9 @@ function cardHTML() { const B = BANNERS[PR.banner] || BANNERS.recruit; const tt 
 function playerCard() { const el = $('#pcard-title'); if (el) el.innerHTML = cardHTML(); }
 SP.playerCardHTML = cardHTML;
 function pick(k, lock) {
-  if (tab === 'operator') { if (lock) { toast(SP.Pass.SKINS[k].name + ' unlocks at Season Pass tier ' + tierOf('skin', k) + '.'); return; } PS.skin = k; }
+  if (tab === 'operator') { const o = SP.OPERATORS[k]; pvOp = k;
+    if (lock) { if (o.price) { if (buyArm === k) { if ((PR.coins || 0) < o.price) { toast(o.name + ' costs ' + o.price + ' coins. You have ' + (PR.coins || 0) + '.'); buyArm = null; render(); return; } PR.coins -= o.price; PS.skins[k] = true; buyArm = null; toast('You unlocked ' + o.name + '!'); PS.skin = k; } else { buyArm = k; toast('Previewing ' + o.name + '. Tap again to buy for ' + o.price + ' coins.'); render(); return; } } else { toast('Previewing ' + o.name + ' · unlocks at Season Pass tier ' + tierOf('skin', k) + '.'); render(); return; } }
+    else { PS.skin = k; buyArm = null; } }
   if (tab === 'wraps') { const C = SP.CAMOS[k]; if (lock) { toast(C.pass ? C.name + ' unlocks at Season Pass tier ' + tierOf('wrap', k) + '.' : C.name + ' unlocks at ' + C.kills + ' kills with this gun.'); return; } if (k === 'none') delete PR.camo[gunSel]; else PR.camo[gunSel] = k; }
   if (tab === 'knives') { const K = SP.KNIVES[k]; if (lock) { if ((PR.coins || 0) < K.price) { toast(K.name + ' costs ' + K.price + ' coins. You have ' + (PR.coins || 0) + '.'); return; } PR.coins -= K.price; PR.knives[k] = true; toast('Bought the ' + K.name + '.'); } PR.knife = k; }
   if (tab === 'crosshair') { const S = SP.settings; const [t, v] = k.split(':'); if (t === 's') S.xhair = v; else S.xcol = k.slice(2); try { const key = 'survival_protocol_ch1_set'; const o = JSON.parse(localStorage.getItem(key) || '{}'); o.xhair = S.xhair; o.xcol = S.xcol; localStorage.setItem(key, JSON.stringify(o)); } catch (e) { } F().applySettings && F().applySettings(); }
@@ -133,7 +138,7 @@ function pick(k, lock) {
 }
 function refresh() { const P = SP.P; if (P && P.cur && SP.buildViewModel && SP.state === 'play') { try { SP.buildViewModel(P.cur); } catch (e) { } } if (SP.Progress.applyKnife) try { SP.Progress.applyKnife(); } catch (e) { } }
 const curScreen = () => { const s = [...document.querySelectorAll('.ov.screen')].find(e => !e.hidden && e.id !== 'locker'); return s ? s.id : 'title'; };
-SP.openLocker = (f, t) => { from = typeof f === 'string' ? f : curScreen(); if (t) tab = t; render(); SP.showScreen('locker'); if (!PV.raf && !$('#lk-cv').hidden) PV.raf = requestAnimationFrame(pvLoop); };
+SP.openLocker = (f, t) => { pvOp = null; buyArm = null; from = typeof f === 'string' ? f : curScreen(); if (t) tab = t; render(); SP.showScreen('locker'); if (!PV.raf && !$('#lk-cv').hidden) PV.raf = requestAnimationFrame(pvLoop); };
 function wire() {
   $('#lk-back').addEventListener('click', () => { SP.showScreen(from || 'title'); playerCard(); });
   ['#btn-locker', '#p-locker', '#mode-locker', '#bl-locker', '#pass-locker'].forEach(s => { const e = $(s); if (e) e.addEventListener('click', () => SP.openLocker()); });

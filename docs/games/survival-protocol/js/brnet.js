@@ -72,7 +72,7 @@ function drawLobby(status) {
   const lb = BR.LB; $('#bl-lb').innerHTML = `<div class="h4">Your best teams</div>` + (lb.hist && lb.hist.length ? lb.hist.slice().sort((a, b) => a.place - b.place || b.kills - a.kills).slice(0, 6).map(h => `<div class="brh"><b>#${h.place}</b><span>${h.flag || ''} ${h.team || ''}</span><span>${h.kills} kills · squad ${h.squadKills || 0}</span></div>`).join('') : '<div class="brh"><span>No matches yet</span></div>') + `<div class="brh"><span>Wins ${lb.wins} · Matches ${lb.games} · Kills ${lb.kills}</span></div>`;
 }
 SP.openBRLobby = async function () {
-  closeLobby(); L.started = false; L.country = Math.random() * BR.COUNTRIES.length | 0; L.name = myName(); L.humans = [{ name: L.name, me: true }]; L.host = true;
+  closeLobby(); L.started = false; L.country = Math.random() * BR.COUNTRIES.length | 0; L.name = myName(); L.humans = [{ name: L.name, me: true, skin: (SP.myOperator ? SP.myOperator() : 'default') }]; L.host = true;
   SP.showScreen('brlobby'); drawLobby('Searching for players online…'); $('#bl-play').textContent = 'Play now';
   const myId = 'sp-' + VER + '-p-' + rid(10); let sig;
   try { sig = new Signal(myId); await sig.open(); }
@@ -82,8 +82,8 @@ SP.openBRLobby = async function () {
     const slot = 'sp-' + VER + '-qp-' + s;
     try { const hs = new Signal(slot); await hs.open(); sig.close(); L.sig = hs; L.host = true; listen(hs, onJoin); drawLobby('Online lobby ' + s + ' open · waiting for players to join your squad'); startCountdown(SP.brLobbyWait || 25); return; }
     catch (e) { if (e !== 'taken') { sig.close(); drawLobby((ERR[e] || 'Online play unavailable') + '. Playing with bots.'); L.offline = true; return; } }
-    try { drawLobby('Joining lobby ' + s + '…'); const c = await connect(sig, slot, 9000); const w = await ask(c, { t: 'join', name: L.name, ver: VER });
-      L.sig = sig; L.conn = c; L.host = false; L.country = w.country; L.humans = w.humans.map(h => ({ name: h.name, me: h.name === L.name && h.idx === w.idx })); L.idx = w.idx;
+    try { drawLobby('Joining lobby ' + s + '…'); const c = await connect(sig, slot, 9000); const w = await ask(c, { t: 'join', name: L.name, ver: VER, skin: (SP.myOperator ? SP.myOperator() : 'default') });
+      L.sig = sig; L.conn = c; L.host = false; L.country = w.country; L.humans = w.humans.map(h => ({ name: h.name, skin: h.skin, me: h.name === L.name && h.idx === w.idx })); L.idx = w.idx;
       c.onmsg = clientLobbyMsg; c.onclose = () => { if (!L.started) { drawLobby('The host left. Searching again…'); setTimeout(() => SP.openBRLobby(), 800); } };
       drawLobby('Joined an online squad · waiting for the host to start'); $('#bl-play').textContent = 'Waiting for host'; return; }
     catch (e) { /* lobby full or gone, try the next */ }
@@ -94,16 +94,16 @@ function onJoin(c) {
   c.onmsg = m => {
     if (m.t !== 'join') return; if (m.ver !== VER) { c.send({ t: 'nope', why: 'version' }); return; }
     if (L.started || L.humans.length >= 4) { c.send({ t: 'full' }); return; }
-    const idx = L.humans.length; L.humans.push({ name: m.name, conn: c }); L.conns.push(c); c.idx = idx;
-    c.send({ t: 'welcome', idx, country: L.country, humans: L.humans.map((h, i) => ({ name: h.name, idx: i })) });
+    const idx = L.humans.length; L.humans.push({ name: m.name, conn: c, skin: m.skin }); L.conns.push(c); c.idx = idx;
+    c.send({ t: 'welcome', idx, country: L.country, humans: L.humans.map((h, i) => ({ name: h.name, idx: i, skin: h.skin })) });
     broadcastLobby(); drawLobby(L.humans.length + ' of 4 real players in your squad'); A.click(1200, 0.1);
     c.onmsg = null; c.onclose = () => { const i = L.humans.findIndex(h => h.conn === c); if (i > 0 && !L.started) { L.humans.splice(i, 1); L.conns = L.conns.filter(x => x !== c); broadcastLobby(); drawLobby(); } };
     if (L.humans.length >= 4) { L.timer = Math.min(L.timer, 3); }
   };
 }
-function broadcastLobby() { const hs = L.humans.map((h, i) => ({ name: h.name, idx: i })); L.conns.forEach(c => c.send({ t: 'lobby', humans: hs, country: L.country })); }
+function broadcastLobby() { const hs = L.humans.map((h, i) => ({ name: h.name, idx: i, skin: h.skin })); L.conns.forEach(c => c.send({ t: 'lobby', humans: hs, country: L.country })); }
 function clientLobbyMsg(m) {
-  if (m.t === 'lobby') { L.humans = m.humans.map(h => ({ name: h.name, me: h.idx === L.idx })); L.country = m.country; drawLobby(); }
+  if (m.t === 'lobby') { L.humans = m.humans.map(h => ({ name: h.name, skin: h.skin, me: h.idx === L.idx })); L.country = m.country; drawLobby(); }
   if (m.t === 'start') { L.started = true; startClient(m); }
 }
 let cdT = null;
@@ -114,16 +114,16 @@ function closeLobby() { clearInterval(cdT); $('#bl-count') && ($('#bl-count').te
 const NET = { role: 'off' };
 function hostStart() {
   if (L.started) return; if (!L.host) return; L.started = true; clearInterval(cdT);
-  const humans = L.humans.map((h, i) => ({ name: h.name, me: i === 0, peer: h.conn || null }));
+  const humans = L.humans.map((h, i) => ({ name: h.name, skin: h.skin, me: i === 0, peer: h.conn || null }));
   const online = humans.length > 1; const seed = Math.random() * 1e9 | 0; const env = SP.pick(['afternoon', 'day', 'afternoon']);
-  if (online) { L.conns.forEach(c => c.send({ t: 'start', seed, country: L.country, env, humans: humans.map(h => h.name) })); try { L.sig && L.sig.close(); } catch (e) { } }
+  if (online) { L.conns.forEach(c => c.send({ t: 'start', seed, country: L.country, env, humans: humans.map(h => h.name), skins: humans.map(h => h.skin || 'default') })); try { L.sig && L.sig.close(); } catch (e) { } }
   else { try { L.sig && L.sig.close(); } catch (e) { } }
   const net = online ? makeHost(L.conns.slice()) : null;
   BR.start({ seed, country: L.country, env, humans, net });
 }
 function startClient(m) {
   try { L.sig && L.sig.close(); } catch (e) { }
-  const humans = m.humans.map((n, i) => ({ name: n, me: i === L.idx, peer: null }));
+  const humans = m.humans.map((n, i) => ({ name: n, skin: (m.skins || [])[i], me: i === L.idx, peer: null }));
   const net = makeClient(L.conn);
   BR.start({ seed: m.seed, country: m.country, env: m.env, humans, net });
 }

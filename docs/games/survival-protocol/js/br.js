@@ -53,7 +53,7 @@ function newMatch(opt) {
   BR.ents = []; let id = 0; const calls = SP.seeded(seed + 11, () => CALLS.slice().sort(() => Math.random() - 0.5));
   for (const tm of BR.teams) for (let k = 0; k < PER; k++) {
     const human = tm.id === 0 && opt.humans && opt.humans[k];
-    BR.ents.push({ id: id++, team: tm.id, name: human ? human.name : (tm.country.slice(0, 3).toUpperCase() + '·' + calls[(tm.id * 4 + k) % calls.length]), human: !!human, me: human ? !!human.me : false, peer: human ? human.peer : null,
+    BR.ents.push({ id: id++, team: tm.id, name: human ? human.name : (tm.country.slice(0, 3).toUpperCase() + '·' + calls[(tm.id * 4 + k) % calls.length]), human: !!human, me: human ? !!human.me : false, peer: human ? human.peer : null, skin: human && human.skin,
       st: 'heli', x: 0, y: 300, z: 0, yaw: 0, hp: 100, sh: 0, knock: 0, guns: [], mats: { wood: 100, stone: 100, metal: 100 }, meds: { bandage: 0, medkit: 0, minishield: 0, shieldpot: 0 }, gold: 0, kills: 0, u: null, acc: rand(0.55, 1.05), skill: rand(0.6, 1.25), lootT: rand(8, 20) });
   }
   if (!opt.humans) BR.ents[0].me = true, BR.ents[0].human = true, BR.ents[0].name = 'YOU';
@@ -92,8 +92,8 @@ const LIVE_R = 240, DROP_R = 320;
 function spawnUnit(e) {
   const P = SP.P; const ally = e.team === BR.myTeam;
   const gid = e.guns[e.cur || 0] && e.guns[e.cur || 0].id;
-  const u = new SP.Unit({ team: ally ? 'ally' : 'foe', name: e.name, pos: V3(e.x, SP.W.groundAt(e.x, e.z, e.y + 1), e.z), weapon: rigWeapon(gid), behavior: 'assault', alert: 1, acc: e.acc, hp: 100, sight: 85,
-    look: { seed: 400 + e.id, top: new T.Color().setHSL(BR.teams[e.team].hue / 360, 0.35, 0.32).getHex(), pants: 0x2a2a28, helmet: e.id % 3 === 0, head: e.id % 3 === 1 ? 'cap' : undefined } });
+  const u = new SP.Unit({ team: ally ? 'ally' : 'foe', name: e.name, pos: V3(e.x, SP.W.groundAt(e.x, e.z, e.y + 1), e.z), weapon: rigWeapon(gid), gid, behavior: 'assault', alert: 1, acc: e.acc, hp: 100, sight: 85,
+    look: { operator: e.skin || (BR.OPS || (BR.OPS = Object.keys(SP.OPERATORS || { default: 1 })))[(e.id * 7 + (BR.seed || 0)) % BR.OPS.length], gid, seed: 400 + e.id, top: new T.Color().setHSL(BR.teams[e.team].hue / 360, 0.35, 0.32).getHex(), pants: 0x2a2a28, helmet: e.id % 3 === 0, head: e.id % 3 === 1 ? 'cap' : undefined } });
   u.br = true; u.brTeam = e.team; u.brEnt = e; u.aware = true; u.stopDist = clsOf(gid) === 'melee' ? 1.4 : clsOf(gid) === 'shotgun' ? 6 : rand(10, 24); u.runSpeed = 5.2; u.gid = gid; u.invuln = false;
   if (e.puppet) { u.puppet = true; u.netPos = V3(e.x, e.y, e.z); }
   if (ally && !e.puppet && !e.human) { u.behavior = 'follow'; u.follow = 'player'; u.offset = V3([-2.5, 2.5, 0][e.id % 3], 0, 3 + (e.id % 3)); }
@@ -103,7 +103,7 @@ function despawnUnit(e) { if (!e.u) return; e.x = e.u.pos.x; e.y = e.u.pos.y; e.
 function setRigGun(u, gid) {
   const S = u.rig; const kind = rigWeapon(gid); if (u.gid === gid) return; u.gid = gid; u.weapon = kind === 'none' ? 'm4' : kind;
   if (S.gun) { S.gun.parent && S.gun.parent.remove(S.gun); S.gun = null; }
-  if (kind !== 'none') { const Mo = SP.Models; S.gun = kind === 'ak' ? Mo.ak() : kind === 'shotgun' ? Mo.shotgun() : kind === 'pistol' ? Mo.pistol() : Mo.m4(true); S.chest.add(S.gun); }
+  if (kind !== 'none') { const Mo = SP.Models; S.gun = SP.tpGun ? SP.tpGun(gid) : kind === 'ak' ? Mo.ak() : kind === 'shotgun' ? Mo.shotgun() : kind === 'pistol' ? Mo.pistol() : Mo.m4(true); S.chest.add(S.gun); }
   u.stopDist = clsOf(gid) === 'melee' ? 1.4 : clsOf(gid) === 'shotgun' ? 6 : rand(10, 24);
 }
 // targets: other teams only (no friendly fire), the player, never vendors
