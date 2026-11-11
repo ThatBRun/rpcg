@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f1630">
+<meta name="format-detection" content="telephone=no">
 <title>Really Live — RAMPACEGAMES</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
@@ -13,7 +14,10 @@
 button,input{font-family:inherit}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:Nunito,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
-canvas#cv{position:fixed;inset:0;display:block;image-rendering:pixelated}
+canvas#cv{position:fixed;inset:0;display:block;image-rendering:pixelated;touch-action:none}
+#stickBase.idle{opacity:.45}
+#controls,#btnA,#btnB,#stickBase{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none}
+#btnA::after,#btnB::after{content:"";position:absolute;inset:-14px;border-radius:50%}
 #ui{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 14px);overflow-y:auto;touch-action:pan-y;z-index:10;background:rgba(9,13,32,.55);backdrop-filter:blur(2px)}
 #ui.center{justify-content:center;background:transparent}
 .panel{width:100%;max-width:520px;background:linear-gradient(180deg,var(--card2),var(--card));border:2px solid #2d3b78;border-radius:20px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.45);margin:auto 0}
@@ -84,13 +88,13 @@ h2{font-size:22px}h3{font-size:18px}h4{font-size:15px;color:var(--y);margin-top:
 .phoneBtn i{position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;font:800 11px Nunito,system-ui,sans-serif;font-style:normal;border-radius:99px;padding:2px 6px}
 body:not(.playing) #controls{display:none}
 #btnA,#btnB{position:fixed;z-index:6;border-radius:50%;display:flex;align-items:center;justify-content:center;font:16px "Russo One",system-ui,sans-serif;color:#fff;touch-action:none;cursor:pointer;user-select:none;box-shadow:0 5px 0 rgba(0,0,0,.4)}
-#btnA{width:84px;height:84px;right:calc(env(safe-area-inset-right) + 18px);bottom:calc(env(safe-area-inset-bottom) + 34px);background:radial-gradient(circle at 35% 30%,#ffb46a,#ff7a10);border:3px solid #ffd2a6}
-#btnB{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 114px);bottom:calc(env(safe-area-inset-bottom) + 22px);background:radial-gradient(circle at 35% 30%,#7fe0ff,#1aa7e6);border:3px solid #c3f0ff}
-#btnA span,#btnB span{font-size:13px;text-shadow:0 2px 0 rgba(0,0,0,.35);text-align:center;line-height:1}
+#btnA{width:94px;height:94px;right:calc(env(safe-area-inset-right) + 18px);bottom:calc(env(safe-area-inset-bottom) + 34px);background:radial-gradient(circle at 35% 30%,#ffb46a,#ff7a10);border:3px solid #ffd2a6}
+#btnB{width:72px;height:72px;right:calc(env(safe-area-inset-right) + 124px);bottom:calc(env(safe-area-inset-bottom) + 22px);background:radial-gradient(circle at 35% 30%,#7fe0ff,#1aa7e6);border:3px solid #c3f0ff}
+#btnA span,#btnB span{font-size:15px;text-shadow:0 2px 0 rgba(0,0,0,.35);text-align:center;line-height:1}
 #btnA.on,#btnB.on{transform:translateY(3px) scale(.96);box-shadow:0 2px 0 rgba(0,0,0,.4)}
-#stickBase{position:fixed;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid rgba(255,255,255,.35);display:none;z-index:6;pointer-events:none}
-#stickKnob{position:absolute;left:30px;top:30px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.75);border:3px solid #fff}
-.hint{position:fixed;left:18px;bottom:calc(env(safe-area-inset-bottom) + 40px);color:rgba(255,255,255,.45);font:800 12px Nunito,sans-serif;z-index:4;pointer-events:none}
+#stickBase{position:fixed;width:130px;height:130px;transition:opacity .15s;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid rgba(255,255,255,.35);display:none;z-index:6;pointer-events:none}
+#stickKnob{position:absolute;left:38px;top:38px;width:54px;height:54px;box-shadow:0 3px 8px rgba(0,0,0,.4);border-radius:50%;background:rgba(255,255,255,.75);border:3px solid #fff}
+.hint{display:none;position:fixed;left:18px;bottom:calc(env(safe-area-inset-bottom) + 40px);color:rgba(255,255,255,.45);font:800 12px Nunito,sans-serif;z-index:4;pointer-events:none}
 #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,8,20,.65);z-index:30;padding:16px}
 .mcard{width:100%;max-width:440px;max-height:88vh;overflow:auto;touch-action:pan-y;background:linear-gradient(180deg,var(--card2),var(--card));border:2px solid #3b4c96;border-radius:20px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:fadein .2s}
 .mbody{font-size:15px;line-height:1.45}.mbtns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -818,47 +822,62 @@ function resize(){
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(H*DPR);
   cv.style.width=W+'px'; cv.style.height=H+'px';
 }
-window.addEventListener('resize',resize); resize();
+window.addEventListener('resize',()=>{ resize(); if(typeof showStickIdle==='function'&&!Input.stick) showStickIdle(); }); resize();
 
-// ---- Input ----
-const Input={ mx:0,my:0, a:false,b:false, aHeld:false,bHeld:false, keys:{}, stick:null, tap:null };
+// ---- Input (rebuilt for mobile: multi-touch, floating+visible joystick, sticky buttons) ----
+const Input={ mx:0,my:0, a:false,b:false, aHeld:false,bHeld:false, keys:{}, stick:null, tap:null, run:false };
 function clearEdges(){ Input.a=false; Input.b=false; Input.tap=null; }
 const stickBase=document.getElementById('stickBase'), stickKnob=document.getElementById('stickKnob');
-cv.addEventListener('pointerdown',e=>{
-  if(!document.body.classList.contains('playing')) return;
-  e.preventDefault();
-  if((SETTINGS.lefty? e.clientX > W*0.4 : e.clientX < W*0.6) || e.pointerType==='mouse'){
-    if(Input.stick) return;
-    Input.stick={id:e.pointerId, ox:e.clientX, oy:e.clientY, x:e.clientX, y:e.clientY};
-    stickBase.style.display='block'; stickBase.style.left=(e.clientX-55)+'px'; stickBase.style.top=(e.clientY-55)+'px';
-    stickKnob.style.transform='translate(0px,0px)';
-    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
-  }
-  Input.tap={x:e.clientX,y:e.clientY};
-});
-cv.addEventListener('pointermove',e=>{
-  const s=Input.stick; if(!s||s.id!==e.pointerId) return;
-  s.x=e.clientX; s.y=e.clientY;
-  let dx=s.x-s.ox, dy=s.y-s.oy; const d=Math.hypot(dx,dy), R=48;
-  if(d>R){ dx=dx/d*R; dy=dy/d*R; }
+const STICK_R=56;
+function stickHome(){ return {x:SETTINGS.lefty?W-95:95, y:H-(H<500?85:120)}; }
+function showStickIdle(){ if(!document.body.classList.contains('playing')){ stickBase.style.display='none'; return; } const h=stickHome(); stickBase.style.display='block'; stickBase.classList.add('idle'); stickBase.style.left=(h.x-65)+'px'; stickBase.style.top=(h.y-65)+'px'; stickKnob.style.transform='translate(0px,0px)'; }
+function inStickZone(x,y){ if(y<(H<500?60:110)) return false; return SETTINGS.lefty? x>W*0.45 : x<W*0.55; }
+function stickStart(id,x,y){ Input.stick={id,ox:x,oy:y}; stickBase.style.display='block'; stickBase.classList.remove('idle'); stickBase.style.left=(x-65)+'px'; stickBase.style.top=(y-65)+'px'; stickMove(x,y); }
+function stickMove(x,y){ const st=Input.stick; if(!st) return; let dx=x-st.ox, dy=y-st.oy; const d=Math.hypot(dx,dy);
+  if(d>STICK_R){ st.ox=x-dx/d*STICK_R; st.oy=y-dy/d*STICK_R; stickBase.style.left=(st.ox-65)+'px'; stickBase.style.top=(st.oy-65)+'px'; dx=x-st.ox; dy=y-st.oy; }
   stickKnob.style.transform=`translate(${dx}px,${dy}px)`;
-  Input.mx=dx/R; Input.my=dy/R;
-});
-function endStick(e){ const s=Input.stick; if(!s||s.id!==e.pointerId) return; Input.stick=null; Input.mx=0; Input.my=0; stickBase.style.display='none'; }
-cv.addEventListener('pointerup',endStick); cv.addEventListener('pointercancel',endStick);
+  const m=Math.min(1,Math.hypot(dx,dy)/STICK_R), dz=.14;
+  if(m<dz){ Input.mx=0; Input.my=0; } else { const k=(m-dz)/(1-dz); const ang=Math.atan2(dy,dx); Input.mx=Math.cos(ang)*k; Input.my=Math.sin(ang)*k; }
+  Input.run=m>.95; }
+function stickEnd(){ Input.stick=null; Input.mx=0; Input.my=0; Input.run=false; showStickIdle(); }
+const UI_SEL='#hud,#ui,#modal,#phone,#btnA,#btnB,#pauseBtn,#toast';
+// touch: joystick
+document.addEventListener('touchstart',e=>{
+  if(!document.body.classList.contains('playing')) return;
+  for(const t of e.changedTouches){ if(t.target.closest&&t.target.closest(UI_SEL)) continue;
+    if(!Input.stick&&inStickZone(t.clientX,t.clientY)) stickStart(t.identifier,t.clientX,t.clientY);
+    Input.tap={x:t.clientX,y:t.clientY}; }
+  if(e.target===cv||e.target.closest&&e.target.closest('#controls')) e.preventDefault();
+},{passive:false});
+document.addEventListener('touchmove',e=>{ if(Input.stick) for(const t of e.changedTouches) if(t.identifier===Input.stick.id) stickMove(t.clientX,t.clientY); if(document.body.classList.contains('playing')&&!(e.target.closest&&e.target.closest('#ui,#phone,#modal'))) e.preventDefault(); },{passive:false});
+const touchEnd=e=>{ if(Input.stick) for(const t of e.changedTouches) if(t.identifier===Input.stick.id) stickEnd(); };
+document.addEventListener('touchend',touchEnd); document.addEventListener('touchcancel',touchEnd);
+// mouse (desktop testing)
+cv.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||!document.body.classList.contains('playing')) return; stickStart('mouse',e.clientX,e.clientY); });
+window.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'&&Input.stick&&Input.stick.id==='mouse') stickMove(e.clientX,e.clientY); });
+window.addEventListener('pointerup',e=>{ if(e.pointerType==='mouse'&&Input.stick&&Input.stick.id==='mouse') stickEnd(); });
+// buttons: stay pressed until the finger lifts, even if it slides
 function bindBtn(el,key){
-  const down=e=>{ e.preventDefault(); e.stopPropagation(); Input[key]=true; Input[key+'Held']=true; el.classList.add('on'); Audio_.unlock(); };
-  const up=e=>{ e.preventDefault(); Input[key+'Held']=false; el.classList.remove('on'); };
-  el.addEventListener('pointerdown',down); el.addEventListener('pointerup',up); el.addEventListener('pointerleave',up); el.addEventListener('pointercancel',up);
+  const ids=new Set();
+  const press=()=>{ Input[key]=true; Input[key+'Held']=true; el.classList.add('on'); Audio_.unlock(); try{ navigator.vibrate&&navigator.vibrate(12); }catch(_){} };
+  const release=()=>{ if(ids.size) return; Input[key+'Held']=false; el.classList.remove('on'); };
+  el.addEventListener('touchstart',e=>{ e.preventDefault(); e.stopPropagation(); for(const t of e.changedTouches) ids.add(t.identifier); press(); },{passive:false});
+  const end=e=>{ for(const t of e.changedTouches) ids.delete(t.identifier); release(); };
+  el.addEventListener('touchend',end); el.addEventListener('touchcancel',end);
+  el.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse') return; e.preventDefault(); press(); });
+  el.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse') return; release(); }); el.addEventListener('pointerleave',e=>{ if(e.pointerType!=='mouse') return; release(); });
 }
 const btnA=document.getElementById('btnA'), btnB=document.getElementById('btnB');
 bindBtn(btnA,'a'); bindBtn(btnB,'b');
-function setButtons(a,b){ btnA.querySelector('span').textContent=a||''; btnB.querySelector('span').textContent=b||''; btnB.style.display=b?'flex':'none'; btnA.style.display=a?'flex':'none'; }
+function setButtons(a,b){ const sa=btnA.querySelector('span'), sb=btnB.querySelector('span'); if(sa.textContent!==(a||'')) sa.textContent=a||''; if(sb.textContent!==(b||'')) sb.textContent=b||''; btnB.style.display=b?'flex':'none'; btnA.style.display=a?'flex':'none'; }
+document.addEventListener('gesturestart',e=>e.preventDefault()); document.addEventListener('dblclick',e=>e.preventDefault()); document.addEventListener('contextmenu',e=>{ if(document.body.classList.contains('playing')) e.preventDefault(); });
+window.addEventListener('blur',()=>{ stickEnd(); Input.aHeld=Input.bHeld=false; });
 window.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT') return;
   const k=e.key.toLowerCase(); if(Input.keys[k]) return; Input.keys[k]=true;
   if(k===' '||k==='j'||k==='enter'){ Input.a=true; Input.aHeld=true; if(document.body.classList.contains('playing')) e.preventDefault(); }
   if(k==='shift'||k==='k'){ Input.b=true; Input.bHeld=true; }
+  if(k==='escape'&&typeof pauseMenu==='function') pauseMenu();
   keyVec();
 });
 window.addEventListener('keyup',e=>{
@@ -892,7 +911,7 @@ function modal(title, body, buttons){
 }
 let toastT=0;
 function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),2200); }
-function setPlaying(on){ document.body.classList.toggle('playing',on); if(!on){ Input.stick=null; Input.mx=Input.my=0; stickBase.style.display='none'; } }
+function setPlaying(on){ document.body.classList.toggle('playing',on); if(!on){ Input.stick=null; Input.mx=Input.my=0; Input.run=false; Input.aHeld=Input.bHeld=false; stickBase.style.display='none'; } else if(!Input.stick) showStickIdle(); }
 
 // ---- Audio (WebAudio synth) ----
 const Audio_={
@@ -1226,14 +1245,170 @@ function prerenderMap(M){
   return c;
 }
 
+// ===== THE REGION: a ~1000x bigger open world around your hometown =====
+// 80 x 70 chunks of 1024px (81,920 x 71,680 px). Generated and drawn on demand in 512px tiles.
+const RC=1024, RCX=80, RCY=70, RTILE=512, HOX=41*RC, HOY=37*RC;
+// default methods for normal maps
+MapDef.prototype.solidsNear=function(){ return this.solids; };
+MapDef.prototype.doorsNear=function(){ return this.doors; };
+MapDef.prototype.treesIn=function(){ return this.trees; };
+MapDef.prototype.roadsNear=function(){ return this.roads; };
+MapDef.prototype.drawArea=function(c,sx,sy,sw,sh){ sx=Math.max(0,sx); sy=Math.max(0,sy); sw=Math.min(this.w-sx,sw); sh=Math.min(this.h-sy,sh); if(sw>0&&sh>0) c.drawImage(this.canvas,sx,sy,sw,sh,sx,sy,sw,sh); };
+const RESIDENTS=['Mr. Alvarez','Mrs. Chen','Grandpa Joe','Ms. Rivera','The Johnsons','Mr. Patel','Coach Dee (retired)','Aunt Rosa','Mr. Kowalski','Dr. Okoye','Mrs. Lindqvist','Farmer Ben','Ms. Tran','Mr. & Mrs. Baker'];
+class Region{
+  constructor(){
+    this.id='home'; this.region=true; this.w=RCX*RC; this.h=RCY*RC; this.o={title:'The Region'}; this.spawn='home';
+    const H=this.H=buildHometown(); placeTreesFor(H,hashStr('home'),160); H.canvas=prerenderMap(H);
+    const off=o=>({...o,x:o.x+HOX,y:o.y+HOY});
+    this.hSolids=H.solids.map(off); this.hDoors=H.doors.map(d=>({...off(d),cx:d.cx+HOX,cy:d.cy+HOY}));
+    this.hTrees=H.trees.map(off); this.hRoads=H.roads.map(r=>[r[0]+HOX,r[1]+HOY,r[2],r[3]]);
+    this.zones=H.zones.map(off); this.hRect={x:HOX-40,y:HOY-40,w:H.w+80,h:H.h+80};
+    this.chunks=new Map(); this.tiles=new Map(); this.budget=0;
+    this.buildTowns();
+  }
+  door(id){ return this.hDoors.find(d=>d.id===id)||[...this.chunks.values()].flatMap(c=>c.doors).find(d=>d.id===id); }
+  get doors(){ return [...this.hDoors,...[...this.chunks.values()].flatMap(c=>c.doors)]; }
+  inHome(x,y,w=0,h=0){ const r=this.hRect; return x+w>r.x&&x<r.x+r.w&&y+h>r.y&&y<r.y+r.h; }
+  buildTowns(){
+    const r=srng(4242); this.towns=[]; this.townAt=new Map();
+    for(let cny=0;cny<Math.floor(RCY/4);cny++) for(let cnx=0;cnx<RCX/4;cnx++){
+      if(cnx===10&&cny===9) continue; // hometown county
+      if(r()<.58){ const name=genPlace(r); const t={name,cnx,cny,cx:cnx*4+1,cy:cny*4+1,x:cnx*4*RC+2*RC,y:cny*4*RC+2*RC,schools:[]}; this.towns.push(t); this.townAt.set(cnx+','+cny,t); }
+    }
+    // assign every school in the game to a real town, closest towns first
+    const hx=HOX+1300, hy=HOY+1100; this.towns.sort((a,b)=>Math.hypot(a.x-hx,a.y-hy)-Math.hypot(b.x-hx,b.y-hy));
+    const q={es:SCHOOLS.es.map(s=>s[0]),ms:SCHOOLS.ms.map(s=>s[0]),hs:SCHOOLS.hs.map(s=>s[0])};
+    for(const t of this.towns){ for(const lv of ['hs','ms','es']) if(q[lv].length) t.schools.push({lv,name:q[lv].shift()}); }
+    this.schoolTown=new Map(); for(const t of this.towns) for(const s of t.schools) this.schoolTown.set(s.name,t);
+  }
+  chunk(cx,cy){
+    const k=cx+','+cy; if(this.chunks.has(k)) return this.chunks.get(k);
+    const ch=this.genChunk(cx,cy); this.chunks.set(k,ch);
+    if(this.chunks.size>160){ const first=this.chunks.keys().next().value; this.chunks.delete(first); }
+    return ch;
+  }
+  genChunk(cx,cy){
+    const X=cx*RC, Y=cy*RC, r=srng(hashStr('ch'+cx+'_'+cy)), ch={cx,cy,solids:[],doors:[],trees:[],roads:[],spots:[],b:[],decor:[],label:null};
+    const homeChunk=cx>=41&&cx<=43&&cy>=37&&cy<=39;
+    const road=(x,y,w,h,hw)=>ch.roads.push([x,y,w,h,hw]);
+    if(!homeChunk){
+      if(cx%4===0) road(X,Y,110,RC,1); if(cy%4===0) road(X,Y,RC,110,1);
+      if(cx%4===2) road(X,Y,60,RC); if(cy%4===2) road(X,Y,RC,60);
+    }
+    // hometown connectors
+    if(cx===42&&cy===36) road(HOX+1250,Y,70,RC); if(cx===42&&cy===39) road(HOX+1250,HOY+2240,70,40*RC-(HOY+2240));
+    if(cx===40&&cy===37) road(X+110,HOY+560,RC-110,60); if(cx===43&&cy===38) road(HOX+2600,HOY+1600,44*RC-(HOX+2600),60);
+    if(homeChunk||cx>=RCX||cy>=RCY) return ch;
+    const town=this.townAt.get(Math.floor(cx/4)+','+Math.floor(cy/4));
+    const urban=town&&cx%4>=1&&cx%4<=2&&cy%4>=1&&cy%4<=2;
+    const id=()=>'r_'+cx+'_'+cy+'_'+ch.doors.length;
+    const B=(x,y,w,h,wall,roof,label,interior,dlabel,data={},o={})=>{ const b={x,y,w,h,wall,roof,label,...o}; ch.b.push(b); ch.solids.push({x,y,w,h}); const did=id(); const dx=x+w/2-22, dy=y+h; ch.doors.push({id:did,x:dx-10,y:dy,w:64,h:36,cx:x+w/2,cy:dy+18,label:dlabel,interior,data}); b.doorX=dx; return b; };
+    const tree=(x,y,bush)=>{ if(ch.trees.some(t=>Math.hypot(t.x-x,t.y-y)<44)) return; ch.trees.push({x,y,bush}); if(!bush) ch.solids.push({x:x-8,y:y-10,w:16,h:10}); };
+    const freeOfRoads=(x,y,w,h)=>!ch.roads.some(R=>x<R[0]+R[2]+30&&x+w>R[0]-30&&y<R[1]+R[3]+40&&y+h>R[1]-30);
+    if(urban){
+      road(X+482,Y,60,RC); road(X,Y+482,RC,60);
+      if(cx%4===1&&cy%4===1) ch.label=town.name;
+      const ti=(cy%4-1)*2+(cx%4-1);
+      const quads=[[X+90,Y+90],[X+572,Y+90],[X+90,Y+572],[X+572,Y+572]];
+      quads.forEach(([qx,qy],qi)=>{
+        const bi=ti*4+qi, palette=[['#c96a4a','#3b4a6b'],['#e0c27a','#7a3b2e'],['#8fb3c9','#3d3d4a'],['#d9d4c7','#5a3e2b'],['#b9cf9a','#6b2f3a'],['#d7a6b3','#4a2f3a']];
+        const sch={0:0,5:1,10:2}[bi]; const sc=sch!==undefined?town.schools[sch]:null;
+        if(sc){ const lvName={es:'Elementary',ms:'Middle',hs:'High'}[sc.lv]; B(qx+30,qy,320,170,['#d77b4d','#5f8f6a','#a64b3d'][['es','ms','hs'].indexOf(sc.lv)],'#3d4654',sc.name.replace(/ (Elementary|Middle|High)$/,'').toUpperCase(),'school',sc.name,{level:sc.lv,school:sc.name},{logo:sc.name,sign:true}); ch.decor.push({type:'field',x:qx,y:qy+220,w:380,h:150,lines:'soccer'}); return; }
+        if(bi===3){ B(qx,qy,180,130,'#9aa6b2','#36495e','TRAIN','station','Train Station'); B(qx+210,qy+180,170,130,'#f6c26b','#6d4c41','CAFÉ','cafe',`${town.name} Café`); tree(qx+40,qy+300); return; }
+        if(bi===12){ B(qx,qy,200,140,'#e9a23b','#b5462f','PITSTOP','shop','Pitstop'); B(qx+200,qy+190,180,150,'#8d6e63','#3e2723','LIBRARY','library',`${town.name} Library`); return; }
+        if(bi===15){ B(qx,qy,190,140,'#546e7a','#263238','GYM','gym',`${town.name} Gym`); B(qx+200,qy+190,180,130,'#ab47bc','#311b92','ARCADE','arcade','Arcade'); return; }
+        if(bi===6){ ch.decor.push({type:'pond',x:qx+60,y:qy+100,w:260,h:180}); ch.solids.push({x:qx+80,y:qy+130,w:220,h:120}); ch.spots.push({x:qx+190,y:qy+300,label:'Fishing spot',act:'fish'}); for(let i=0;i<6;i++) tree(qx+r()*380,qy+(i%2?20:360)+r()*20); return; }
+        // houses
+        for(let k=0;k<4;k++){ const hx=qx+(k%2)*200, hy=qy+Math.floor(k/2)*200; const p=palette[Math.floor(r()*palette.length)]; B(hx,hy,140,110,p[0],p[1],'','resident',`${pick2(RESIDENTS,r)}'s House`,{resident:Math.floor(r()*999)}); if(r()<.5) tree(hx+160,hy+130,r()<.4); }
+      });
+      return ch;
+    }
+    // rural
+    const kind=r(); const ax=X+150, ay=Y+150, aw=RC-260, ah=RC-260;
+    if(kind<.3){ ch.decor.push({type:'farm',x:ax,y:ay,w:aw,h:ah*.6,seed:cx*31+cy}); if(freeOfRoads(ax+aw-180,ay+ah*.65,160,120)) B(ax+aw-180,ay+ah*.65,160,120,'#b23a3a','#4e342e','BARN','resident',`${pick2(RESIDENTS,r)}'s Farm`,{resident:Math.floor(r()*999),farm:true}); for(let i=0;i<10;i++) tree(ax+r()*aw,ay+ah*.65+r()*ah*.35); }
+    else if(kind<.52){ const lw=380+r()*200, lh=240+r()*160, lx=ax+r()*(aw-lw), ly=ay+r()*(ah-lh); ch.decor.push({type:'pond',x:lx,y:ly,w:lw,h:lh}); ch.solids.push({x:lx+20,y:ly+30,w:lw-40,h:lh-60}); ch.spots.push({x:lx+lw/2,y:ly+lh+14,label:'Fishing spot',act:'fish'}); for(let i=0;i<16;i++){ const tx=X+80+r()*(RC-160), ty=Y+80+r()*(RC-160); if(tx>lx-30&&tx<lx+lw+30&&ty>ly-30&&ty<ly+lh+60) continue; tree(tx,ty,r()<.3); } }
+    else { const n=22+Math.floor(r()*18); for(let i=0;i<n;i++){ const tx=X+80+r()*(RC-160), ty=Y+80+r()*(RC-160); tree(tx,ty,r()<.25); } if(r()<.25) B(X+400,Y+400,140,110,'#a1887f','#3e2723','','resident','Cabin in the Woods',{resident:Math.floor(r()*999)}); }
+    // keep trees/buildings off roads
+    ch.trees=ch.trees.filter(t=>!ch.roads.some(R=>t.x>R[0]-24&&t.x<R[0]+R[2]+24&&t.y>R[1]-10&&t.y<R[1]+R[3]+60));
+    ch.solids=ch.solids.filter(s=>!(s.w===16&&s.h===10)||ch.trees.some(t=>t.x-8===s.x&&t.y-10===s.y));
+    return ch;
+  }
+  chunksAround(x0,y0,x1,y1){ const out=[]; for(let cy=Math.max(0,Math.floor(y0/RC));cy<=Math.min(RCY-1,Math.floor(y1/RC));cy++) for(let cx=Math.max(0,Math.floor(x0/RC));cx<=Math.min(RCX-1,Math.floor(x1/RC));cx++) out.push(this.chunk(cx,cy)); return out; }
+  solidsNear(x,y){ const cs=this.chunksAround(x-120,y-120,x+120,y+120).flatMap(c=>c.solids); return this.inHome(x-200,y-200,400,400)? cs.concat(this.hSolids):cs; }
+  doorsNear(x,y){ const cs=this.chunksAround(x-100,y-100,x+100,y+100).flatMap(c=>c.doors); return this.inHome(x-200,y-200,400,400)? cs.concat(this.hDoors):cs; }
+  treesIn(x0,y0,x1,y1){ const cs=this.chunksAround(x0,y0,x1,y1).flatMap(c=>c.trees); return this.inHome(x0,y0,x1-x0,y1-y0)? cs.concat(this.hTrees):cs; }
+  roadsNear(x0,y0,x1,y1){ const cs=this.chunksAround(x0,y0,x1,y1).flatMap(c=>c.roads); return this.inHome(x0,y0,x1-x0,y1-y0)? cs.concat(this.hRoads):cs; }
+  spotsNear(x,y){ return this.chunksAround(x-600,y-600,x+600,y+600).flatMap(c=>c.spots); }
+  renderTile(tx,ty){
+    const c=mkCanvas(RTILE,RTILE), g=c.getContext('2d'); g.imageSmoothingEnabled=false; const X=tx*RTILE, Y=ty*RTILE;
+    g.translate(-X,-Y);
+    g.fillStyle=pat(g,TEX.grass); g.fillRect(X,Y,RTILE,RTILE);
+    const ch=this.chunk(Math.floor(X/RC),Math.floor(Y/RC));
+    const near=this.chunksAround(X-RC,Y-RC,X+RTILE+RC,Y+RTILE+RC);
+    for(const cc of near) for(const R of cc.roads){ if(R[0]>X+RTILE+20||R[0]+R[2]<X-20||R[1]>Y+RTILE+20||R[1]+R[3]<Y-20) continue; g.fillStyle=pat(g,TEX.walk); g.fillRect(R[0]-14,R[1]-14,R[2]+28,R[3]+28); }
+    for(const cc of near) for(const R of cc.roads){ if(R[0]>X+RTILE||R[0]+R[2]<X||R[1]>Y+RTILE||R[1]+R[3]<Y) continue; g.fillStyle=pat(g,TEX.road); g.fillRect(R[0],R[1],R[2],R[3]);
+      const horiz=R[2]>R[3]; g.fillStyle=R[4]?'#ffffff':'#f2d24b';
+      if(horiz) for(let x=Math.floor(R[0]/46)*46;x<R[0]+R[2]-20;x+=46){ if(x<R[0]) continue; g.fillRect(x,R[1]+R[3]/2-2,24,4); if(R[4]){ g.fillStyle='#f2d24b'; g.fillRect(x,R[1]+6,24,3); g.fillRect(x,R[1]+R[3]-9,24,3); g.fillStyle='#fff'; } }
+      else for(let y=Math.floor(R[1]/46)*46;y<R[1]+R[3]-20;y+=46){ if(y<R[1]) continue; g.fillRect(R[0]+R[2]/2-2,y,4,24); if(R[4]){ g.fillStyle='#f2d24b'; g.fillRect(R[0]+6,y,3,24); g.fillRect(R[0]+R[2]-9,y,3,24); g.fillStyle='#fff'; } } }
+    const dummy={solids:[]};
+    for(const cc of near){ for(const d of cc.decor){ if(d.x>X+RTILE||d.x+d.w<X||d.y>Y+RTILE||d.y+d.h<Y) continue; if(d.type==='farm') drawFarm(g,d); else { drawDecor(g,d,dummy); drawExtraDecor(g,d,dummy); } }
+      for(const dd of cc.doors){ if(dd.cx>X-60&&dd.cx<X+RTILE+60&&dd.y>Y-60&&dd.y<Y+RTILE+60){ g.fillStyle=pat(g,TEX.walk); g.fillRect(dd.cx-20,dd.y,40,40); } }
+      for(const b of cc.b){ if(b.x>X+RTILE+20||b.x+b.w<X-20||b.y>Y+RTILE+40||b.y+b.h<Y-20) continue; drawBuilding(g,b); }
+      if(cc.label){ const t=this.townAt.get(Math.floor(cc.cx/4)+','+Math.floor(cc.cy/4)); const lx=t.x, ly=t.y-40; if(lx>X-400&&lx<X+RTILE+400&&ly>Y-60&&ly<Y+RTILE+60){ g.font='bold 34px "Russo One",sans-serif'; g.textAlign='center'; g.fillStyle='rgba(0,0,0,.4)'; g.fillText(t.name.toUpperCase(),lx+2,ly+2); g.fillStyle='#fff'; g.fillText(t.name.toUpperCase(),lx,ly); g.font='bold 14px Nunito,sans-serif'; g.fillText(`Pop. ${(hashStr(t.name)%40000+2000).toLocaleString()}`,lx,ly+20); } } }
+    // highway signs
+    if(this.inHome(X,Y,RTILE,RTILE)) g.drawImage(this.H.canvas,HOX,HOY);
+    return c;
+  }
+  drawArea(c,sx,sy,sw,sh,noGen){
+    const t0x=Math.max(0,Math.floor(sx/RTILE)), t0y=Math.max(0,Math.floor(sy/RTILE)), t1x=Math.floor((sx+sw)/RTILE), t1y=Math.floor((sy+sh)/RTILE);
+    for(let ty=t0y;ty<=t1y;ty++) for(let tx=t0x;tx<=t1x;tx++){
+      const k=tx+','+ty; let t=this.tiles.get(k);
+      if(!t&&!noGen&&this.budget>0){ this.budget--; t=this.renderTile(tx,ty); this.tiles.set(k,t); if(this.tiles.size>36){ this.tiles.delete(this.tiles.keys().next().value); } }
+      if(t){ this.tiles.delete(k); this.tiles.set(k,t); c.drawImage(t,tx*RTILE,ty*RTILE); } else { c.fillStyle='#5cae4a'; c.fillRect(tx*RTILE,ty*RTILE,RTILE,RTILE); }
+    }
+  }
+  nearestTown(x,y){ let best=null,bd=1e18; for(const t of this.towns){ const d=Math.hypot(t.x-x,t.y-y); if(d<bd){bd=d;best=t;} } return {t:best,d:bd}; }
+  areaName(x,y){ if(this.inHome(x,y)) return 'Hometown'; const {t,d}=this.nearestTown(x,y); return d<1600?t.name:`Countryside near ${t.name}`; }
+}
+function pick2(a,r){ return a[Math.floor(r()*a.length)]; }
+function drawFarm(g,d){ const r=seeded(d.seed); const cols=['#c9a227','#6b8e23','#8b5a2b','#9acd32']; const strip=Math.floor(d.w/3);
+  for(let i=0;i<3;i++){ const col=cols[Math.floor(r()*cols.length)]; g.fillStyle=col; g.fillRect(d.x+i*strip,d.y,strip-10,d.h); g.fillStyle='rgba(0,0,0,.12)'; for(let y=d.y;y<d.y+d.h;y+=14) g.fillRect(d.x+i*strip,y,strip-10,4); }
+  g.strokeStyle='#8d6e63'; g.lineWidth=3; g.strokeRect(d.x-6,d.y-6,d.w+2,d.h+12); }
+function drawRegionMinimap(c,sc){
+  const M=sc.M, p=sc.player, mw=W<500?110:150, mh=mw, x=W-mw-10, y=H<500?58:70, span=4200, k=mw/span;
+  c.save(); c.fillStyle='#0b0e1c'; rr(c,x-3,y-3,mw+6,mh+16,8); c.fill(); c.beginPath(); c.rect(x,y,mw,mh); c.clip(); c.fillStyle='#4f9a43'; c.fillRect(x,y,mw,mh);
+  c.translate(x+mw/2,y+mh/2); c.scale(k,k); c.translate(-p.x,-p.y);
+  for(const R of M.roadsNear(p.x-span/2,p.y-span/2,p.x+span/2,p.y+span/2)){ c.fillStyle=R[4]?'#e0e0e0':'#8a8f99'; c.fillRect(R[0],R[1],Math.max(R[2],60),Math.max(R[3],60)); }
+  for(const ch of M.chunksAround(p.x-span/2,p.y-span/2,p.x+span/2,p.y+span/2)){ for(const b of ch.b){ c.fillStyle='#c7a37a'; c.fillRect(b.x,b.y,b.w,b.h); } for(const d of ch.decor) if(d.type==='pond'){ c.fillStyle='#3a8fd6'; c.fillRect(d.x,d.y,d.w,d.h); } }
+  if(M.inHome(p.x-span/2,p.y-span/2,span,span)) c.drawImage(M.H.canvas,HOX,HOY);
+  const obj=worldObjective(M); if(obj){ const d=M.door(obj.door); if(d){ c.fillStyle='#ffd23f'; c.beginPath(); c.arc(d.cx,d.cy,90,0,7); c.fill(); } }
+  c.restore();
+  c.fillStyle='#29c4ff'; c.strokeStyle='#fff'; c.lineWidth=1.5; c.beginPath(); c.arc(x+mw/2,y+mh/2,4,0,7); c.fill(); c.stroke();
+  c.font='bold 9px Nunito,sans-serif'; c.fillStyle='#fff'; c.textAlign='center'; c.fillText(M.areaName(p.x,p.y),x+mw/2,y+mh+10,mw);
+}
+function regionMapApp(M){ const p=WORLDS.cur.player, s=S();
+  const towns=[...M.towns].map(t=>({t,d:Math.hypot(t.x-p.x,t.y-p.y)})).sort((a,b)=>a.d-b.d).slice(0,40);
+  const cost=d=>2+Math.round(d/2500);
+  const go=(x,y)=>{ closePhone(); const w=WORLDS.cur; w.player.x=x; w.player.y=y; for(let i=0;i<40&&w.hits(w.player.x,w.player.y,11);i++) w.player.y+=30; setScene(w); updateHud(); setPlaying(true); toast('🚗 Arrived!'); };
+  const mine=s.team&&M.schoolTown.get(s.team);
+  return `<h3>🗺️ The Region</h3><p class="sub">${(M.w/1000).toFixed(0)}k × ${(M.h/1000).toFixed(0)}k px · ${M.towns.length} towns · You're in <b>${esc(M.areaName(p.x,p.y))}</b></p>
+    <button class="btn track" ${A(()=>{ if(s.money<2) return toast('Need $2'); money(-2); const d=M.door(homeDoor()==='home'?'home':'home'); go(d.cx,d.y+60); })}>🏠 Hometown<small>$2</small></button>
+    ${mine?`<button class="btn track" ${A(()=>{ const c=cost(Math.hypot(mine.x-p.x,mine.y-p.y)); if(s.money<c) return toast('Need $'+c); money(-c); go(mine.x+100,mine.y+40); })}>🏫 ${esc(mine.name)} — your school's town<small>$${cost(Math.hypot(mine.x-p.x,mine.y-p.y))}</small></button>`:''}
+    <h4>Nearest towns (ride-share)</h4>${towns.map(({t,d})=>`<button class="btn track" ${A(()=>{ const c=cost(d); if(s.money<c) return toast('Need $'+c); money(-c); go(t.x+100,t.y+40); })}>${esc(t.name)}<small>${(d/1000).toFixed(1)} km · ${t.schools.map(x=>x.name.replace(/ (Elementary|Middle|High)$/,'')+' '+x.lv.toUpperCase()).join(', ')||'no schools'} · $${cost(d)}</small></button>`).join('')}`;
+}
+// migrate old hometown positions into region coordinates
+const _enterWorld=enterWorld;
+enterWorld=function(first){ const s=S(); if(s&&s.pos&&s.pos.map==='home'&&s.pos.v!==3){ s.pos.x+=HOX; s.pos.y+=HOY; s.pos.v=3; } return _enterWorld(first); };
+
 // ===== OPEN WORLD SCENE (works for any MapDef) =====
 const NPC_LINES=['Did you see the SportsNow headlines today?','I failed my quiz… gotta study.','Pitstop has new cleats in stock!','Go {mascot}!','Midterms are so stressful.','The train is the fastest way around.','I\'m trying out for JV next season.','Have you heard the new track on RhythmStart?','Just Gougle it.','Our coach makes us run SO many laps.','Championship game is gonna be packed!','Keep your GPA up or you can\'t play!','Scouts were at the last game!','Free refills at the café today.','The library is open late.'];
 const MAP_CACHE={};
 function getMap(id,arg){
   const key=id+(arg||'');
   if(MAP_CACHE[key]) return MAP_CACHE[key];
-  const M= id==='home'?buildHometown(): id==='campus'?buildCampus(arg): buildProCity();
-  placeTreesFor(M,hashStr(key),id==='home'?160:90);
+  if(id==='home'){ const R=new Region(); MAP_CACHE[key]=R; return R; }
+  const M= id==='campus'?buildCampus(arg): buildProCity();
+  placeTreesFor(M,hashStr(key),90);
   M.canvas=prerenderMap(M);
   MAP_CACHE[key]=M;
   // keep only a couple of campuses in memory
@@ -1257,15 +1432,16 @@ class WorldScene{
     this.player.x=d.cx; this.player.y=d.y+d.h+26; this.player.dir=0;
     if(S()) S().pos={map:this.M.id,x:this.player.x,y:this.player.y};
   }
-  hits(x,y,r){ for(const s of this.M.solids) if(x+r>s.x&&x-r<s.x+s.w&&y>s.y&&y-r*0.8<s.y+s.h) return true; return x<10||y<20||x>this.M.w-10||y>this.M.h-6; }
+  hits(x,y,r){ for(const s of this.M.solidsNear(x,y)) if(x+r>s.x&&x-r<s.x+s.w&&y>s.y&&y-r*0.8<s.y+s.h) return true; return x<10||y<20||x>this.M.w-10||y>this.M.h-6; }
   move(e,dx,dy,r=10){ let mx=dx,my=dy; if(!this.hits(e.x+dx,e.y,r)) e.x+=dx; else mx=0; if(!this.hits(e.x,e.y+dy,r)) e.y+=dy; else my=0; return mx||my; }
   update(dt){
     const p=this.player, s=S();
-    const sp=(170+(s?s.stats.spd:3)*7)*(Input.bHeld?1.6:1)*(s&&s.f?RIDES[s.f.ride].mult:1);
+    const sp=(170+(s?s.stats.spd:3)*7)*((Input.bHeld||Input.run)?1.6:1)*(s&&s.f?RIDES[s.f.ride].mult:1);
     const mx=Input.mx, my=Input.my, m=Math.hypot(mx,my);
     p.moving=m>.15;
-    if(p.moving){ const moved=this.move(p,mx*sp*dt,my*sp*dt,11); p.dir=dirFromVec(mx,my,p.dir); p.anim+=dt*(Input.bHeld?13:9); if(!moved) p.anim=0; } else p.anim=0;
-    if(s) s.pos={map:this.M.id,x:p.x,y:p.y};
+    if(p.moving){ const moved=this.move(p,mx*sp*dt,my*sp*dt,11); p.dir=dirFromVec(mx,my,p.dir); p.anim+=dt*((Input.bHeld||Input.run)?13:9); if(!moved) p.anim=0; } else p.anim=0;
+    if(s) s.pos={map:this.M.id,x:p.x,y:p.y,v:3};
+    if(this.M.region){ this.M.budget=3; for(const n of this.npcs){ if(Math.hypot(n.x-p.x,n.y-p.y)>1500){ const z={x:p.x-900,y:p.y-700,w:1800,h:1400}; const q=this.randomPoint(z); n.x=q.x; n.y=q.y; n.tx=q.x; n.ty=q.y; n.zone=z; } } }
     for(const n of this.npcs){
       if(n.sayT>0) n.sayT-=dt;
       if(n.wait>0){ n.wait-=dt; n.anim=0; continue; }
@@ -1276,7 +1452,7 @@ class WorldScene{
     }
     if(s&&!this.near&&FWX.fishing){ p.vx=0; }
     this.near=null;
-    for(const d of this.M.doors){ if(p.x>d.x-6&&p.x<d.x+d.w+6&&p.y>d.y-4&&p.y<d.y+d.h+34){ this.near={type:'door',d}; break; } }
+    for(const d of this.M.doorsNear(p.x,p.y)){ if(p.x>d.x-6&&p.x<d.x+d.w+6&&p.y>d.y-4&&p.y<d.y+d.h+34){ this.near={type:'door',d}; break; } }
     if(!this.near) for(const n of this.npcs){ if(Math.hypot(n.x-p.x,n.y-p.y)<44){ this.near={type:'npc',n}; break; } }
     setButtons(this.near?(this.near.type==='door'?'Enter':'Talk'):'A','Run');
     const busy=s&&worldUpdate(this,dt);
@@ -1295,13 +1471,13 @@ class WorldScene{
     c.save(); c.scale(z,z); c.translate(-Math.round(cam.x),-Math.round(cam.y)); c.imageSmoothingEnabled=false;
     const vw=W/z, vh=H/z;
     const sx=Math.max(0,Math.floor(cam.x)), sy=Math.max(0,Math.floor(cam.y)), sw=Math.min(M.w-sx,Math.ceil(vw)+2), sh=Math.min(M.h-sy,Math.ceil(vh)+2);
-    c.drawImage(M.canvas,sx,sy,sw,sh,sx,sy,sw,sh);
+    M.drawArea(c,sx,sy,sw,sh);
     const obj=worldObjective(M); let od=null;
     if(obj){ od=M.door(obj.door); if(od){ const bob=Math.sin(Game.t*5)*5; c.fillStyle='#ffd23f'; c.strokeStyle='#1c1626'; c.lineWidth=2; c.beginPath(); c.moveTo(od.cx,od.y-8+bob); c.lineTo(od.cx-11,od.y-26+bob); c.lineTo(od.cx+11,od.y-26+bob); c.closePath(); c.fill(); c.stroke(); } }
     const ents=[];
-    for(const t of M.trees) if(t.x>cam.x-60&&t.x<cam.x+vw+60&&t.y>cam.y-20&&t.y<cam.y+vh+90) ents.push({y:t.y,draw:()=>c.drawImage(t.bush?BUSH:TREE,t.x-(t.bush?18:32),t.y-(t.bush?24:74))});
+    for(const t of M.treesIn(cam.x-60,cam.y-20,cam.x+vw+60,cam.y+vh+90)) if(t.x>cam.x-60&&t.x<cam.x+vw+60&&t.y>cam.y-20&&t.y<cam.y+vh+90) ents.push({y:t.y,draw:()=>c.drawImage(t.bush?BUSH:TREE,t.x-(t.bush?18:32),t.y-(t.bush?24:74))});
     for(const n of this.npcs) if(n.x>cam.x-40&&n.x<cam.x+vw+40&&n.y>cam.y-20&&n.y<cam.y+vh+60) ents.push({y:n.y,draw:()=>drawChar(c,n.look,n.x,n.y,n.dir,n.anim?(Math.floor(n.anim)%2?1:2):0,2)});
-    if(s) ents.push({y:p.y,draw:()=>{ drawRide(c,p.x,p.y,p.dir); const ride=s.f&&s.f.ride!=='walk'; const em=FWX.emote&&/dance|LET/.test(FWX.emote.icon); drawChar(c,s.look,p.x,p.y-(ride?6:0)-(em?Math.abs(Math.sin(Game.t*12))*6:0),em?Math.floor(Game.t*6)%4:p.dir,p.moving&&!ride?(Math.floor(p.anim)%2?1:2):0,2); }});
+    if(s) ents.push({y:p.y,draw:()=>{ drawRide(c,p.x,p.y,p.dir); if(s.f&&s.f.ride==='car') return; const ride=s.f&&s.f.ride!=='walk'; const em=FWX.emote&&/dance|LET/.test(FWX.emote.icon); drawChar(c,s.look,p.x,p.y-(ride?6:0)-(em?Math.abs(Math.sin(Game.t*12))*6:0),em?Math.floor(Game.t*6)%4:p.dir,p.moving&&!ride?(Math.floor(p.anim)%2?1:2):0,2); }});
     drawWorldExtras(c,this);
     ents.sort((a,b)=>a.y-b.y).forEach(e=>e.draw());
     for(const n of this.npcs) if(n.sayT>0&&n.say) bubble(c,n.x,n.y-58,n.say);
@@ -1328,6 +1504,9 @@ function npcO(x,y,look,label,act,extra={}){ return {t:'npc',x,y,w:1,h:1,solid:tr
 function interiorDef(door,M){
   const kind=door.interior, data=door.data||{}, S_=S();
   const L=(seed)=>randomLook(seed);
+  if(kind==='resident'){ const rows=['################','#bbbbbb#kkkkkkk#','#bbbbbb#kkkkkkk#','#bbbbbbbkkkkkkk#','#bbbbbb#kkkkkkk#','###b######k#####','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#######DD#######'];
+    const objs=[O('bed',1,1,2,2),O('desk',4,1,2,1),O('counter',8,1,3,1),O('stove',11,1),O('fridge',13,1,1,2),O('table',10,3,2,1),O('tv',4,6,3,1),O('couch',4,8,3,1),O('rug',8,7,4,3),O('shelf',12,6,2,1),O('plant',14,6),npcO(10,9,L(1000+(data.resident||0)),`Talk to ${door.label.replace(/'s (House|Farm)$/,'')}`,'resident',{seed:data.resident})];
+    return {name:door.label, rows, objs, wall:pick(['#d9c7a3','#c8d8e4','#e8d0d8','#d0e0c0'])}; }
   if(kind==='house'||kind==='friend'){
     const rows=['################','#bbbbbb#kkkkkkk#','#bbbbbb#kkkkkkk#','#bbbbbbbkkkkkkk#','#bbbbbb#kkkkkkk#','###b######k#####','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#aaaaaaaaaaaaaa#','#######DD#######'];
     const objs=[O('bed',1,1,2,2,{label:kind==='house'?'Sleep':'',act:kind==='house'?'sleep':null}),O('desk',4,1,2,1,{label:kind==='house'?'Computer':'',act:kind==='house'?'pc':null}),O('closet',1,4,1,1,{label:kind==='house'?'Closet':'',act:kind==='house'?'closet':null}),
@@ -1354,7 +1533,7 @@ function interiorDef(door,M){
       O('counter',8,11,4,1,{label:'Lunch line',act:'lunch'}),O('table',2,13,3,1),O('table',7,13,3,1),
       O('desk',22,12,2,1),npcO(23,11,L(9191),'Athletic Director — Sports Office','ad'),O('trophy',14,11,3,1,{label:'Trophy case',act:'trophies'}),O('plant',26,14)];
     if(kind==='lecture'){ objs.splice(0,4); objs.unshift(O('studentdesk',3,2,3,1),O('studentdesk',8,2,3,1),O('studentdesk',3,4,3,1),O('studentdesk',8,4,3,1),O('studentdesk',3,6,3,1),O('studentdesk',8,6,3,1),O('whiteboard',3,0,9,1)); }
-    const nm=kind==='lecture'?'Lecture Hall':(data.level===S_.level&&S_.team&&findSchool(S_.team)&&findSchool(S_.team).level===data.level? S_.team : door.label);
+    const nm=kind==='lecture'?'Lecture Hall':data.school?data.school:(data.level===S_.level&&S_.team&&findSchool(S_.team)&&findSchool(S_.team).level===data.level? S_.team : door.label);
     return {name:nm, rows, objs, wall:'#c9d6c4', school:true, level:lv};
   }
   if(kind==='dorm'){ const dobjs=[]; if(S_.f) addDecor(dobjs,S_.f.decor,{tv:[8,4],shelf:[1,7],plants:[[12,7],[1,8]],gaming:[4,4]}); return {name:data.apt?'Your Apartment':'Your Dorm Room', rows:roomRows(14,10,data.apt?'a':'b'), wall:'#cfd8dc', objs:[...dobjs,O('bed',1,1,2,2,{label:'Sleep',act:'sleep'}),O('desk',4,1,2,1,{label:'Computer',act:'pc'}),O('closet',7,1,1,1,{label:'Closet',act:'closet'}),O('fridge',12,1,1,2,{label:'Fridge',act:'fridge'}),O('tv',8,4,3,1,{label:'Watch TV',act:'tv'}),O('couch',8,6,3,1),O('rug',2,5,4,3),O('plant',12,7)]}; }
@@ -1456,7 +1635,7 @@ class InteriorScene{
     for(const o of this.def.objs) if(o.solid&&px>o.x*T+2&&px<(o.x+o.w)*T-2&&py>o.y*T+4&&py<(o.y+o.h)*T+2) return true; return false; }
   hits(x,y){ return this.solidAt(x-9,y)||this.solidAt(x+9,y)||this.solidAt(x-9,y-8)||this.solidAt(x+9,y-8); }
   update(dt){
-    const p=this.player, s=S(); const sp=(150+(s?s.stats.spd:3)*6)*(Input.bHeld?1.5:1);
+    const p=this.player, s=S(); const sp=(150+(s?s.stats.spd:3)*6)*((Input.bHeld||Input.run)?1.5:1);
     const mx=Input.mx,my=Input.my; p.moving=Math.hypot(mx,my)>.15;
     if(p.moving){ const dx=mx*sp*dt, dy=my*sp*dt; if(!this.hits(p.x+dx,p.y)) p.x+=dx; if(!this.hits(p.x,p.y+dy)) p.y+=dy; p.dir=dirFromVec(mx,my,p.dir); p.anim+=dt*9; } else p.anim=0;
     const tx=Math.floor(p.x/T), ty=Math.floor((p.y-4)/T), r=this.def.rows;
@@ -1823,7 +2002,7 @@ function askQuestion(subj,i,n,q,topicName){
 function onMyTeamHere(sc){
   // is this place where my team plays?
   const s=S(); if(!s.team) return false; const d=sc.door, M=sc.M;
-  if(isSchoolLevel(s.level)) return sc.def.school&&d.data.level===s.level;
+  if(isSchoolLevel(s.level)) return sc.def.school&&d.data.level===s.level&&(!d.data.school||d.data.school===s.team);
   if(s.level==='col') return M.id==='campus'&&M.o.college===s.team&&(d.interior==='venue');
   if(s.level==='pro') return M.id==='pro'&&d.data.venue===sportVenue(s.season?s.season.sport:s.lastSport);
   return false;
@@ -1841,13 +2020,14 @@ async function interiorAction(act,o,sc){
     case 'tv': { await modal('📺 SportsNow on TV',s.news.slice(0,6).map(n=>`<p>• ${esc(n.text)}</p>`).join('')||'Nothing on right now.'); return back(); }
     case 'friend': return friendHang(o.fi);
     case 'teacher': {
-      const myClass=(isSchoolLevel(s.level)&&sc.def.school&&sc.def.level===s.level&&sc.door.interior==='school')||(s.level==='col'&&sc.door.interior==='lecture'&&sc.M.o.college===s.team);
+      const myClass=(isSchoolLevel(s.level)&&sc.def.school&&sc.def.level===s.level&&sc.door.interior==='school'&&(!sc.door.data.school||sc.door.data.school===s.team))||(s.level==='col'&&sc.door.interior==='lecture'&&sc.M.o.college===s.team);
       if(!myClass) return modal(s.level==='col'?'Professor':'Teacher',`"You're not in my class! Your classes are at ${s.level==='col'?'the Lecture Hall':esc(s.team||'your school')}."`).then(back);
       if(s.level==='pro') return modal('Teacher','"Pros don\'t have class!"').then(back);
       if(!isSchoolDay(s.day)) return modal('Teacher','"No class today — enjoy the weekend!"').then(back);
       if(s.attended) return modal('Teacher','"You already finished today\'s classes. See you tomorrow!"').then(back);
       return runClasses(isMidtermDay()); }
-    case 'ad': { if(!isSchoolLevel(s.level)||sc.def.level!==s.level) return modal('Athletic Director','"I only handle sign-ups for our own students."').then(back); return sportsOffice(); }
+    case 'resident': { const r=seeded(o.seed||1); const lines=['"Oh! Hello there. Nice to see a young athlete around here."','"I saw you on SportsNow! Keep it up."','"Want some lemonade? It\'s fresh."','"Back in my day we played in the snow uphill both ways."','"The fishing\'s great at the lake past the highway."','"Make sure you study, not just practice!"']; const gift=!s.daily['res'+o.seed]&&r()<.5; if(gift){ s.daily['res'+o.seed]=1; money(10); } await modal(o.label.replace('Talk to ',''),lines[Math.floor(Math.random()*lines.length)]+(gift?'<p>They gave you $10 for snacks. 💵</p>':'')); return back(); }
+    case 'ad': { if(!isSchoolLevel(s.level)||sc.def.level!==s.level||(sc.door.data.school&&sc.door.data.school!==s.team)) return modal('Athletic Director','"I only handle sign-ups for our own students."').then(back); return sportsOffice(); }
     case 'coach': case 'venuecoach': return coachMenu(sc);
     case 'tryout': return tryoutMenu(sc);
     case 'lunch': { if(s.money<3) { toast('Lunch costs $3'); return back(); } money(-3); toast('🍕 Lunch! Pizza day.'); updateHud(); return back(); }
@@ -3708,7 +3888,7 @@ const FISH=[['Bluegill',1,40],['Perch',1,35],['Sunfish',1,30],['Crappie',2,25],[
 const SPONSORS=[['Pitstop Sports',300,20],['RhythmStart Audio',800,45],['Gougle Fit',1500,80],['Blaze Energy Drink',3000,150],['Apex Athletics',6000,300]];
 const STYLE_ITEMS=[{id:'cap',name:'Baseball Cap',price:40,slot:'hat'},{id:'beanie',name:'Beanie',price:35,slot:'hat'},{id:'headband',name:'Headband',price:25,slot:'hat'},{id:'shades',name:'Sunglasses',price:45,slot:'glasses'},{id:'backpack',name:'Backpack',price:60,slot:'backpack'}];
 const DECOR=[{id:'bigtv',name:'Big-Screen TV',price:400},{id:'gaming',name:'Gaming Setup',price:350},{id:'trophyshelf',name:'Trophy Shelf',price:250},{id:'plants',name:'Plant Collection',price:120}];
-const RIDES={walk:{name:'Walking',mult:1},skate:{name:'Skateboard',mult:1.35,price:120},bike:{name:'Bike',mult:1.65,price:250}};
+const RIDES={walk:{name:'Walking',mult:1},skate:{name:'Skateboard',mult:1.35,price:120},bike:{name:'Bike',mult:1.65,price:250},car:{name:'Car',mult:3,price:1500}};
 const WALLPAPERS=[['Night','linear-gradient(180deg,#1b2650,#0f1630)'],['Sunset','linear-gradient(180deg,#ff7e5f,#2b1055)'],['Ocean','linear-gradient(180deg,#0f7b8a,#062a3a)'],['Forest','linear-gradient(180deg,#2e7d32,#0b2a12)'],['Royal','linear-gradient(180deg,#6a1b9a,#1a0033)']];
 const CELEBS=['🔥 ON FIRE!','💪 FLEX!','🕺 DANCE!','🫡 SALUTE!','🤫 SHHH!','🎯 BULLSEYE!'];
 
@@ -3772,11 +3952,11 @@ function drawWeather(c){
 function clockStr(){ const s=S(); const base={morning:7*60+20,afternoon:15*60+10,evening:19*60+30}[s.phase]||600; const m=base+Math.min(170,Math.floor((Game.t%600)/3)); const h=Math.floor(m/60)%24, mm=m%60; return `${(h+11)%12+1}:${String(mm).padStart(2,'0')} ${h<12?'AM':'PM'}`; }
 // ---------- golden sneakers & spots ----------
 const GOLD_CACHE={};
-function goldFor(M){ const key=M.id==='campus'?'campus':M.id; if(GOLD_CACHE[key]) return GOLD_CACHE[key]; const n=key==='home'?15:key==='campus'?8:10; const r=seeded(hashStr('gold'+key)); const out=[]; let g=0;
+function goldFor(M){ if(M.region){ if(!M._gold) M._gold=goldFor(M.H).map(g=>({...g,x:g.x+HOX,y:g.y+HOY})); return M._gold; } const key=M.id==='campus'?'campus':M.id; if(GOLD_CACHE[key]) return GOLD_CACHE[key]; const n=key==='home'?15:key==='campus'?8:10; const r=seeded(hashStr('gold'+key)); const out=[]; let g=0;
   const probe={hits:(x,y)=>{ for(const s of M.solids) if(x+12>s.x&&x-12<s.x+s.w&&y>s.y-4&&y-12<s.y+s.h) return true; return false; }};
   while(out.length<n&&g++<4000){ const x=60+r()*(M.w-120), y=60+r()*(M.h-120); if(probe.hits(x,y)) continue; if(out.some(o=>Math.hypot(o.x-x,o.y-y)<200)) continue; out.push({x,y,id:key+out.length}); }
   return GOLD_CACHE[key]=out; }
-function spotsFor(M){ if(M.id==='home') return [{x:1060,y:1990,label:'Fishing dock',act:'fish'},{x:1690,y:1560,label:'Pickup game',act:'pickup'},{x:730,y:1085,label:'Fountain — make a wish ($1)',act:'wish'}];
+function spotsFor(M){ if(M.region){ const p=WORLDS.cur&&WORLDS.cur.player||{x:HOX,y:HOY}; return spotsFor(M.H).map(s=>({...s,x:s.x+HOX,y:s.y+HOY})).concat(M.spotsNear(p.x,p.y)); } if(M.id==='home') return [{x:1060,y:1990,label:'Fishing dock',act:'fish'},{x:1690,y:1560,label:'Pickup game',act:'pickup'},{x:730,y:1085,label:'Fountain — make a wish ($1)',act:'wish'}];
   if(M.id==='campus') return [{x:570,y:1120,label:'Fountain — make a wish ($1)',act:'wish'}];
   return [{x:450,y:1600,label:'Pickup game',act:'pickup'}]; }
 // ---------- world hooks ----------
@@ -3815,16 +3995,17 @@ function drawWorldExtras(c,sc){ const f=F(); if(!f) return; const p=sc.player, M
   if(f.pet){ const pt=FWX.pet; drawDog(c,pt.x,pt.y,pt.dir,pt.anim); }
   if(FWX.fishing){ c.fillStyle='#e53935'; const b=FWX.fishing.bite?Math.sin(t*30)*3:Math.sin(t*3); c.beginPath(); c.arc(p.x+40,p.y-4+b,5,0,7); c.fill(); c.strokeStyle='#ddd'; c.beginPath(); c.moveTo(p.x+8,p.y-40); c.lineTo(p.x+40,p.y-4); c.stroke(); if(FWX.fishing.bite) bubble(c,p.x+40,p.y-24,'! REEL !','#ff8a80'); }
   if(FWX.emote){ const e=FWX.emote; bubble(c,p.x,p.y-62,e.icon,'#fff'); }
-  if(S().phase==='evening') for(const R of M.roads){ const horiz=R[2]>R[3]; const n=Math.floor((horiz?R[2]:R[3])/220); for(let i=0;i<=n;i++){ const x=horiz?R[0]+i*220:R[0]-18, y=horiz?R[1]-18:R[1]+i*220; c.fillStyle='#555'; c.fillRect(x,y-30,4,30); const g=c.createRadialGradient(x+2,y-30,2,x+2,y-10,60); g.addColorStop(0,'rgba(255,230,140,.55)'); g.addColorStop(1,'rgba(255,230,140,0)'); c.fillStyle=g; c.beginPath(); c.arc(x+2,y-10,60,0,7); c.fill(); } }
+  if(S().phase==='evening') for(const R of M.roadsNear(p.x-700,p.y-700,p.x+700,p.y+700)){ const horiz=R[2]>R[3]; const n=Math.floor((horiz?R[2]:R[3])/220); for(let i=0;i<=n;i++){ const x=horiz?R[0]+i*220:R[0]-18, y=horiz?R[1]-18:R[1]+i*220; c.fillStyle='#555'; c.fillRect(x,y-30,4,30); const g=c.createRadialGradient(x+2,y-30,2,x+2,y-10,60); g.addColorStop(0,'rgba(255,230,140,.55)'); g.addColorStop(1,'rgba(255,230,140,0)'); c.fillStyle=g; c.beginPath(); c.arc(x+2,y-10,60,0,7); c.fill(); } }
 }
 function drawRide(c,x,y,dir){ const f=F(); if(!f||f.ride==='walk') return; const side=dir===1||dir===2; c.fillStyle='rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x,y,16,4,0,0,7); c.fill();
+  if(f.ride==='car'){ const col=S().look.shirt; c.fillStyle='rgba(0,0,0,.3)'; c.fillRect(x-20,y-8,44,18); if(side){ c.fillStyle=col; c.fillRect(x-24,y-24,48,22); c.fillStyle='#bfe3ff'; c.fillRect(x-10,y-22,20,8); c.fillStyle='#111'; c.fillRect(x-18,y-4,8,6); c.fillRect(x+10,y-4,8,6); } else { c.fillStyle=col; c.fillRect(x-14,y-40,28,42); c.fillStyle='#bfe3ff'; c.fillRect(x-10,dir===3?y-36:y-12,20,8); c.fillStyle='#111'; c.fillRect(x-16,y-34,3,8); c.fillRect(x+13,y-34,3,8); c.fillRect(x-16,y-8,3,8); c.fillRect(x+13,y-8,3,8); } return; }
   if(f.ride==='bike'){ c.strokeStyle='#222'; c.lineWidth=3; if(side){ c.beginPath(); c.arc(x-10,y-6,7,0,7); c.arc(x+10,y-6,7,0,7); c.stroke(); c.strokeStyle='#e53935'; c.beginPath(); c.moveTo(x-10,y-6); c.lineTo(x,y-16); c.lineTo(x+10,y-6); c.stroke(); } else { c.fillStyle='#222'; c.fillRect(x-2,y-14,4,14); c.fillStyle='#e53935'; c.fillRect(x-9,y-18,18,3); } }
   else { c.fillStyle='#8d6e63'; if(side) c.fillRect(x-14,y-4,28,4); else c.fillRect(x-4,y-14,8,16); c.fillStyle='#333'; c.fillRect(side?x-11:x-5,y-1,4,3); c.fillRect(side?x+7:x+1,y-1,4,3); } }
 function drawDog(c,x,y,dir,anim){ c.fillStyle='rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(x,y,10,3,0,0,7); c.fill(); const leg=Math.floor(anim)%2?2:0; const side=dir===1||dir===2, fl=dir===1?-1:1;
   c.fillStyle='#b5651d'; if(side){ c.fillRect(x-9,y-12,18,8); c.fillRect(x+fl*7-3,y-17,8,8); c.fillStyle='#7a3e10'; c.fillRect(x+fl*9-1,y-19,3,4); c.fillRect(x-fl*9-1,y-14,3,3); c.fillStyle='#b5651d'; c.fillRect(x-8,y-4,3,4-leg); c.fillRect(x+5,y-4,3,2+leg); c.fillStyle='#000'; c.fillRect(x+fl*10,y-15,2,2); }
   else { c.fillRect(x-6,y-14,12,12); c.fillStyle='#7a3e10'; c.fillRect(x-7,y-16,3,5); c.fillRect(x+4,y-16,3,5); if(dir===0){ c.fillStyle='#000'; c.fillRect(x-3,y-11,2,2); c.fillRect(x+1,y-11,2,2); } c.fillStyle='#b5651d'; c.fillRect(x-5,y-2,3,2+leg); c.fillRect(x+2,y-2,3,4-leg); }
   const n=F().pet; if(n){ c.font='bold 9px Nunito,sans-serif'; c.textAlign='center'; c.fillStyle='#fff'; c.fillText(n,x,y-22); } }
-function drawMinimap(c,sc){ const M=sc.M, mw=W<500?96:130, mh=mw*M.h/M.w, x=W-mw-10, y=(H<500?58:70)+(W<500?0:0); const yy=y+(W<500?6:0);
+function drawMinimap(c,sc){ if(sc.M.region) return drawRegionMinimap(c,sc); const M=sc.M, mw=W<500?96:130, mh=mw*M.h/M.w, x=W-mw-10, y=(H<500?58:70)+(W<500?0:0); const yy=y+(W<500?6:0);
   c.save(); c.globalAlpha=.9; c.fillStyle='#0b0e1c'; rr(c,x-3,yy-3,mw+6,mh+6,8); c.fill(); c.drawImage(M.canvas,0,0,M.w,M.h,x,yy,mw,mh); c.globalAlpha=1;
   const k=mw/M.w, p=sc.player; const obj=worldObjective(M); if(obj){ const d=M.door(obj.door); if(d){ c.fillStyle='#ffd23f'; c.beginPath(); c.arc(x+d.cx*k,yy+d.cy*k,3.5,0,7); c.fill(); } }
   const f=F(); if(f&&f.quest&&f.quest.map===M.id){ const d=M.door(f.quest.door); if(d){ c.fillStyle='#ff80ab'; c.fillRect(x+d.cx*k-2.5,yy+d.cy*k-2.5,5,5); } }
@@ -3949,7 +4130,7 @@ function shopHub(){ const s=S(), f=F(); setPlaying(false);
     <h4>Gear</h4>${SHOP.map((it,i)=>`<div class="shopit"><span class="ic">${it.icon}</span><div><b>${it.name}</b><small>${it.desc}</small></div><button class="btn small pri" ${A(()=>{ buy(i,'x'); shopHub(); })}>$${it.price}</button></div>`).join('')}
     <h4>Style</h4>${STYLE_ITEMS.map(it=>row('🧢',it.name,'Equip it from your closet',it.price,()=>{ if(pay(it.price)){ f.owned[it.id]=1; s.look[it.slot]=it.id; toast(`Bought ${it.name}`); shopHub(); } },f.owned[it.id])).join('')}
     ${row('💇','Style Studio','New hairstyle, hair color & shoes',25,()=>{ if(pay(25)) styleStudio(); })}
-    <h4>Rides</h4>${['skate','bike'].map(k=>row(k==='bike'?'🚲':'🛹',RIDES[k].name,`${Math.round((RIDES[k].mult-1)*100)}% faster around town`,RIDES[k].price,()=>{ if(pay(RIDES[k].price)){ f.owned[k]=1; f.ride=k; ach('ride'); shopHub(); } },f.owned[k])).join('')}
+    <h4>Rides</h4>${['skate','bike','car'].map(k=>row(k==='bike'?'🚲':k==='car'?'🚗':'🛹',RIDES[k].name,`${Math.round((RIDES[k].mult-1)*100)}% faster around town`,RIDES[k].price,()=>{ if(pay(RIDES[k].price)){ f.owned[k]=1; f.ride=k; ach('ride'); shopHub(); } },f.owned[k])).join('')}
     <h4>Life</h4>${row('🐶','Adopt a dog','A loyal buddy who follows you everywhere',150,()=>{ if(pay(150)) namePet(); },!!f.pet)}
     ${row('🎁','Gift box','Give to a friend for +25 friendship',20,()=>{ if(pay(20)){ f.gifts++; toast('Gift added'); shopHub(); } })}
     ${row('🃏','Trading card pack','3 random pro cards',15,()=>{ if(pay(15)){ openPack(); } })}
@@ -3987,7 +4168,7 @@ function phoneApp(app){ const s=S(), f=F(); if(!f) return '';
   if(app==='calendar'){ const se=s.season, start=Math.floor((s.day-1)/28)*28+1; let cells=''; for(let d=start;d<start+28;d++){ const g=se&&[...se.schedule,...se.playoffs].find(x=>x.day===d); const mid=se&&!se.midterm&&d===se.midDay; cells+=`<div class="cal ${d===s.day?'today':''} ${g&&g.res?(g.res.win?'w':'l'):''}"><small>${d}</small>${g?sportById(se.sport).icon:''}${mid?'📝':''}${dow(d)>=5?'':''}</div>`; }
     return `<h3>📅 ${seasonOf(s.day)} · Days ${start}–${start+27}</h3><div class="calgrid">${DOW.map(x=>`<b>${x[0]}</b>`).join('')}${'<div></div>'.repeat(dow(start))}${cells}</div><p class="sub">🏀 game · 📝 midterm · green = win · red = loss</p>`; }
   if(app==='weather'){ return `<h3>🌤️ Weather</h3><p class="big">${WEATHER_ICON[weatherOf(s.day)]}</p><p>${seasonOf(s.day)} · Day ${s.day} · ${clockStr()}</p><h4>Forecast</h4>${[1,2,3,4].map(i=>`<div class="news">${DOW[dow(s.day+i)]} (Day ${s.day+i}) — ${WEATHER_ICON[weatherOf(s.day+i)]}</div>`).join('')}`; }
-  if(app==='map'){ const M=WORLDS.cur&&WORLDS.cur.M; if(!M) return '<p>No map.</p>'; return `<h3>🗺️ ${esc(M.o.title||'Map')}</h3><p class="sub">Tap a place to take a ride-share there ($2).</p>${M.doors.filter(d=>!/^friend|^house/.test(d.id)||d.id.startsWith('friend')).map(d=>`<button class="btn track" ${A(()=>{ if(s.money<2) return toast('Need $2'); money(-2); closePhone(); WORLDS.cur.placeAt(d.id); setScene(WORLDS.cur); updateHud(); setPlaying(true); toast('🚗 Arrived!'); })}>${esc(d.label)}<small>$2</small></button>`).join('')}`; }
+  if(app==='map'){ const M=WORLDS.cur&&WORLDS.cur.M; if(!M) return '<p>No map.</p>'; if(M.region) return regionMapApp(M); return `<h3>🗺️ ${esc(M.o.title||'Map')}</h3><p class="sub">Tap a place to take a ride-share there ($2).</p>${M.doors.filter(d=>!/^friend|^house/.test(d.id)||d.id.startsWith('friend')).map(d=>`<button class="btn track" ${A(()=>{ if(s.money<2) return toast('Need $2'); money(-2); closePhone(); WORLDS.cur.placeAt(d.id); setScene(WORLDS.cur); updateHud(); setPlaying(true); toast('🚗 Arrived!'); })}>${esc(d.label)}<small>$2</small></button>`).join('')}`; }
   if(app==='cards'){ const by={}; for(const k in f.cards){ const sp=k.split('|')[0]; by[sp]=(by[sp]||0)+1; } return `<h3>🃏 Cards — ${Object.keys(f.cards).length} unique</h3><p class="sub">Buy packs at any shop. Each pro league has 24 cards.</p>${SPORTS.map(sp=>`<div class="news">${sp.icon} ${esc(PRO[sp.id].name)} — <b>${by[sp.id]||0}/24</b></div>`).join('')}<h4>Your collection</h4><div class="cards">${Object.keys(f.cards).slice(0,30).map(k=>{ const t=k.split('|')[1]; return `<div class="card">${logoImg(t,40)}<small>${esc(t)}${f.cards[k]>1?' ×'+f.cards[k]:''}</small></div>`; }).join('')}</div>`; }
   if(app==='fishlog'){ return `<h3>🐟 Fish Log — ${f.fishCount} caught</h3><p class="sub">Fish at the dock by the pond downtown.</p>${FISH.map(x=>`<div class="shopit"><span class="ic">${f.fish[x[0]]?'🐟':'❔'}</span><div><b>${f.fish[x[0]]?x[0]:'???'}</b><small>${'⭐'.repeat(x[1])||'junk'} · owned ${f.fish[x[0]]||0}</small></div>${f.fish[x[0]]?`<button class="btn small" ${A(()=>{ f.fish[x[0]]--; const v=5+x[1]*12; money(v); toast(`Sold for $${v}`); save(); openPhone('fishlog'); })}>Sell $${5+x[1]*12}</button>`:''}</div>`).join('')}`; }
   return ''; }
