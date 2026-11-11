@@ -95,6 +95,25 @@
       "updated": "Oct 2026"
     },
     {
+      "id": "really-live",
+      "title": "Really Live",
+      "shortName": "Really Live",
+      "subtitle": "Elementary to the Pros",
+      "description": "Live an athlete's whole career. Start in elementary school, go to class, try out for teams and work your way up through high school, college and into the pros. 21 sports, 468 schools and 1,500 colleges, with 3 career save slots, Free Play and a Hall of Fame. Plays upright or sideways.",
+      "genre": "Sports",
+      "version": "1.0",
+      "status": "Pre-release",
+      "launch": "web",
+      "url": "games/really-live/index.html",
+      "iconURL": "icons/really-live.png",
+      "colors": [
+        "#ff8a1f",
+        "#0f1630"
+      ],
+      "featured": true,
+      "updated": "Nov 2026"
+    },
+    {
       "id": "nova",
       "title": "NOVA",
       "shortName": "NOVA",
