@@ -118,10 +118,10 @@
       "title": "NOVA",
       "shortName": "NOVA",
       "subtitle": "Your personal AI assistant",
-      "description": "NOVA is RamPaceCorp's voice assistant. This is NOVA Mobile: chat with NOVA from anywhere through your Claude account. It opens in Safari, so you stay signed in. The full NOVA, which opens apps, controls music and watches your battery, runs on your Windows PC.",
+      "description": "NOVA is RamPaceCorp's voice assistant. This is NOVA Mobile: chat with NOVA from anywhere through your Claude account. The first time, sign in to Claude with your email (Google sign-in doesn't work inside apps). The full NOVA, which opens apps, controls music and watches your battery, runs on your Windows PC.",
       "genre": "Assistant",
       "version": "1.0",
-      "launch": "link",
+      "launch": "web",
       "url": "https://claude.ai/artifact/VkNkvi9WZpfspnXMbfzmsM",
       "iconURL": "icons/nova.png",
       "colors": [
