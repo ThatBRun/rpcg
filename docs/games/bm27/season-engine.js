@@ -142,7 +142,7 @@
     }
     const ri=Number(sg.tournamentRound)||0,r=t.rounds?.[ri];const m=r?.matches?.find(x=>eq(x.id,sg.tournamentMatchId));if(!m)return;
     completeBracketMatch(t,m,ri,{my:+sg.myScore,opp:+sg.oppScore});for(const other of r.matches)if(other.status!=='final')completeBracketMatch(t,other,ri);makeNextRound(t,ri);
-    if(!eq(m.winnerId,current.schoolId)){current.schedule=current.schedule.filter(g=>!(eq(g.tournamentId,t.id)&&!g.played));while(!t.championId)driveTournament(t)}else driveTournament(t);
+    if(!eq(m.winnerId,current.schoolId)){current.schedule=current.schedule.filter(g=>!(eq(g.tournamentId,t.id)&&!g.played));{let guard=0;while(!t.championId&&guard++<64)driveTournament(t);if(!t.championId)console.warn('BM27 v2.8.0: tournament could not auto-finish after elimination',t.id)}}else driveTournament(t);
   }
 
   function regularUserGames(){return (current.schedule||[]).filter(g=>!g.tournamentId&&!isPostseasonType(g.type)&&g.type!=='summer'&&g.type!=='fall')}
@@ -213,7 +213,7 @@
     const entrants=[String(current.schoolId),...ids];if(new Set(entrants).size!==wanted)throw new Error('Tournament teams must be unique.');for(const id of entrants)if(!team(id))throw new Error('A selected tournament school is missing from this save.');const type=preset==='holiday'?'Holiday Tournament':preset==='showme'?'Show-Me Tournament':'Custom Tournament';const t=createBracket({name:name||'Custom Tournament',type,entrants,startDate:new Date(`${start}T18:00:00`).toISOString(),automatic:false});driveTournament(t);persist();renderAll();return t;
   }
 
-  function enforceSeniorNight(g){if(typeof seniorNightReady==='function'&&!seniorNightReady()){toast('Choose a home Senior Night game before playing the season.');return false}if(g?.seniorNight){const seniors=myTeam()?.roster?.filter(p=>Number(p.grade)===12&&(!window.BM27Academics2716||window.BM27Academics2716.isEligible(p)))||[];myTeam().roster.forEach(p=>p.seniorNightStarter=false);seniors.forEach(p=>{p.seniorNightStarter=true;p.minutes=Math.max(Number(p.minutes)||0,24)});current.news=current.news||[];current.news.unshift({date:g.date,text:`Senior Night: ${seniors.map(p=>p.name).join(', ')} started and were honored before the game.`})}return true}
+  function enforceSeniorNight(g){if(typeof seniorNightReady==='function'&&!seniorNightReady())try{window.BM27AutoSeniorNight?.()}catch{}if(typeof seniorNightReady==='function'&&!seniorNightReady()){toast('Choose a home Senior Night game before playing the season.');return false}if(g?.seniorNight){const seniors=myTeam()?.roster?.filter(p=>Number(p.grade)===12&&(!window.BM27Academics2716||window.BM27Academics2716.isEligible(p)))||[];myTeam().roster.forEach(p=>p.seniorNightStarter=false);seniors.forEach(p=>{p.seniorNightStarter=true;p.minutes=Math.max(Number(p.minutes)||0,24)});current.news=current.news||[];current.news.unshift({date:g.date,text:`Senior Night: ${seniors.map(p=>p.name).join(', ')} started and were honored before the game.`})}return true}
   function simulateUserGame(g,options={}){
     const silent=!!options?.silent;
     if(!current||!g||g.played)return;

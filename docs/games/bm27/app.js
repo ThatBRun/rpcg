@@ -59,7 +59,7 @@ exposeSchoolDirectory();
 window.BM27SchoolLogo=function(name,cls='schoolLogo'){return window.BM27Branding255?.html?.(name,cls)||window.BM27Logos252?.html?.(name,cls)||''};
 
 function rng(seed){let t=seed%2147483647;if(t<=0)t+=2147483646;return()=>((t=t*16807%2147483647)-1)/2147483646}function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return Math.abs(h)}
-function makePlayer(school,index,season=2026){const r=rng(hash(school.name+index+season));const pos=['PG','SG','SF','PF','C'][index%5];const grade=9+Math.floor(r()*4);const base=50+r()*30+(grade-9)*2;const skill=()=>clamp(Math.round(base+(r()-.5)*18),35,96);const p={id:uid(),name:FIRST[Math.floor(r()*FIRST.length)]+' '+LAST[Math.floor(r()*LAST.length)],pos,grade,height:pos==='C'?`6'${3+Math.floor(r()*7)}"`:pos==='PF'?`6'${1+Math.floor(r()*6)}"`:`5'${7+Math.floor(r()*8)}"`,shooting:skill(),finishing:skill(),defense:skill(),passing:skill(),rebounding:skill(),athleticism:skill(),potential:clamp(Math.round(base+8+r()*15),55,99),minutes:index<5?28-index:12};p.overall=Math.round((p.shooting+p.finishing+p.defense+p.passing+p.rebounding+p.athleticism)/6);return p}
+function makePlayer(school,index,season=2026){const r=rng(hash(school.name+index+season));const pos=['PG','SG','SF','PF','C'][index%5];const grade=9+Math.floor(r()*4);const base=50+r()*30+(grade-9)*2;const skill=()=>clamp(Math.round(base+(r()-.5)*18),35,96);const p={id:uid(),name:FIRST[Math.floor(r()*FIRST.length)]+' '+LAST[Math.floor(r()*LAST.length)],pos,grade,height:pos==='C'?`6'${3+Math.floor(r()*7)}"`:pos==='PF'?`6'${1+Math.floor(r()*6)}"`:(h=>`${Math.floor(h/12)}'${h%12}"`)(67+Math.floor(r()*8)),shooting:skill(),finishing:skill(),defense:skill(),passing:skill(),rebounding:skill(),athleticism:skill(),potential:clamp(Math.round(base+8+r()*15),55,99),minutes:index<5?28-index:12};p.overall=Math.round((p.shooting+p.finishing+p.defense+p.passing+p.rebounding+p.athleticism)/6);return p}
 function teamRating(roster){return Math.round(roster.slice().sort((a,b)=>b.overall-a.overall).slice(0,8).reduce((a,p)=>a+p.overall,0)/8)}
 function buildUniverse(userSchool){return dedupeSchoolList(directory).map((s,i)=>{const roster=Array.from({length:13},(_,n)=>makePlayer(s,n));return {...s,roster,rating:teamRating(roster),wins:0,losses:0,pf:0,pa:0,rank:0}})}
 function normalizeSchoolName(name=''){return String(name).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
@@ -158,7 +158,7 @@ function openSave(id){current=saves.find(s=>String(s.id)===String(id));if(!curre
 function myTeam(){return current.teams.find(t=>t.id===current.schoolId)}function opponent(g){return current.teams.find(t=>t.id===g.opponentId)||(window.BM27ResolveNationalTeam?window.BM27ResolveNationalTeam(g?.opponentId||g?.nationalOpponentId):null)}
 function renderAll(){const me=myTeam();$('sideSchool').textContent=me.name;$('currentDate').textContent=new Date(current.day).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});$('teamHero').style.background=`linear-gradient(110deg,${me.primary},${me.secondary})`;$('teamHero').innerHTML=`<div><p class="eyebrow">CLASS ${me.class} • DISTRICT ${me.district}</p><h1>${me.name}${me.mascot?' '+me.mascot:''}</h1><p>${me.wins}-${me.losses} • ${current.strategy.pace} pace • ${current.strategy.defense}</p></div><div class="hero-rating">${me.rating}</div>`;$('dashboardMetrics').innerHTML=[['Record',`${me.wins}-${me.losses}`],['Team OVR',me.rating],['State Rank','#'+getRank(me)],['Save Season','2026–27']].map(x=>`<div class="metric"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');renderNext();renderNews();renderRoster();renderSchedule();renderTournamentCenter();renderStandings();renderRankings();repairRecords();renderOffice();renderMeetings();renderHistory();persist()}
 function getRank(team){return current.teams.slice().sort((a,b)=>power(b)-power(a)).findIndex(t=>t.id===team.id)+1}function power(t){return t.rating+t.wins*1.8-t.losses*.7+(t.pf-t.pa)/Math.max(1,t.wins+t.losses)/8}
-function nextUnplayed(){return current.schedule.find(g=>!g.played)}function renderNext(){const games=current.schedule.filter(g=>!g.played).slice(0,5);$('nextGame').innerHTML=games.length?games.map(g=>{const o=opponent(g);const mark=o?(window.BM27Branding255?.html?.(o.name,'nextFiveLogo')||window.BM27Logos252?.html?.(o.name,'nextFiveLogo')||''):'';return `<div class="row next-five-row"><div class="next-five-team">${mark}<div><b>${g.home?'vs':'at'} ${o?.name||'TBD'}${o?.mascot?' '+o.mascot:''}</b><br><small>${new Date(g.date).toLocaleString()} • ${g.type}</small></div></div>${o?`<span class="tag">${o.rating} OVR</span>`:''}</div>`}).join(''):'<p class="muted">Regular season complete.</p>';$('playNextBtn').disabled=!games.length}
+function nextUnplayed(){return (current&&Array.isArray(current.schedule))?current.schedule.find(g=>!g.played)||null:null}function renderNext(){if(!current||!$('nextGame'))return;const games=(current.schedule||[]).filter(g=>!g.played).slice(0,5);$('nextGame').innerHTML=games.length?games.map(g=>{const o=opponent(g);const mark=o?(window.BM27Branding255?.html?.(o.name,'nextFiveLogo')||window.BM27Logos252?.html?.(o.name,'nextFiveLogo')||''):'';return `<div class="row next-five-row"><div class="next-five-team">${mark}<div><b>${g.home?'vs':'at'} ${o?.name||'TBD'}${o?.mascot?' '+o.mascot:''}</b><br><small>${new Date(g.date).toLocaleString()} • ${g.type}</small></div></div>${o?`<span class="tag">${o.rating} OVR</span>`:''}</div>`}).join(''):'<p class="muted">Regular season complete.</p>';$('playNextBtn').disabled=!games.length}
 function renderNews(){$('newsFeed').innerHTML=current.news.slice(-6).reverse().map(n=>`<div class="row"><div>${n.text}<br><small>${new Date(n.date).toLocaleDateString()}</small></div></div>`).join('')}
 function renderRoster(){const me=myTeam();$('rosterTable').innerHTML=`<table><thead><tr><th>Player</th><th>Pos</th><th>Grade</th><th>HT</th><th>OVR</th><th>SHT</th><th>FIN</th><th>DEF</th><th>PASS</th><th>REB</th><th>ATH</th><th>MIN</th></tr></thead><tbody>${me.roster.slice().sort((a,b)=>b.minutes-a.minutes).map(p=>`<tr><td><b>${p.name}</b></td><td>${p.pos}</td><td>${p.grade}</td><td>${p.height}</td><td class="rating">${p.overall}</td><td>${p.shooting}</td><td>${p.finishing}</td><td>${p.defense}</td><td>${p.passing}</td><td>${p.rebounding}</td><td>${p.athleticism}</td><td><input type="number" min="0" max="36" value="${p.minutes}" data-minutes="${p.id}" style="width:70px"></td></tr>`).join('')}</tbody></table>`;document.querySelectorAll('[data-minutes]').forEach(i=>i.onchange=()=>{const p=me.roster.find(x=>x.id===i.dataset.minutes);p.minutes=clamp(Number(i.value)||0,0,36);persist()})}
 function scheduleEditable(){return current&&!current.schedule.some(g=>g.played)}
@@ -395,14 +395,27 @@ function setSeniorNight(gameId){
   persist();renderSchedule();renderNext();toast('Senior Night selected and saved.');
 }
 function seniorNightReady(){
+  if(current?.seniorNightWaived)return true;
   const seniors=myTeam()?.roster?.filter(p=>Number(p.grade)===12)||[];
   if(!seniors.length)return true;
   const game=current.schedule.find(g=>g.id===current.seniorNightGameId);
   return Boolean(game&&game.home&&!game.neutral);
 }
 const simulateGameBeforeSeniorNight=simulateGame;
+function autoPickSeniorNightV280(){
+  // v2.8.0 fix: never let the season silently skip every game because Senior Night was not picked.
+  if(!current||seniorNightReady())return;
+  const homes=(current.schedule||[]).filter(g=>!g.played&&g.home&&!g.neutral&&g.type!=='Tournament');
+  const pick=homes[homes.length-1];
+  if(pick){current.schedule.forEach(x=>x.seniorNight=false);pick.seniorNight=true;pick.type='Senior Night';current.seniorNightGameId=pick.id;
+    current.news=current.news||[];current.news.push({date:current.day,text:`Senior Night was automatically set for the home game against ${opponent(pick)?.name||'an opponent'}.`});
+    try{toast('Senior Night was auto-set to your last home game.')}catch{}}
+  else current.seniorNightWaived=true;
+}
+window.BM27AutoSeniorNight=autoPickSeniorNightV280;
 simulateGame=function(g){
-  if(!seniorNightReady())return toast('Choose a home Senior Night game before playing the season.');
+  if(!seniorNightReady())autoPickSeniorNightV280();
+  if(!seniorNightReady()&&!current.seniorNightWaived)return toast('Choose a home Senior Night game before playing the season.');
   const seniors=myTeam().roster.filter(p=>Number(p.grade)===12);
   if(g.seniorNight){
     myTeam().roster.forEach(p=>p.seniorNightStarter=false);

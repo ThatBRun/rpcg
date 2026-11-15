@@ -68,8 +68,12 @@ function diverseNationalPool(entries,save=current){
   if(out.length<99){for(const e of unique.values()){if(out.length>=99)break;if(!out.some(x=>eq22(x.id,e.id)))out.push(e)}}
   return out.slice(0,99);
 }
+let nationalFailAt280=0,nationalFailCount280=0;
 async function hydrateRealNationalPool(save=current){
   if(!save)return [];const v=save.v22||(save.v22={});if(v.nationalHydrating)return v.nationalPool||[];
+  // v2.8.0: back off after a failed nationwide load instead of retrying (and re-saving) in a tight loop.
+  if(nationalFailCount280&&Date.now()-nationalFailAt280<Math.min(300000,15000*2**Math.min(5,nationalFailCount280-1)))return v.nationalPool||[];
+  nationalFailAt280=Date.now();
   v.nationalHydrating=true;v.nationalLoadError='';v.nationalDirectoryReady=false;v.nationalDirectoryLoadedStates=0;v.nationalDirectoryTotalStates=NATIONAL_STATE_CODES.length+1;
   try{
     if(!window.BM27OutOfState?.loadAllStates)throw new Error('National school directory is not ready yet.');
@@ -81,12 +85,12 @@ async function hydrateRealNationalPool(save=current){
     v.nationalPool=diverseNationalPool(all,save);
     const states=new Set(window.BM27NationalDirectory.map(stateCodeFromEntry).filter(Boolean));
     v.nationalDirectoryReady=true;v.nationalDirectoryLoadedStates=v.nationalDirectoryTotalStates;v.nationalDirectorySchoolCount=window.BM27NationalDirectory.length+(save.teams||[]).filter(t=>!t.nationalOnly&&t.name).length;
-    v.nationalStatesRepresented=states.size+1;
+    v.nationalStatesRepresented=states.size+1;if((v.nationalPool||[]).length>=67)nationalFailCount280=0;else nationalFailCount280++;
     nationalRankingCache.key='';
     if(stateComplete(save)&&!v.nationals)setTimeout(()=>{try{createNationals(save);syncNationalSchedule(save);persist?.();renderAll?.()}catch(e){console.warn('BM27 nationals startup creation',e)}},0);
     const field=v.nationals?.field||[];const fieldTeams=field.map(id=>id==='national-user'?{state:'MO'}:nationalTeam(save,id)).filter(Boolean);const fieldStates=new Set(fieldTeams.map(stateCodeFromEntry));
     if(v.nationals&&!v.nationals.championId&&fieldStates.size<10){v.nationals=null;for(const g of (save.schedule||[]).filter(g=>g.nationalTournament&&!g.played))g.__bm27Remove=true;save.schedule=(save.schedule||[]).filter(g=>!g.__bm27Remove);if(stateComplete(save))createNationals(save)}
-  }catch(e){console.error('BM27 nationwide school preload failed',e);v.nationalPool=diverseNationalPool(realSaveCandidates(save),save);v.nationalLoadError=e?.message||String(e)}finally{v.nationalHydrating=false;try{persist?.()}catch{};setTimeout(()=>{try{renderNationalsPage()}catch{}},0)}
+  }catch(e){nationalFailCount280++;console.warn('BM27 nationwide school preload failed (will retry later)',e?.message||e);v.nationalPool=diverseNationalPool(realSaveCandidates(save),save);v.nationalLoadError=e?.message||String(e)}finally{v.nationalHydrating=false;try{persist?.()}catch{};setTimeout(()=>{try{renderNationalsPage()}catch{}},0)}
   return v.nationalPool||[];
 }
 function ensureNationalPool(save=current){

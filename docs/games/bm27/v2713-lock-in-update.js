@@ -79,9 +79,9 @@ function buildMainMenu(){
   if(!branding&&byId('branding255Btn')){branding=byId('branding255Btn');modes.appendChild(branding)}
   if(!history&&byId('history254Btn')){history=byId('history254Btn');modes.appendChild(history)}
   const labels=new Map([[dyn,'Dynasty'],[season,'Season'],[legacy,'Legacy'],[play,'Play Now'],[my,'MySchool'],[rost,'Rosters'],[settings,'Settings'],[branding,'School Branding'],[history,'Historic Rosters']]);
-  for(const [b,label] of labels)if(b)b.innerHTML=`<b>${label}</b>`;
+  for(const [b,label] of labels)if(b&&!b.querySelector('.k2-art')&&b.innerHTML!==`<b>${label}</b>`)b.innerHTML=`<b>${label}</b>`; /* v2.9.2: don't wipe the 2K tile art */
   let pass=byId('seasonPass2713Menu');if(!pass){pass=document.createElement('button');pass.id='seasonPass2713Menu';pass.className='v2713-season-pass-menu';pass.innerHTML='<b>Season Pass</b>';modes.appendChild(pass)}
-  const order=[dyn,season,pass,legacy,play,my,branding,rost,history,settings].filter(Boolean);order.forEach(b=>modes.appendChild(b));
+  const order=[dyn,season,pass,legacy,play,my,branding,rost,history,settings].filter(Boolean);if(order.some((b,i)=>modes.children[i]!==b))order.forEach(b=>modes.appendChild(b)); /* v2.9.2: only reorder when needed */
   if(!modes.dataset.v2713Bound){modes.dataset.v2713Bound='1';modes.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if(b.id==='seasonPass2713Menu')return menuAction('seasonpass');if(b.id==='branding255Btn')return menuAction('branding');if(b.id==='history254Btn')return menuAction('history');const m=b.dataset.mode;if(m)menuAction(m)},true)}
   if(menu.dataset.v2713!=='1'){
     menu.dataset.v2713='1';const art=menu.querySelector('.rd-menu-art'),now=menu.querySelector('.rd-now'),oldPanel=menu.querySelector('.rd-menu-panel'),shade=menu.querySelector('.rd-menu-shade');

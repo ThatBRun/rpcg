@@ -7,9 +7,9 @@
       "title": "MSHSAA Basketball Manager 27",
       "shortName": "BM27",
       "subtitle": "Run a Missouri high school program",
-      "description": "Take over a Missouri high school basketball program and build a dynasty. Recruit and develop players, play out the regular season, chase your conference title, and fight through districts and MSHSAA Madness for the state championship. Real schools, real rosters, box scores, stats and cloud saves.",
+      "description": "Take over a Missouri high school basketball program and build a dynasty — now with an NBA 2K-style look and The Locker Room: your hometown newspaper, scouting reports, season projections, the team group chat, a play whiteboard, PA starting-lineup intros, banners and trophies. Recruit, play the season, and chase the MSHSAA state title.",
       "genre": "Sports",
-      "version": "2.7.68",
+      "version": "2.9.2",
       "launch": "web",
       "url": "games/bm27/index.html",
       "iconURL": "icons/bm27.png",
@@ -18,7 +18,7 @@
         "#0B1F14"
       ],
       "featured": true,
-      "updated": "Oct 2026"
+      "updated": "Nov 2026"
     },
     {
       "id": "backrooms-unsighted",
