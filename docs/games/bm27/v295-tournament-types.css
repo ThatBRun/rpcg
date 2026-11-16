@@ -1,0 +1,34 @@
+/* BM27 v2.9.5 — more tournament types */
+.v295-event summary{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;cursor:pointer;list-style:none}
+.v295-event summary::-webkit-details-marker{display:none}
+.v295-event h3{margin:2px 0}
+.v295-champ{font-weight:900;white-space:nowrap;background:linear-gradient(90deg,#f5b700,#ff7a00);color:#000;padding:6px 12px;border-radius:2px}
+.v295-logo,.v295-team img{width:22px;height:22px;object-fit:contain;flex:0 0 22px}
+.v295-team{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.v295-team b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v295-team.me b{color:var(--k2-accent,#f5b700)}
+.v295-table td,.v295-table th{text-align:center}
+.v295-table td:first-child,.v295-table th:first-child{text-align:left}
+.v295-rank{display:inline-block;min-width:22px;font-weight:900;opacity:.6}
+tr.v295-me td{background:#f5b70018!important}
+.v295-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.v295-grid2 h4,.v295-col h4{margin:10px 0 6px;font-size:12px;letter-spacing:.18em;opacity:.75}
+.v295-cols{display:flex;gap:12px;overflow-x:auto;padding:6px 0 4px;align-items:flex-start}
+.v295-col{flex:0 0 250px}
+.v295-match{border:1px solid #ffffff1c;border-radius:4px;padding:8px 10px;margin-bottom:8px;background:#ffffff06}
+.v295-match.mine{border-color:#f5b70077}
+.v295-match.skip{opacity:.45}
+.v295-match small{display:block;opacity:.7;font-size:11px;margin-bottom:4px}
+.v295-side{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;opacity:.8}
+.v295-side.win{opacity:1;font-weight:800}
+.v295-side strong{min-width:24px;text-align:right}
+.v295-series{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 0;flex-wrap:wrap}
+.v295-series>div{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.v295-series img{width:56px;height:56px;object-fit:contain}
+.v295-series strong{font-size:44px;line-height:1;font-style:italic}
+.v295-series>span{font-weight:800;letter-spacing:.2em;opacity:.5;font-size:12px}
+.v295-places{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.v295-places span{padding:5px 10px;border-radius:2px;background:#ffffff0c;font-size:13px}
+.v295-places span.v295-me{background:#f5b70033}
+.v295-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.v295-note{display:block;margin-top:4px}

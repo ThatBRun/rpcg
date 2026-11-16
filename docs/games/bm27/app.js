@@ -14,18 +14,57 @@ const BM27Storage=window.BM27Storage=window.BM27Storage||(()=>{
   const quotaError=e=>e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014);
   // v2.7.11: never delete career saves to recover browser quota. Only disposable caches are cleared.
   const cleanup=()=>{for(const key of ['mshsaa_bm27_directory']){try{localStorage.removeItem(key)}catch{}}};
+  // v2.9.3: career saves fall back to compressed storage when the browser's ~5 MB fills up,
+  // instead of silently failing to save. Compression runs shortly after the last change so play stays fast.
+  const BIG=new Set(['mshsaa_bm27_saves','mshsaa_bm27_last_good_save']);
+  const LZ='LZ1:',LZ2='LZ2:';const pending=new Map(),packCache=new Map();let timer=0,warnedAt=0;
+  const warn=()=>{if(Date.now()-warnedAt<60000)return;warnedAt=Date.now();try{const t=document.getElementById('toast');if(t){t.textContent='Could not save on this device — storage is full. Delete an old save or sign in for cloud saves.';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),5000)}}catch{}console.error('BM27: save storage full')};
+  // Each career is compressed on its own, so only the career that changed is recompressed.
+  const pack=(key,value)=>{
+    const Z=window.BM27LZ;if(!Z)return null;
+    if(key!=='mshsaa_bm27_saves')return LZ+Z.compressToUTF16(value);
+    let list;try{list=JSON.parse(value)}catch{return LZ+Z.compressToUTF16(value)}
+    if(!Array.isArray(list))return LZ+Z.compressToUTF16(value);
+    const seen=new Set();const parts=list.map((x,i)=>{const id=String(x&&x.id!=null?x.id:'#'+i);seen.add(id);const json=JSON.stringify(x);const c=packCache.get(id);if(c&&c.json===json)return c.packed;const packed=Z.compressToUTF16(json);packCache.set(id,{json,packed});return packed});
+    for(const id of [...packCache.keys()])if(!seen.has(id))packCache.delete(id);
+    return LZ2+JSON.stringify(parts)};
+  const unpack=v=>{const Z=window.BM27LZ;if(!Z)return null;
+    if(v.startsWith(LZ2))return '['+JSON.parse(v.slice(LZ2.length)).map(p=>Z.decompressFromUTF16(p)).join(',')+']';
+    return Z.decompressFromUTF16(v.slice(LZ.length))};
+  const writeCompressed=(key,value)=>{
+    let packed;try{packed=pack(key,value)}catch(e){console.warn('BM27 compress failed',e);return false}
+    if(!packed)return false;
+    const tryset=()=>{try{localStorage.setItem(key,packed);return true}catch(e){return quotaError(e)?false:(console.warn('BM27 save write failed',e),false)}};
+    if(tryset())return true;
+    cleanup();if(key==='mshsaa_bm27_saves'){try{localStorage.removeItem('mshsaa_bm27_last_good_save')}catch{}}
+    if(tryset())return true;
+    // Last resort: the old copy of this same key is what is using the space; replace it in one step.
+    try{localStorage.removeItem(key)}catch{}
+    return tryset()};
+  const flush=()=>{if(timer){clearTimeout(timer);timer=0}for(const [key,value] of [...pending]){pending.delete(key);if(!writeCompressed(key,value)&&key==='mshsaa_bm27_saves')warn()}};
+  const queue=(key,value)=>{
+    if(key==='mshsaa_bm27_last_good_save'){try{localStorage.removeItem(key)}catch{}return true} // duplicate backup; skipped while space is tight
+    pending.set(key,value);if(timer)clearTimeout(timer);timer=setTimeout(flush,900);return true};
+  try{addEventListener('pagehide',flush);addEventListener('beforeunload',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()})}catch{}
   const set=(key,value)=>{
+    if(BIG.has(key))pending.delete(key);
     try{localStorage.setItem(key,value);return true}catch(e){
       if(quotaError(e)){
         cleanup();
-        try{localStorage.setItem(key,value);return true}catch(retryError){console.warn('BM27 storage quota still full:',key,retryError);return false}
+        try{localStorage.setItem(key,value);return true}catch(retryError){
+          if(BIG.has(key)&&typeof value==='string')return queue(key,value)
+          console.warn('BM27 storage quota still full:',key,retryError);return false}
       }
       console.warn('BM27 browser backup skipped:',key,e);return false
     }
   };
-  const get=key=>{try{return localStorage.getItem(key)}catch{return null}};
-  const remove=key=>{try{localStorage.removeItem(key)}catch{}};
-  return {get,set,remove,cleanup};
+  const get=key=>{
+    if(pending.has(key))return pending.get(key);
+    let v=null;try{v=localStorage.getItem(key)}catch{return null}
+    if(v&&(v.startsWith(LZ)||v.startsWith(LZ2))){try{return unpack(v)}catch(e){console.warn('BM27 could not read compressed save',e);return null}}
+    return v};
+  const remove=key=>{pending.delete(key);try{localStorage.removeItem(key)}catch{}};
+  return {get,set,remove,cleanup,flush};
 })();
 const $=id=>document.getElementById(id);
 function uid(){
@@ -132,7 +171,7 @@ function hydrateDeviceSave(save){
 window.BM27FastSave={compactSave:compactSaveForDevice,hydrateSave:hydrateDeviceSave,version:'2.7.12'};
 function loadSaves(){
   try{
-    const parsed=JSON.parse(localStorage.getItem('mshsaa_bm27_saves')||'[]');
+    const parsed=JSON.parse(BM27Storage.get('mshsaa_bm27_saves')||'[]');
     saves=Array.isArray(parsed)?parsed.map(hydrateDeviceSave):[]
   }catch{saves=[]}
 }

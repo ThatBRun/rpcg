@@ -346,7 +346,7 @@
     // overwrite newer work from this device. Whichever copy has the newest updatedAt wins.
     let localSaves = [];
     try {
-      const parsed = JSON.parse(localStorage.getItem('mshsaa_bm27_saves') || '[]');
+      const parsed = JSON.parse((window.BM27Storage?.get?.('mshsaa_bm27_saves') ?? localStorage.getItem('mshsaa_bm27_saves')) || '[]');
       if (Array.isArray(parsed)) localSaves = parsed.map(x => window.BM27FastSave?.hydrateSave?.(x) || x);
     } catch {}
     const memorySaves = (typeof saves !== 'undefined' && Array.isArray(saves)) ? saves : [];
@@ -867,7 +867,7 @@
       session = null;
       current = null;
       saves = [];
-      try { localStorage.removeItem('mshsaa_bm27_saves'); } catch {}
+      try { window.BM27Storage?.remove?.('mshsaa_bm27_saves'); localStorage.removeItem('mshsaa_bm27_saves'); } catch {}
       el('game')?.classList.add('hidden');
       el('launcher')?.classList.remove('hidden');
       updateAccountUI();

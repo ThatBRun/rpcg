@@ -3,7 +3,7 @@
    Season, MySchool, Dynasty, saves and school logos keep running through their original code. */
 (()=>{'use strict';
 if(window.__BM27_V280__)return;window.__BM27_V280__=true;
-const VERSION='2.9.2';
+const VERSION='2.9.5';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const has=v=>typeof v!=='undefined';
