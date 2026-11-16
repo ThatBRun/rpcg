@@ -503,6 +503,66 @@ NEW|Newcastle|Newcastle|#bdbdbd|72
 NFO|Nottingham Forest|Forest|#DD0000|62
 SUN|Sunderland|Sunderland|#EB172B|58
 TOT|Tottenham Hotspur|Spurs|#c9cbe6|66`,
+ncaam:`DUKE|Duke Blue Devils|Duke|#3a6fe0|88
+UNC|North Carolina Tar Heels|North Carolina|#7BAFD4|80
+KU|Kansas Jayhawks|Kansas|#2f6fd6|84
+UK|Kentucky Wildcats|Kentucky|#2f5fd0|82
+CONN|UConn Huskies|UConn|#3a6fe0|86
+HOU|Houston Cougars|Houston|#C8102E|88
+PUR|Purdue Boilermakers|Purdue|#CEB888|84
+AUB|Auburn Tigers|Auburn|#F26522|82
+ALA|Alabama Crimson Tide|Alabama|#9E1B32|82
+FLA|Florida Gators|Florida|#FA4616|86
+TENN|Tennessee Volunteers|Tennessee|#FF8200|84
+GONZ|Gonzaga Bulldogs|Gonzaga|#5f7fb3|82
+ARIZ|Arizona Wildcats|Arizona|#CC0033|84
+MSU|Michigan State Spartans|Michigan State|#2f8a5a|82
+BAY|Baylor Bears|Baylor|#FFB81C|76
+ISU|Iowa State Cyclones|Iowa State|#C8102E|82
+TTU|Texas Tech Red Raiders|Texas Tech|#CC0000|82
+MARQ|Marquette Golden Eagles|Marquette|#3a6fe0|76
+SJU|St. John's Red Storm|St. John's|#BA0C2F|82
+ILL|Illinois Fighting Illini|Illinois|#E84A27|80
+WIS|Wisconsin Badgers|Wisconsin|#C5050C|78
+MICH|Michigan Wolverines|Michigan|#FFCB05|80
+TEX|Texas Longhorns|Texas|#BF5700|74
+ARK|Arkansas Razorbacks|Arkansas|#9D2235|78
+BYU|BYU Cougars|BYU|#2f6fd6|78
+UCLA|UCLA Bruins|UCLA|#2D68C4|76
+CREI|Creighton Bluejays|Creighton|#3a7fd6|74
+VILL|Villanova Wildcats|Villanova|#3a6fe0|70
+IU|Indiana Hoosiers|Indiana|#990000|72
+MIZ|Missouri Tigers|Missouri|#F1B82D|76
+ORE|Oregon Ducks|Oregon|#1f9d55|74
+LOU|Louisville Cardinals|Louisville|#C9001F|78
+OSU|Ohio State Buckeyes|Ohio State|#BB0000|72
+UVA|Virginia Cavaliers|Virginia|#E57200|70
+SMC|Saint Mary's Gaels|Saint Mary's|#D80024|76
+MSST|Mississippi State Bulldogs|Mississippi State|#a3324a|74
+MISS|Ole Miss Rebels|Ole Miss|#CE1126|76
+CLEM|Clemson Tigers|Clemson|#F56600|76
+XAV|Xavier Musketeers|Xavier|#3a6fe0|72
+MEM|Memphis Tigers|Memphis|#3a6fe0|74`,
+ncaavb:`NEB|Nebraska Cornhuskers|Nebraska|#E41C38|92
+TEX|Texas Longhorns|Texas|#BF5700|88
+WIS|Wisconsin Badgers|Wisconsin|#C5050C|86
+PSU|Penn State Nittany Lions|Penn State|#3a6fe0|90
+PITT|Pittsburgh Panthers|Pitt|#FFB81C|88
+LOU|Louisville Cardinals|Louisville|#C9001F|86
+STAN|Stanford Cardinal|Stanford|#8C1515|84
+UK|Kentucky Wildcats|Kentucky|#2f5fd0|84
+CREI|Creighton Bluejays|Creighton|#3a7fd6|84
+PUR|Purdue Boilermakers|Purdue|#CEB888|84
+ASU|Arizona State Sun Devils|Arizona State|#8C1D40|82
+SMU|SMU Mustangs|SMU|#C8102E|80
+KU|Kansas Jayhawks|Kansas|#2f6fd6|80
+MINN|Minnesota Golden Gophers|Minnesota|#a3324a|82
+ORE|Oregon Ducks|Oregon|#1f9d55|78
+FLA|Florida Gators|Florida|#FA4616|80
+GT|Georgia Tech Yellow Jackets|Georgia Tech|#B3A369|78
+BAY|Baylor Bears|Baylor|#FFB81C|76
+TENN|Tennessee Volunteers|Tennessee|#FF8200|78
+DAY|Dayton Flyers|Dayton|#CE1141|74`,
 atp:`Jannik Sinner|95
 Carlos Alcaraz|95
 Alexander Zverev|82
@@ -549,32 +609,50 @@ Jiri Prochazka|80|.2`
 for(const k in TEAMS)TEAMS[k]=TEAMS[k].split('\n').map(l=>l.split('|'));
 const LG={
  nfl:{name:'NFL',sp:'football',icon:'🏈',sim:true,path:'football/nfl'},
- ncaaf:{name:'College Football',sp:'football',icon:'🏈',path:'football/college-football'},
+ ncaam:{name:"Men's College Basketball",sp:'cbb',icon:'🏀',sim:true,path:'basketball/mens-college-basketball',q:'groups=50&limit=400'},
+ ncaaw:{name:"Women's College Basketball",sp:'wbb',icon:'🏀',path:'basketball/womens-college-basketball',q:'groups=50&limit=400'},
+ ncaaf:{name:'College Football',sp:'football',icon:'🏈',path:'football/college-football',q:'groups=80&limit=300'},
  nba:{name:'NBA',sp:'basketball',icon:'🏀',sim:true,path:'basketball/nba'},
+ gleague:{name:'NBA G League',sp:'basketball',icon:'🏀',path:'basketball/nba-development'},
+ wnba:{name:'WNBA',sp:'wbb',icon:'🏀',path:'basketball/wnba'},
  nhl:{name:'NHL',sp:'hockey',icon:'🏒',sim:true,path:'hockey/nhl'},
+ ncaah:{name:'College Hockey',sp:'hockey',icon:'🏒',path:'hockey/mens-college-hockey',q:'limit=200'},
  mlb:{name:'MLB',sp:'baseball',icon:'⚾',sim:true,path:'baseball/mlb'},
+ ncaabb:{name:'College Baseball',sp:'baseball',icon:'⚾',path:'baseball/college-baseball',q:'limit=300'},
+ ufl:{name:'UFL',sp:'football',icon:'🏈',path:'football/ufl'},
  epl:{name:'Premier League',sp:'soccer',icon:'⚽',sim:true,path:'soccer/eng.1'},
  ucl:{name:'Champions League',sp:'soccer',icon:'⚽',path:'soccer/uefa.champions'},
+ europa:{name:'Europa League',sp:'soccer',icon:'⚽',path:'soccer/uefa.europa'},
+ laliga:{name:'La Liga',sp:'soccer',icon:'⚽',path:'soccer/esp.1'},
+ bundesliga:{name:'Bundesliga',sp:'soccer',icon:'⚽',path:'soccer/ger.1'},
+ seriea:{name:'Serie A',sp:'soccer',icon:'⚽',path:'soccer/ita.1'},
+ ligue1:{name:'Ligue 1',sp:'soccer',icon:'⚽',path:'soccer/fra.1'},
  mls:{name:'MLS',sp:'soccer',icon:'⚽',path:'soccer/usa.1'},
+ ligamx:{name:'Liga MX',sp:'soccer',icon:'⚽',path:'soccer/mex.1'},
+ ncaavb:{name:'College Volleyball',sp:'volleyball',icon:'🏐',sim:true,path:'volleyball/womens-college-volleyball',q:'limit=300'},
  atp:{name:'ATP Tennis',sp:'tennis',icon:'🎾',sim:true},
- ufc:{name:'UFC',sp:'mma',icon:'🥊',sim:true}
+ ufc:{name:'UFC',sp:'mma',icon:'🥊',sim:true,path:'mma/ufc'}
 };
 
 const SP={
  football:{name:'Football',league:'Pro Football League',icon:'🏈',ups:60/480,reg:60,plen:15,np:4,k:.006,unit:'Points',p1:'1st Quarter',spn:'Spread',kick:'Kickoff!'},
- basketball:{name:'Basketball',league:'Pro Basketball Assoc.',icon:'🏀',ups:48/480,reg:48,plen:12,np:4,k:.0015,unit:'Points',p1:'1st Quarter',spn:'Spread',kick:'Tip-off!'},
+ basketball:{name:'Basketball',league:'Pro Basketball Assoc.',icon:'🏀',ups:48/480,reg:48,plen:12,np:4,k:.0015,eff:1,pn:'Q',pword:'quarter',hoops:true,unit:'Points',p1:'1st Quarter',spn:'Spread',kick:'Tip-off!'},
+ cbb:{name:'College Basketball',icon:'🏀',ups:40/480,reg:40,plen:20,np:2,k:.0025,eff:.74,pn:'H',pword:'half',hoops:true,unit:'Points',p1:'1st Half',spn:'Spread',kick:'Tip-off!'},
+ wbb:{name:"Women's Basketball",icon:'🏀',ups:40/480,reg:40,plen:10,np:4,k:.0025,eff:.66,pn:'Q',pword:'quarter',hoops:true,unit:'Points',p1:'1st Quarter',spn:'Spread',kick:'Tip-off!'},
+ volleyball:{name:'Volleyball',icon:'🏐',ups:180/480,k:.006,unit:'Points',sets:true,bo:3,tgName:'Total Points',p1:'1st Set',kick:'First serve!'},
  baseball:{name:'Baseball',league:'Pro Baseball League',icon:'⚾',ups:18/480,reg:18,plen:2,np:9,k:.007,unit:'Runs',p1:'1st Inning',spn:'Run Line',kick:'Play ball!'},
  hockey:{name:'Hockey',league:'Pro Hockey League',icon:'🏒',ups:60/480,reg:60,plen:20,np:3,k:.007,unit:'Goals',p1:'1st Period',spn:'Puck Line',kick:'Puck drop!'},
  soccer:{name:'Soccer',league:'Premier Division',icon:'⚽',ups:90/480,reg:90,plen:45,np:2,k:.016,unit:'Goals',p1:'1st Half',spn:'Handicap',kick:'Kick-off!',draw:true},
- tennis:{name:'Tennis',league:'World Tennis Tour',icon:'🎾',ups:24/480,k:.005,unit:'Games',indiv:true,kick:'Players take the court — first serve'},
+ tennis:{name:'Tennis',league:'World Tennis Tour',icon:'🎾',ups:24/480,k:.005,unit:'Games',indiv:true,sets:true,bo:2,tgName:'Total Games',kick:'Players take the court — first serve'},
  mma:{name:'MMA',league:'Fight Night',icon:'🥊',ups:15/300,reg:15,plen:5,np:3,k:.02,indiv:true,kick:'Round 1 — FIGHT!'}
 };
-const CARD={football:['sp','tot','ml'],basketball:['sp','tot','ml'],baseball:['sp','tot','ml'],hockey:['sp','tot','ml'],soccer:['sp','tot','ml'],tennis:['tg','ml'],mma:['ml']};
+const CARD={football:['sp','tot','ml'],basketball:['sp','tot','ml'],baseball:['sp','tot','ml'],hockey:['sp','tot','ml'],soccer:['sp','tot','ml'],tennis:['tg','ml'],mma:['ml'],cbb:['sp','tot','ml'],wbb:['sp','tot','ml'],volleyball:['tg','ml']};
+const vs=sp=>({cbb:'basketball',wbb:'basketball'}[sp]||sp);
 
 /* ================= simulation core ================= */
 function initState(sp){
  const s={sp,u:0,score:[0,0],ps:[],ev:[],st:[[0,0,0],[0,0,0]],over:false,win:-1,ot:false};
- if(sp==='tennis'){s.cur=[0,0];s.srv=rnd()<.5?0:1;s.tg=0}
+ if(sp==='tennis'||sp==='volleyball'){s.cur=[0,0];s.srv=rnd()<.5?0:1;s.tg=0}
  if(sp==='mma'){s.method=null}
  return s;
 }
@@ -585,9 +663,27 @@ function finish(s){s.over=true;if(s.win<0)s.win=s.score[0]>s.score[1]?0:s.score[
 function rel(P,i){const home=P.indiv?0:(i===1?3:-3);return (P.tf||1)*Math.exp((P.r[i]-P.r[1-i]+home)*P.k)}
 function wshare(P,i){const a=rel(P,0),b=rel(P,1);return i===0?a/(a+b):b/(a+b)}
 function pickPl(sh){let r=rnd(),c=0;for(let i=0;i<sh.length;i++){c+=sh[i];if(r<c)return i}return -1}
-function p1Done(s){if(s.over)return true;if(s.sp==='tennis')return s.ps.length>=1;if(s.sp==='baseball')return s.u>=2;return s.u>=SP[s.sp].plen}
+function p1Done(s){if(s.over)return true;if(SP[s.sp].sets)return s.ps.length>=1;if(s.sp==='baseball')return s.u>=2;return s.u>=SP[s.sp].plen}
 const PN=(P,t,i)=>i>=0?P.pl[t][i]:'A role player';
 
+function hoops(s,P,L){
+ const C=SP[s.sp],reg=C.reg,pl=C.plen;
+ ensureP(s,s.u<reg?Math.floor(s.u/pl):C.np+Math.floor((s.u-reg)/5));
+ for(let k=0;k<2;k++)for(const t of [0,1]){
+  const m=rel(P,t)*C.eff,r=rnd();let pts=0;
+  if(r<.125*m)pts=3;else if(r<.495*m)pts=2;else if(r<.55*m)pts=rnd()<.7?2:1;
+  if(pts){const pl=pickPl(P.sh);sc(s,t,pts,pl,pts);
+   if(L&&pts===3&&rnd()<.6)L(`${PN(P,t,pl)} drains a three for ${P.tn[t]}`,'score',t,'THREE!');
+   else if(L&&pts===2&&rnd()<.08)L(`${PN(P,t,pl)} throws down a monster dunk!`,'score',t,'SLAM DUNK!');}
+ }
+ s.u++;
+ if(L&&s.u<reg&&s.u%pl===0){if(s.u===reg/2)L('Halftime','info');else L(`End of the ${ord(s.u/pl)} ${C.pword}`,'info')}
+ if(s.u>=reg&&(s.u-reg)%5===0){
+  if(s.score[0]!==s.score[1])finish(s);
+  else if(s.u>=reg+25){const t=rnd()<wshare(P,1)?1:0;sc(s,t,1,-1,0);finish(s)}
+  else{s.ot=true;L&&L('All tied up — OVERTIME!','big',-1,'OVERTIME')}
+ }
+}
 const STEP={
  football(s,P,L){
   ensureP(s,s.u<60?Math.floor(s.u/15):4);
@@ -604,23 +700,14 @@ const STEP={
   if(s.u===60){if(s.score[0]===s.score[1]){s.ot=true;L&&L('Tied at the end of regulation — OVERTIME!','big',-1,'OVERTIME')}else finish(s)}
   else if(s.u>=70&&!s.over){const t=rnd()<wshare(P,1)?1:0;sc(s,t,3,-1,0);finish(s);L&&L(`Last-second field goal! ${P.tn[t]} win`,'big',t,'GAME OVER')}
  },
- basketball(s,P,L){
-  ensureP(s,s.u<48?Math.floor(s.u/12):4+Math.floor((s.u-48)/5));
-  for(let k=0;k<2;k++)for(const t of [0,1]){
-   const m=rel(P,t),r=rnd();let pts=0;
-   if(r<.125*m)pts=3;else if(r<.495*m)pts=2;else if(r<.55*m)pts=rnd()<.7?2:1;
-   if(pts){const pl=pickPl(P.sh);sc(s,t,pts,pl,pts);
-    if(L&&pts===3&&rnd()<.6)L(`${PN(P,t,pl)} drains a three for the ${P.tn[t]}`,'score',t,'THREE!');
-    else if(L&&pts===2&&rnd()<.08)L(`${PN(P,t,pl)} throws down a monster dunk!`,'score',t,'SLAM DUNK!');}
-  }
-  s.u++;
-  if(L&&(s.u===12||s.u===36))L(`End of the ${s.u===12?'1st':'3rd'} quarter`,'info');
-  if(L&&s.u===24)L('Halftime','info');
-  if(s.u>=48&&(s.u-48)%5===0){
-   if(s.score[0]!==s.score[1])finish(s);
-   else if(s.u>=73){const t=rnd()<wshare(P,1)?1:0;sc(s,t,1,-1,0);finish(s)}
-   else{s.ot=true;L&&L('All tied up — OVERTIME!','big',-1,'OVERTIME')}
-  }
+ basketball(s,P,L){hoops(s,P,L)},cbb(s,P,L){hoops(s,P,L)},wbb(s,P,L){hoops(s,P,L)},
+ volleyball(s,P,L){
+  const target=s.ps.length===4?15:25,sv=s.srv;
+  const base=clamp(.5+(P.r[1]-P.r[0]+.8)*P.k,.25,.75),p1=clamp(base+(sv===1?-.08:.08),.1,.9);
+  const w=rnd()<p1?1:0;s.cur[w]++;s.tg++;s.srv=w;s.u++;
+  if(s.cur[w]>=target&&s.cur[w]-s.cur[1-w]>=2){const a=s.cur[w],b=s.cur[1-w];s.ps.push(s.cur.slice());s.score[w]++;s.ev.push(w);
+   L&&L(`${P.tn[w]} take set ${s.ps.length}, ${a}-${b}`,'big',w,'SET '+String(P.tn[w]).toUpperCase());s.cur=[0,0];
+   if(s.score[w]===3){finish(s);L&&L(`Match point converted — ${P.tn[w]} win ${s.score[w]}-${s.score[1-w]}!`,'big',w,'MATCH!')}}
  },
  baseball(s,P,L){
   const inn=Math.floor(s.u/2),bat=s.u%2;ensureP(s,inn);
@@ -687,6 +774,7 @@ function grade(s,q){
   case 'tot':return ou(s.score[0]+s.score[1],q,s.over);
   case 'tt':return ou(s.score[q.t],q,s.over);
   case 'tg':return ou(s.tg,q,s.over);
+  case 'ts':return ou(s.score[0]+s.score[1],q,s.over);
   case 'pou':return ou(s.st[q.t][q.i],q,s.over);
   case 'p1':{if(!p1Done(s))return null;const a=s.ps[0]||[0,0];const r=a[0]>a[1]?0:a[1]>a[0]?1:2;return r===q.k?1:0}
   case 'nx':if(s.ev.length>q.n)return s.ev[q.n]===q.k?1:0;if(s.over)return q.k===-1?1:0;return null;
@@ -721,7 +809,7 @@ function markets(g){
  const add=(id,name,outs,type)=>{const o=outs.map(x=>{const pr=price(g,x.q);const r=Object.assign(x,{key:pr.key,am:pr.am,done:pr.done,gid:g.id,mname:name,pk:x.pk||x.name+(x.line&&x.line!==x.name?' '+x.line:'')});SELS[r.key]=r;return r});M.push({id,name,outs:o,type})};
  if(C.draw)add('ml','Match Result',[{q:{m:'ml',k:0},name:nm(0),line:''},{q:{m:'ml',k:2},name:'Draw',line:''},{q:{m:'ml',k:1},name:nm(1),line:''}]);
  else add('ml',C.indiv?'To Win':'Moneyline',[{q:{m:'ml',k:0},name:nm(0),line:''},{q:{m:'ml',k:1},name:nm(1),line:''}]);
- if(!C.indiv){
+ if(!C.indiv&&!C.sets){
   const mg=S.reduce((a,c)=>a+c.score[1]-c.score[0],0)/S.length;
   const L=(sp==='hockey'||sp==='baseball')?(mg>=0?1.5:-1.5):half(mg);
   add('sp',C.spn,[{q:{m:'sp',k:0,l:L},name:nm(0),line:fl(L)},{q:{m:'sp',k:1,l:L},name:nm(1),line:fl(-L)}]);
@@ -733,18 +821,21 @@ function markets(g){
   add('tt','Team Totals',tt);
   if(sp==='soccer')add('btts','Both Teams to Score',[{q:{m:'btts',k:'y'},name:'Yes',line:'',pk:'Both teams score: Yes'},{q:{m:'btts',k:'n'},name:'No',line:'',pk:'Both teams score: No'}]);
   else if(!s.ot){const n=sp==='baseball'?'Extra Innings?':'Overtime?';add('ot',n,[{q:{m:'ot',k:'y'},name:'Yes',line:'',pk:n.replace('?','')+': Yes'},{q:{m:'ot',k:'n'},name:'No',line:'',pk:n.replace('?','')+': No'}])}
-  if(g.real){}else if(sp==='basketball'){const o=[];for(const t of[0,1])for(let i=0;i<3;i++){const l=half(meds(c=>c.st[t][i]));o.push({q:{m:'pou',t,i,k:'o',l},name:T[t].pl[i],sub:ab(t),line:'O '+l,pk:`${T[t].pl[i]} Over ${l} pts`},{q:{m:'pou',t,i,k:'u',l},name:T[t].pl[i],sub:ab(t),line:'U '+l,pk:`${T[t].pl[i]} Under ${l} pts`})}add('pp','Player Points',o,'pou')}
+  if(g.real){}else if(C.hoops){const o=[];for(const t of[0,1])for(let i=0;i<3;i++){const l=half(meds(c=>c.st[t][i]));o.push({q:{m:'pou',t,i,k:'o',l},name:T[t].pl[i],sub:ab(t),line:'O '+l,pk:`${T[t].pl[i]} Over ${l} pts`},{q:{m:'pou',t,i,k:'u',l},name:T[t].pl[i],sub:ab(t),line:'U '+l,pk:`${T[t].pl[i]} Under ${l} pts`})}add('pp','Player Points',o,'pou')}
   else{const PNM={football:['Anytime Touchdown Scorer','Anytime TD'],hockey:['Anytime Goal Scorer','Anytime goal'],soccer:['Anytime Goalscorer','Anytime goal'],baseball:['To Hit a Home Run','To homer']}[sp];
    const o=[];for(const t of[0,1])for(let i=0;i<3;i++)o.push({q:{m:'any',t,i,l:1},name:T[t].pl[i],sub:ab(t),line:'Yes',pk:`${T[t].pl[i]} — ${PNM[1]}`});add('pp',PNM[0],o);
    if(sp==='football'){const o2=[];for(const t of[0,1])for(let i=0;i<3;i++)o2.push({q:{m:'any',t,i,l:2},name:T[t].pl[i],sub:ab(t),line:'2+',pk:`${T[t].pl[i]} — 2+ TDs`});add('pp2','2+ Touchdowns',o2)}}
  }
- if(sp==='tennis'){
-  const TL=half(meds(c=>c.tg));add('tg','Total Games',[{q:{m:'tg',k:'o',l:TL},name:'Over',line:'O '+TL,pk:'Over '+TL+' games'},{q:{m:'tg',k:'u',l:TL},name:'Under',line:'U '+TL,pk:'Under '+TL+' games'}]);
-  if(live)add('nx','Next Set Winner',[{q:{m:'nx',k:0,n:s.ev.length},name:nm(0),line:'',pk:nm(0)+' wins next set'},{q:{m:'nx',k:1,n:s.ev.length},name:nm(1),line:'',pk:nm(1)+' wins next set'}]);
+ if(C.sets){
+  const TL=half(meds(c=>c.tg)),u=sp==='tennis'?'games':'points',bo=C.bo;
+  add('tg',C.tgName,[{q:{m:'tg',k:'o',l:TL},name:'Over',line:'O '+TL,pk:`Over ${TL} ${u}`},{q:{m:'tg',k:'u',l:TL},name:'Under',line:'U '+TL,pk:`Under ${TL} ${u}`}]);
+  if(live&&!g.real)add('nx','Next Set Winner',[{q:{m:'nx',k:0,n:s.ev.length},name:nm(0),line:'',pk:nm(0)+' wins next set'},{q:{m:'nx',k:1,n:s.ev.length},name:nm(1),line:'',pk:nm(1)+' wins next set'}]);
   if(!p1Done(s))add('p1','1st Set Winner',[{q:{m:'p1',k:0},name:nm(0),line:'',pk:nm(0)+' wins 1st set'},{q:{m:'p1',k:1},name:nm(1),line:'',pk:nm(1)+' wins 1st set'}]);
-  add('sb','Set Betting',[['2-0',0],['2-1',0],['1-2',1],['0-2',1]].map(([k,t])=>({q:{m:'sb',k},name:T[t].nick,line:t?k.split('').reverse().join(''):k,pk:`${nm(t)} wins ${t?k.split('').reverse().join(''):k}`})));
+  if(bo===3){const SL=3.5;add('ts','Total Sets',[{q:{m:'ts',k:'o',l:SL},name:'Over',line:'O '+SL,pk:'Over 3.5 sets'},{q:{m:'ts',k:'u',l:SL},name:'Under',line:'U '+SL,pk:'Under 3.5 sets'}])}
+  const sb=[];for(let l=0;l<bo;l++)sb.push([bo+'-'+l,0]);for(let l=bo-1;l>=0;l--)sb.push([l+'-'+bo,1]);
+  add('sb','Set Betting',sb.map(([k,t])=>{const sh=t?k.split('-').reverse().join('-'):k;return{q:{m:'sb',k},name:T[t].nick,line:sh,pk:`${nm(t)} wins ${sh}`}}));
  }
- if(sp==='mma'){
+ if(sp==='mma'&&!g.real){
   const LB={KO:'KO/TKO',SUB:'Submission',DEC:'Decision'},o=[];
   for(const t of[0,1])for(const k of['KO','SUB','DEC'])o.push({q:{m:'meth',t,k},name:T[t].nick,line:LB[k],pk:`${nm(t)} by ${LB[k]}`});
   add('meth','Method of Victory',o);
@@ -755,7 +846,7 @@ function markets(g){
 
 /* ================= world ================= */
 const V={now:Date.now(),bal:10000,bets:[],games:[],nid:1,bonusAt:0,speed:1};
-const ROLES={football:['RB1','WR1','TE1'],basketball:['top scorer','No. 2 scorer','No. 3 scorer'],hockey:['1st-line C','1st-line W','top D-man'],soccer:['striker','winger','attacking mid'],baseball:['cleanup hitter','No. 3 hitter','leadoff hitter']};
+const ROLES={volleyball:[],football:['RB1','WR1','TE1'],cbb:['top scorer','No. 2 scorer','No. 3 scorer'],wbb:['top scorer','No. 2 scorer','No. 3 scorer'],basketball:['top scorer','No. 2 scorer','No. 3 scorer'],hockey:['1st-line C','1st-line W','top D-man'],soccer:['striker','winger','attacking mid'],baseball:['cleanup hitter','No. 3 hitter','leadoff hitter']};
 function abbrFor(n){const w=n.split(' ').slice(-1)[0].replace(/[^A-Za-z]/g,'');return w.slice(0,3).toUpperCase()}
 function mkTeam(lg,av){
  const sp=LG[lg].sp,x=pick(TEAMS[lg].filter(t=>!av.n.includes(t[0])));av.n.push(x[0]);
@@ -792,7 +883,7 @@ function maintain(){
  const open=new Set();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));
  V.games=V.games.filter(g=>open.has(g.id)||!(g.s.over&&(g.real?Date.now()-(g.finalReal||0)>8*3600e3:V.now-g.finalAt>25*60000)));
 }
-function preRun(g,frac){g.start=V.now-1000;g.started=true;logG(g,SP[g.sport].kick,'info');const units=SP[g.sport].reg||22;g.prog=frac*units;const P=params(g),L=(x,k,t,f)=>logG(g,x,k,t,f);while(!g.s.over&&g.s.u<Math.floor(g.prog))STEP[g.sport](g.s,P,L)}
+function preRun(g,frac){g.start=V.now-1000;g.started=true;logG(g,SP[g.sport].kick,'info');const units=SP[g.sport].reg||({tennis:22,volleyball:180}[g.sport])||22;g.prog=frac*units;const P=params(g),L=(x,k,t,f)=>logG(g,x,k,t,f);while(!g.s.over&&g.s.u<Math.floor(g.prog))STEP[g.sport](g.s,P,L)}
 function initWorld(){
  for(const lg in LG){if(!LG[lg].sim)continue;
   preRun(newGame(lg,0),.15+rnd()*.25);preRun(newGame(lg,0),.45+rnd()*.3);
@@ -801,25 +892,54 @@ function initWorld(){
 }
 
 /* ================= real games (ESPN public scoreboard feed) ================= */
-const REAL={ok:null,next:{},busy:false,orphanAt:0,retry:0};
+const REAL={ok:null,next:{},busy:false,orphanAt:0,retry:0,sched:0,schedAt:0,loading:false};
 const ESPN='https://site.api.espn.com/apis/site/v2/sports/';
-async function getJSON(url){const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);try{const r=await fetch(url,{signal:ctl.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(tm)}}
+async function getJSON(url){const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),12000);try{const r=await fetch(url,{signal:ctl.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(tm)}}
 function etDate(t){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(t)).replace(/-/g,'')}
-async function pollReal(){
- if(REAL.busy)return;const now=Date.now();if(REAL.ok===false&&now<REAL.retry)return;REAL.busy=true;
+function lgURL(L,date){const q=[];if(date)q.push('dates='+date);if(L.q)q.push(L.q);return ESPN+L.path+'/scoreboard'+(q.length?'?'+q.join('&'):'')}
+function ingest(lg,j){let n=0;for(const ev of (j&&j.events)||[]){if(LG[lg].sp==='mma'){for(const comp of ev.competitions||[])if(upsertFight(lg,ev,comp))n++}else if(upsertReal(lg,ev))n++}return n}
+const realCount=()=>V.games.filter(g=>g.real).length;
+async function loadSchedule(){
+ // full refresh of every league: today plus the next 2 days. Runs at start and then every hour.
+ const now=Date.now(),before=realCount(),days=[0,1,2].map(d=>etDate(now+d*864e5));
+ REAL.loading=true;REAL.sched=now+3600e3;lastMainHTML='';
+ for(const d of days){for(const lg in LG){const L=LG[lg];if(!L.path)continue;try{ingest(lg,await getJSON(lgURL(L,d)))}catch(e){}}
+  if(d===days[0]){lastMainHTML='';render()}}
+ REAL.loading=false;REAL.schedAt=Date.now();const added=realCount()-before;
+ if(REAL.loadedOnce&&added>0)toast(`🔄 Loaded ${added} new real game${added>1?'s':''}`,'ok');REAL.loadedOnce=true;lastMainHTML='';render();
+}
+async function pollReal(force){
+ if(REAL.busy)return;const now=Date.now();if(REAL.ok===false&&now<REAL.retry&&!force)return;REAL.busy=true;
  try{
+  if(REAL.ok!==true){try{await getJSON(lgURL(LG.nfl));REAL.ok=true;lastMainHTML='';render()}catch(e){REAL.ok=false;REAL.retry=now+300000;lastMainHTML='';render();return}}
+  if(force||now>=REAL.sched)await loadSchedule();
+  // fast updates for leagues with games live or starting soon (every 20 s)
   for(const lg in LG){const L=LG[lg];if(!L.path||now<(REAL.next[lg]||0))continue;
-   try{const j=await getJSON(ESPN+L.path+'/scoreboard');const first=REAL.ok!==true;REAL.ok=true;let live=false;
-    for(const ev of j.events||[]){const g=upsertReal(lg,ev);if(g&&isLive(g))live=true}REAL.next[lg]=now+(live?20000:180000);if(first){lastMainHTML='';render()}}
-   catch(e){if(REAL.ok!==true){REAL.ok=false;REAL.retry=now+300000;lastMainHTML='';render();break}REAL.next[lg]=now+60000}
+   const hot=V.games.filter(g=>g.real&&g.lg===lg&&!g.s.over&&(isLive(g)||(g.start<now+10*60000&&g.start>now-8*3600e3)));
+   if(!hot.length){REAL.next[lg]=now+300000;continue}
+   for(const d of new Set(hot.map(g=>etDate(g.start)))){try{ingest(lg,await getJSON(lgURL(L,d)))}catch(e){}}
+   REAL.next[lg]=now+20000;
   }
-  if(REAL.ok&&now>REAL.orphanAt){REAL.orphanAt=now+120000;
-   const open=new Set();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));
-   const done=new Set();
+  if(now>REAL.orphanAt){REAL.orphanAt=now+120000;
+   const open=new Set();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));const done=new Set();
    for(const g of V.games.filter(g=>g.real&&!g.s.over&&open.has(g.id)&&now-(g.seen||0)>300000)){const k=g.lg+etDate(g.start);if(done.has(k))continue;done.add(k);
-    try{const j=await getJSON(ESPN+LG[g.lg].path+'/scoreboard?dates='+etDate(g.start));for(const ev of j.events||[])upsertReal(g.lg,ev)}catch(e){}}}
+    try{ingest(g.lg,await getJSON(lgURL(LG[g.lg],etDate(g.start))))}catch(e){}}}
  }finally{REAL.busy=false}
  settle();
+}
+function upsertFight(lg,ev,comp){
+ try{const cs=comp.competitors||[];if(cs.length!==2)return null;const id=`r-${lg}-${ev.id}-${comp.id}`;let g=gameById(id);
+  const nm=c=>(c.athlete&&(c.athlete.displayName||c.athlete.fullName))||'TBD';
+  if(!g){const t=cs.map((c,i)=>{const n=nm(c),rec=(c.records&&c.records[0]&&c.records[0].summary)||'';return{name:n,nick:n.split(' ').slice(1).join(' ')||n,ab:abbrFor(n),c:i?'#3a86ff':'#e63946',r:recRating(rec),rec,sub:.35,pl:[]}});
+   g={id,real:true,lg,sport:'mma',t,start:Date.parse(comp.date||comp.startDate||ev.date)||Date.now(),s:initState('mma'),log:[],ln:0,prog:0,started:false,finalAt:0,event:ev.shortName||ev.name||''};V.games.push(g)}
+  g.seen=Date.now();const st=comp.status||ev.status||{},ty=st.type||{},state=ty.state||'pre',s=g.s;
+  g.det=ty.shortDetail||'';g.tv=[...new Set((comp.broadcasts||ev.broadcasts||[]).flatMap(b=>b.names||[]))].join(', ');
+  if(state==='pre'){g.rst='pre';g.start=Date.parse(comp.date||comp.startDate||ev.date)||g.start;return g}
+  g.rst=state;if(!g.started){g.started=true;if(state==='in')logG(g,SP.mma.kick,'info')}
+  const per=+st.period||1,clk=+st.clock||0;s.u=Math.max(0,Math.min(14,Math.floor((per-1)*5+(5-clk/60))));g.prog=s.u;ensureP(s,per-1);
+  if(state==='post'){const w=cs.findIndex(c=>c.winner===true);if(w<0||ty.completed===false)g.void=true;s.over=true;s.win=w<0?2:w;s.method=s.method||'DEC';
+   if(!g.finalAt){g.finalAt=V.now;g.finalReal=Date.now();logG(g,g.void?'Fight canceled or no result — bets voided':`${g.t[s.win]?g.t[s.win].name:'?'} wins! ${g.det}`,'big',w<0?-1:w,w<0?'':'WINNER!')}}
+  return g}catch(e){console.warn('fight parse',e);return null}
 }
 function realTeam(c){const t=c.team||{},rec=(c.records&&c.records[0]&&c.records[0].summary)||'';
  return{tid:t.id,name:t.displayName||t.name||'TBD',nick:t.shortDisplayName||t.name||t.abbreviation||'TBD',ab:String(t.abbreviation||'TBD').toUpperCase(),c:visCol(t.color,t.alternateColor),r:recRating(rec),rec,pl:[]}}
@@ -841,7 +961,7 @@ function setRealRatings(g,comp){
  const C=cal(sp);g.tf=o&&+o.overUnder>0?clamp(+o.overUnder/C.T0,.5,1.8):1;
  let margin=null,ph=null;
  if(o){const ml=(side,old)=>{const m=o.moneyline&&o.moneyline[side];return mlProb(old!=null?old:m&&((m.close&&m.close.odds)||(m.open&&m.open.odds)))};const hm=ml('home',o.homeTeamOdds&&o.homeTeamOdds.moneyLine),am=ml('away',o.awayTeamOdds&&o.awayTeamOdds.moneyLine),dm=ml('draw',o.drawOdds&&o.drawOdds.moneyLine)||0;if(hm&&am)ph=hm/(hm+am+dm);
-  if((sp==='football'||sp==='basketball')&&typeof o.details==='string'){const d=o.details.trim();if(/^even$/i.test(d))margin=0;else{const m=d.match(/^(\S+)\s+([-+]?\d+(\.\d+)?)$/);if(m){const num=+m[2];margin=m[1].toUpperCase()===g.t[1].ab?-num:num}}}}
+  if((sp==='football'||SP[sp].hoops)&&typeof o.details==='string'){const d=o.details.trim();if(/^even$/i.test(d))margin=0;else{const m=d.match(/^(\S+)\s+([-+]?\d+(\.\d+)?)$/);if(m){const num=+m[2];margin=m[1].toUpperCase()===g.t[1].ab?-num:num}}}}
  g._P=null;
  if(margin!=null){const dd=clamp((margin-C.m0*g.tf)/(C.slope*g.tf),-90,90);g.t[0].r=70-dd/2;g.t[1].r=70+dd/2}
  else if(ph!=null){let lo=-90,hi=90;for(let i=0;i<10;i++){const mid=(lo+hi)/2;g.t[0].r=70-mid/2;g.t[1].r=70+mid/2;g._P=null;const S=simulate({sport:sp,t:g.t,s:initState(sp),tf:g.tf},300);
@@ -854,6 +974,7 @@ function realScore(g,t,d){const nk=g.t[t].nick;let x=null,f='',k='score';
   case 'hockey':x=`GOAL ${nk}!`;f='GOAL!';k='big';break;
   case 'soccer':x=`GOAL ${nk}!`;f='GOOOAL!';k='big';break;
   case 'baseball':x=`${nk} score ${d} run${d>1?'s':''}`;f=d>1?d+' RUNS SCORE':'RUN SCORES';break;
+  case 'volleyball':x=`${nk} win the set!`;f='SET '+String(nk).toUpperCase();k='big';break;
  }
  g.s.ev.push(t);if(x)logG(g,x,k,t,f);
 }
@@ -869,12 +990,13 @@ function realUpdate(g,ev,comp,A,H){
  const sc=[+A.score||0,+H.score||0];
  if(g.inited)for(const i of[0,1]){const d=sc[i]-s.score[i];if(d>0)realScore(g,i,d)}
  s.score=sc;
- if(sp==='basketball'&&g.inited){const ld=Math.sign(sc[1]-sc[0]);if(ld&&g.lead&&ld!==g.lead){const t=ld>0?1:0;logG(g,`${g.t[t].nick} take the lead, ${Math.max(...sc)}-${Math.min(...sc)}`,'score',t,'LEAD CHANGE')}if(ld)g.lead=ld}
+ if(SP[sp].hoops&&g.inited){const ld=Math.sign(sc[1]-sc[0]);if(ld&&g.lead&&ld!==g.lead){const t=ld>0?1:0;logG(g,`${g.t[t].nick} take the lead, ${Math.max(...sc)}-${Math.min(...sc)}`,'score',t,'LEAD CHANGE')}if(ld)g.lead=ld}
  const ls=[A,H].map(c=>(c.linescores||[]).map(x=>+x.value||0)),n=Math.max(ls[0].length,ls[1].length);s.ps=[];for(let j=0;j<n;j++)s.ps.push([ls[0][j]||0,ls[1][j]||0]);
  const per=+st.period||1,clk=+st.clock||0,dl=g.det.toLowerCase();let u=0;
  switch(sp){
   case 'football':u=per<=4?(per-1)*15+(15-clk/60):60+Math.min(9.9,10-clk/60);s.ot=per>4;break;
-  case 'basketball':u=per<=4?(per-1)*12+(12-clk/60):48+(per-5)*5+(5-clk/60);s.ot=per>4;break;
+  case 'basketball':case 'cbb':case 'wbb':u=per<=C.np?(per-1)*C.plen+(C.plen-clk/60):C.reg+(per-C.np-1)*5+(5-clk/60);s.ot=per>C.np;break;
+  case 'volleyball':{const lsA=ls[0],lsH=ls[1],done=state==='post'?n:Math.max(0,per-1);s.ps=[];for(let j=0;j<done;j++)s.ps.push([lsA[j]||0,lsH[j]||0]);s.cur=state==='post'?[0,0]:[lsA[done]||0,lsH[done]||0];s.tg=[...lsA,...lsH].reduce((a,b)=>a+b,0);u=s.tg;break}
   case 'hockey':u=per<=3?(per-1)*20+(20-clk/60):per===4?60+(5-clk/60):65;s.ot=per>3;s.so=per>=5;break;
   case 'soccer':u=Math.min(89.9,clk/60);if(per>=2)u=Math.max(u,45);break;
   case 'baseball':u=(per-1)*2+(/^(bot|mid)/.test(dl)?1:/^end/.test(dl)?2:0);s.ot=per>9;break;
@@ -889,18 +1011,24 @@ function realUpdate(g,ev,comp,A,H){
 }
 
 /* ================= sims scheduler ================= */
+function needSims(g){
+ if(isLive(g))return true;if(VIEW==='game-'+g.id||(A&&A.gid===g.id))return true;
+ for(const it of SLIP.values())if(it.gid===g.id)return true;
+ return V.bets.some(b=>b.status==='open'&&b.legs.some(l=>l.gid===g.id&&l.res==null));
+}
 function refreshSims(budget){
  const t0=performance.now(),cand=[];
  for(const g of V.games){
-  if(g.s.over){if(g.sims){g.sims=null;g._mk=[]}continue}
-  const live=isLive(g);let pri=-1;
-  if(!g.sims)pri=3;else if(live&&g._simSig!==sig(g))pri=5;else if(live&&!g._wasLive)pri=4;
-  else if(live&&t0-g._simAt>2500&&g._simU!==g.s.u)pri=2;else if(!live&&t0-g._simAt>30000)pri=1;
+  if(g.s.over){if(g.sims||g._mk){g.sims=null;g._mk=[]}continue}
+  const live=isLive(g),keep=needSims(g);let pri=-1;
+  if(!g._simAt)pri=3;else if(keep&&!g.sims)pri=4;else if(live&&g._simSig!==sig(g))pri=5;else if(live&&!g._wasLive)pri=4;
+  else if(live&&t0-g._simAt>2500&&g._simU!==g.s.u)pri=2;else if(!live&&t0-g._simAt>(keep?30000:300000))pri=1;
+  if(!keep&&g.sims&&pri<0){g.sims=null}
   if(pri>=0)cand.push([pri,g._simAt||0,g]);
  }
  cand.sort((a,b)=>b[0]-a[0]||a[1]-b[1]);
- for(const [,,g] of cand){if(performance.now()-t0>budget)break;const live=isLive(g);
-  g.sims=simulate(g,live?350:450);g._simAt=performance.now();g._simSig=sig(g);g._simU=g.s.u;g._wasLive=live;g._mk=markets(g)}
+ for(const [,,g] of cand){if(performance.now()-t0>budget)break;const live=isLive(g),keep=needSims(g);
+  g.sims=simulate(g,live?350:keep?450:260);g._simAt=performance.now();g._simSig=sig(g);g._simU=g.s.u;g._wasLive=live;g._mk=markets(g);if(!keep)g.sims=null}
 }
 
 /* ================= text helpers ================= */
@@ -914,7 +1042,8 @@ function clockText(g){
  const p=Math.min(Math.max(g.prog,s.u),s.u+.999);
  switch(sp){
   case 'football':return p<60?`Q${Math.floor(p/15)+1} ${mmss(15-p%15)}`:`OT ${mmss(70-p)}`;
-  case 'basketball':if(p<48)return `Q${Math.floor(p/12)+1} ${mmss(12-p%12)}`;{const o=p-48,n=Math.floor(o/5)+1;return `OT${n>1?n:''} ${mmss(5-o%5)}`}
+  case 'basketball':case 'cbb':case 'wbb':{const C=SP[sp];if(p<C.reg)return `${C.pn}${Math.floor(p/C.plen)+1} ${mmss(C.plen-p%C.plen)}`;const o=p-C.reg,n=Math.floor(o/5)+1;return `OT${n>1?n:''} ${mmss(5-o%5)}`}
+  case 'volleyball':return `Set ${s.ps.length+1} · ${s.cur[0]}-${s.cur[1]}`;
   case 'hockey':return p<60?`P${Math.floor(p/20)+1} ${mmss(20-p%20)}`:p<65?`OT ${mmss(65-p)}`:'Shootout';
   case 'soccer':return Math.floor(p)+1+"'";
   case 'baseball':return `${s.u%2?'Bot':'Top'} ${ord(Math.floor(s.u/2)+1)}`;
@@ -923,7 +1052,7 @@ function clockText(g){
  }
 }
 const scorePlain=(g,i)=>g.sport==='mma'?(g.s.win===i?'W':'L'):g.s.score[i];
-function scoreHTML(g,i){const s=g.s;if(g.sport==='mma')return s.over?(s.win===i?'W':'L'):'';if(g.sport==='tennis')return s.score[i]+(s.over?'':`<small>${s.cur[i]}</small>`);return s.score[i]}
+function scoreHTML(g,i){const s=g.s;if(g.sport==='mma')return s.over?(s.win===i?'W':'L'):'';if(SP[g.sport].sets)return s.score[i]+(s.over?'':`<small>${s.cur[i]}</small>`);return s.score[i]}
 const gameTitle=g=>`${g.t[0].name} ${SP[g.sport].indiv||g.sport==='soccer'?'vs':'@'} ${g.t[1].name}`;
 
 /* ================= bets ================= */
@@ -936,7 +1065,7 @@ function toggleSlip(key){
  renderSlip();renderMain();renderArenaBets();
 }
 function pulseFab(){const f=$('#slipFab');f.animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}],{duration:300})}
-function priceNow(it){const g=gameById(it.gid);if(!g||g.s.over||!g.sims||stale(g))return null;if(grade(g.s,it.q)!==null)return null;
+function priceNow(it){const g=gameById(it.gid);if(!g||g.s.over||stale(g)||(!g.sims&&!(g._pc&&g._pc[it.key]!=null)))return null;if(grade(g.s,it.q)!==null)return null;
  let p=g._pc&&g._pc[it.key];if(p==null)p=prob(g,it.q);return toAm(p)}
 const legFrom=it=>({gid:it.gid,q:it.q,pk:it.pk,mname:it.mname,game:it.game,am:it.am,res:null});
 function sameGameConflict(items){const s=new Set();for(const it of items){if(s.has(it.gid))return true;s.add(it.gid)}return false}
@@ -1013,16 +1142,18 @@ function cardInner(g){
 }
 const tag=g=>g.real?'<span class="tag real">REAL</span>':'<span class="tag sim">SIM</span>';
 function grouped(list){let h='';for(const lg in LG){const l=list.filter(g=>g.lg===lg);if(!l.length)continue;h+=`<div class="sub">${LG[lg].icon} ${LG[lg].name}</div><div class="grid">${l.map(card).join('')}</div>`}return h}
+function schedLine(){if(!REAL.ok)return '';const t=d=>new Date(d).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+ return `<div class="note" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${REAL.loading?'⏳ Loading real games…':REAL.schedAt?`🔄 Real schedule updated ${t(REAL.schedAt)} · next update ${t(REAL.sched)} (every hour)`:''}<button class="lnk" data-refresh="1">Refresh now</button></div>`}
 function realBox(){
- if(REAL.ok===true)return '';
- if(REAL.ok===null)return '<div class="info">⏳ Checking for real games (NFL, NBA, NHL, MLB, college football, soccer)…</div>';
+ if(REAL.ok===true)return schedLine();
+ if(REAL.ok===null)return '<div class="info">⏳ Checking for real games…</div>';
  return `<div class="info"><b>Real live games are switched off in this preview.</b> Claude's preview window blocks outside data. Put this same file on your own site (itch.io, GitHub Pages, Google Sites or your Game Store app) and today's real games load automatically, with live scores, clocks, TV channels and odds that track the real lines. Until then you can play the <b>SIM</b> games below. They use real teams, but the results are simulated.</div>`;
 }
 function viewHome(){
  const all=V.games,rl=all.filter(g=>g.real&&isLive(g)),rp=all.filter(g=>g.real&&status(g)==='pre').sort((a,b)=>a.start-b.start).slice(0,12);
  const sl=all.filter(g=>!g.real&&isLive(g)),sp=all.filter(g=>!g.real&&status(g)==='pre').sort((a,b)=>a.start-b.start).slice(0,8);
  const firstLive=(rl.find(g=>g.sport==='football')||rl[0]||sl.find(g=>g.lg==='nfl')||sl[0]||{}).id||'';
- return `<div class="hero"><div class="lights"></div><h1>Turn your living room into the arena.</h1><p>NFL, NBA, NHL, MLB, college football, Premier League, Champions League, MLS, ATP tennis and UFC. Bet with play coins on odds that move live, then watch in Arena Mode with the jumbotron, crowd noise and play-by-play.</p>
+ return `<div class="hero"><div class="lights"></div><h1>Turn your living room into the arena.</h1><p>NFL, NBA, college basketball, college football, NHL, MLB, volleyball, Premier League, La Liga, Bundesliga, Serie A, Champions League, MLS, ATP tennis and UFC. Bet with play coins on odds that move live, then watch in Arena Mode with the jumbotron, crowd noise and play-by-play.</p>
  <div class="row"><button class="btn" data-watch="${firstLive}">📺 Enter Arena Mode</button><button class="btn ghost" data-nav="bets">My Bets</button></div></div>
  ${realBox()}
  ${REAL.ok?`<div class="sec"><h2><i class="dot"></i>Real Games · Live</h2><span class="ct">${rl.length} on now</span></div>${grouped(rl)||'<div class="empty">No real games are live right now. Check the upcoming list below.</div>'}
@@ -1032,18 +1163,18 @@ function viewHome(){
 }
 function viewLeague(lg){
  const L=LG[lg],l=V.games.filter(g=>g.lg===lg),by=f=>l.filter(f);
- const sec=(t,list)=>list.length?`<div class="sub">${t}</div><div class="grid">${list.map(card).join('')}</div>`:'';
+ const sec=(t,list,cap)=>{if(!list.length)return '';const more=cap&&list.length>cap?`<div class="empty" style="padding:10px">+ ${list.length-cap} more</div>`:'';return `<div class="sub">${t} <span style="opacity:.6">(${list.length})</span></div><div class="grid">${(cap?list.slice(0,cap):list).map(card).join('')}</div>${more}`};
  const st=x=>g=>status(g)===x,srt=(a,b)=>a.start-b.start,fin=(a,b)=>b.finalAt-a.finalAt;
  return `<div class="sec"><h2>${L.icon} ${L.name}</h2></div>
- ${L.path&&REAL.ok?sec('<i class="dot"></i>Real · Live',by(g=>g.real&&st('live')(g)))+sec('Real · Upcoming',by(g=>g.real&&st('pre')(g)).sort(srt))+sec('Real · Final',by(g=>g.real&&st('final')(g)).sort(fin)):''}
- ${L.path&&!REAL.ok?realBox():''}
+ ${L.path&&REAL.ok?sec('<i class="dot"></i>Real · Live',by(g=>g.real&&st('live')(g)))+sec('Real · Upcoming',by(g=>g.real&&st('pre')(g)).sort(srt),40)+sec('Real · Final',by(g=>g.real&&st('final')(g)).sort(fin),24):''}
+ ${L.path&&!REAL.ok?realBox():L.path?schedLine():''}
  ${L.sim?sec('<i class="dot"></i>Sim · Live',by(g=>!g.real&&st('live')(g)))+sec('Sim · Starting soon',by(g=>!g.real&&st('pre')(g)).sort(srt))+sec('Sim · Final',by(g=>!g.real&&st('final')(g)).sort(fin)):''}
  ${!l.length?'<div class="empty">No games on the board for this league right now.</div>':''}`;
 }
 function lineScore(g){
  const s=g.s,sp=g.sport,C=SP[sp];if(status(g)==='pre')return '';
  let heads=[],vals=[[],[]];
- if(sp==='tennis'){s.ps.forEach((x,j)=>{heads.push('S'+(j+1));vals[0].push(x[0]);vals[1].push(x[1])});if(!s.over){heads.push('S'+(s.ps.length+1));vals[0].push(s.cur[0]);vals[1].push(s.cur[1])}}
+ if(C.sets){s.ps.forEach((x,j)=>{heads.push('S'+(j+1));vals[0].push(x[0]);vals[1].push(x[1])});if(!s.over){heads.push('S'+(s.ps.length+1));vals[0].push(s.cur[0]);vals[1].push(s.cur[1])}}
  else{const n=Math.max(C.np,s.ps.length);for(let j=0;j<n;j++){heads.push(sp==='baseball'?j+1:sp==='mma'?'R'+(j+1):j<C.np?j+1:(sp==='hockey'&&j===3&&s.so?'SO':'OT'));
   const x=s.ps[j];const done=sp==='mma'?(x&&(x[0]||x[1])):true;vals[0].push(x&&done?x[0]:'–');vals[1].push(x&&done?x[1]:'–')}}
  const tot=sp==='mma'?'':'<th>T</th>';
@@ -1151,7 +1282,7 @@ function toast(msg,kind){const box=$('#toasts');while(box.children.length>3)box.
 let A=null;
 function openArena(id){
  const g=gameById(id);if(!g)return;
- A={gid:g.id,seen:g.ln,ex:.15,pos:rnd()<.5?0:1,b:{x:.5,y:.5,tx:.5,ty:.5},hold:0,rt:0,pl:formation(g.sport),crowd:mkCrowd(g),t0:performance.now(),bases:[0,0,0],pitch:0,hit:null,ang:0};
+ A={gid:g.id,seen:g.ln,ex:.15,pos:rnd()<.5?0:1,b:{x:.5,y:.5,tx:.5,ty:.5},hold:0,rt:0,pl:formation(vs(g.sport)),crowd:mkCrowd(g),t0:performance.now(),bases:[0,0,0],pitch:0,hit:null,ang:0};
  document.body.classList.add('arena-on');$('#slip').classList.remove('open');
  renderArena(true);if(SND.on)setCrowd(.12);requestAnimationFrame(frame);
 }
@@ -1175,7 +1306,7 @@ function onArenaEvent(g,e){
  if(e.k==='info'||!e.f)return;
  const big=e.k==='big';A.ex=Math.min(1,A.ex+(big?.85:.45));
  const fe=$('#flash');fe.textContent=e.f;fe.style.setProperty('--fc',e.t>=0?g.t[e.t].c:'#2f8cff');fe.classList.remove('show');void fe.offsetWidth;fe.classList.add('show');
- if(e.t>=0&&['football','basketball','hockey','soccer'].includes(g.sport)){A.b.tx=e.t===0?.975:.025;A.b.ty=.5;A.pos=e.t;A.hold=1.8;A.reset=1}
+ if(e.t>=0&&['football','basketball','hockey','soccer'].includes(vs(g.sport))){A.b.tx=e.t===0?.975:.025;A.b.ty=.5;A.pos=e.t;A.hold=1.8;A.reset=1}
  if(g.sport==='baseball'&&e.t>=0){A.hit={x:.5,y:.88,tx:big?.2+rnd()*.6:.3+rnd()*.4,ty:big?-.05:.3,t:0};A.bases=[0,0,0]}
  roar(big);
 }
@@ -1207,7 +1338,11 @@ function drawArena(g,t,dt,run){
 function drawField(c,g,x,y,w,h){
  const T=g.t,ln='rgba(255,255,255,.85)';c.save();c.lineWidth=Math.max(1.2,w*.0022);c.strokeStyle=ln;
  const rect=(a,b,ww,hh)=>c.strokeRect(x+a*w,y+b*h,ww*w,hh*h);
- switch(g.sport){
+ switch(vs(g.sport)){
+ case 'volleyball':{
+  c.fillStyle='#e8a33d';c.fillRect(x+w*.08,y+h*.12,w*.84,h*.76);c.fillStyle=T[0].c+'40';c.fillRect(x+w*.08,y+h*.12,w*.14,h*.76);c.fillStyle=T[1].c+'40';c.fillRect(x+w*.78,y+h*.12,w*.14,h*.76);
+  rect(.08,.12,.84,.76);c.beginPath();c.moveTo(x+w*.36,y+h*.12);c.lineTo(x+w*.36,y+h*.88);c.moveTo(x+w*.64,y+h*.12);c.lineTo(x+w*.64,y+h*.88);c.stroke();
+  c.lineWidth=4;c.strokeStyle='#f5f5f5';c.beginPath();c.moveTo(x+w/2,y+h*.05);c.lineTo(x+w/2,y+h*.95);c.stroke();break}
  case 'football':{
   for(let i=0;i<10;i++){c.fillStyle=i%2?'#2e7a32':'#358a39';c.fillRect(x+w*(.1+i*.08),y,w*.08+1,h)}
   c.fillStyle=T[0].c;c.fillRect(x,y,w*.1,h);c.fillStyle=T[1].c;c.fillRect(x+w*.9,y,w*.1,h);
@@ -1261,7 +1396,10 @@ function drawField(c,g,x,y,w,h){
 }
 function dot(c,X,Y,r,col,ring){c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(X,Y+r*.7,r,r*.45,0,0,7);c.fill();c.fillStyle=col;c.beginPath();c.arc(X,Y,r,0,7);c.fill();c.lineWidth=Math.max(1,r*.22);c.strokeStyle=ring||'#fff';c.stroke()}
 function drawActors(c,g,x,y,w,h,t,run){
- const sp=g.sport,T=g.t,b=A.b,X=v=>x+v*w,Y=v=>y+v*h,mv=run?1:0;
+ const sp=vs(g.sport),T=g.t,b=A.b,X=v=>x+v*w,Y=v=>y+v*h,mv=run?1:0;
+ if(sp==='volleyball'){const r=h*.03,ph=(t*.75)%2,p=ph<1?ph:2-ph,arc=Math.sin(p*Math.PI)*.22*mv;
+  [[.14,.25],[.14,.5],[.14,.75],[.38,.25],[.38,.5],[.38,.75]].forEach(([px,py],i)=>{dot(c,X(px+.0+Math.sin(t*1.5+i)*.006*mv),Y(py),r,T[0].c);dot(c,X(1-px-.0+Math.cos(t*1.4+i)*.006*mv),Y(py),r,T[1].c)});
+  const bx=run?.2+.6*p:.5,by=.5+Math.sin(t*.37)*.2;c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(X(bx),Y(by),h*.015,h*.007,0,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(X(bx),Y(by-arc),h*.016,0,7);c.fill();c.strokeStyle='#2f6fd6';c.lineWidth=2;c.stroke();return}
  if(['football','basketball','hockey','soccer'].includes(sp)){
   const r=h*(sp==='basketball'?.032:sp==='hockey'?.027:.022),S=SHIFT[sp];
   let best=null,bd=9;for(const p of A.pl)if(p.team===A.pos&&p.hx>.1&&p.hx<.9){const d=Math.hypot(p.x-b.x,p.y-b.y);if(d<bd){bd=d;best=p}}
@@ -1341,8 +1479,8 @@ function roar(big){if(!SND.on||!SND.ctx)return;const C=SND.ctx,t=C.currentTime,g
 /* ================= persistence ================= */
 const KEY='pacebook_v2';
 function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,now:V.now,real:Date.now(),bal:V.bal,bets:V.bets,nid:V.nid,bonusAt:V.bonusAt,speed:V.speed,
- games:V.games.map(g=>{const o={};for(const k in g){if(k[0]==='_'||k==='sims')continue;o[k]=g[k]}return o})}))}catch(e){}}
-const SIMLG={football:'nfl',basketball:'nba',hockey:'nhl',baseball:'mlb',soccer:'epl',tennis:'atp',mma:'ufc'};
+ games:V.games.filter(g=>!g.real||V.bets.some(b=>b.status==='open'&&b.legs.some(l=>l.gid===g.id))).map(g=>{const o={};for(const k in g){if(k[0]==='_'||k==='sims')continue;o[k]=g[k]}return o})}))}catch(e){}}
+const SIMLG={cbb:'ncaam',volleyball:'ncaavb',football:'nfl',basketball:'nba',hockey:'nhl',baseball:'mlb',soccer:'epl',tennis:'atp',mma:'ufc'};
 function repairGames(list){
  // saves from the first store build dropped each game's league and real-game info; rebuild them
  const out=[];
@@ -1368,6 +1506,7 @@ document.addEventListener('click',e=>{
  if(el=T.closest('[data-k]')){toggleSlip(el.dataset.k);return}
  if(el=T.closest('[data-watch-next]')){const n=V.games.find(g=>status(g)==='live'&&(!A||g.id!==A.gid));if(n)openArena(n.id);else toast('No other live games right now');return}
  if(el=T.closest('[data-watch]')){if(el.dataset.watch)openArena(el.dataset.watch);return}
+ if(el=T.closest('[data-refresh]')){if(!REAL.loading){toast('Loading the latest real games…');REAL.sched=0;pollReal(true)}return}
  if(el=T.closest('[data-cash]')){cashOut(el.dataset.cash);return}
  if(el=T.closest('[data-rm]')){SLIP.delete(el.dataset.rm);renderSlip();lastMainHTML='';renderMain();renderArenaBets();return}
  if(el=T.closest('[data-qs]')){const it=SLIP.get(el.dataset.qs);if(it){it.stake=String((Math.floor(+it.stake)||0)+(+el.dataset.v));const inp=document.querySelector(`[data-stake="${CSS.escape(it.key)}"]`);if(inp)inp.value=it.stake;slipTotals()}return}
