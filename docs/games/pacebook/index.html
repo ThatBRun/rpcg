@@ -102,6 +102,27 @@ h1,h2,h3{margin:0}
 .tv{font-size:11.5px;color:var(--mut);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
 .info{margin-top:14px;background:rgba(47,140,255,.08);border:1px solid rgba(47,140,255,.3);border-radius:14px;padding:12px 14px;color:#c6d3f5;font-size:13px;line-height:1.5}
 .note{font-size:12px;color:var(--mut);margin-top:12px}
+.row2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.fxc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.fxt{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.fxt.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;background:#10203f}
+.fxt b{font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase;letter-spacing:.4px}.fxt small{color:var(--mut)}.fxt span{font-size:12px;color:var(--gold);font-weight:700}
+.fxbar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.fxbar div{background:var(--pan2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.fxbar small{color:var(--mut);font-size:11px;font-weight:700;text-transform:uppercase}.fxbar b{display:block;font-family:'Barlow Condensed';font-size:24px;font-variant-numeric:tabular-nums}
+.fxslots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:7px}
+.fxs{display:flex;align-items:center;gap:8px;background:var(--pan2);border:1px dashed var(--line);border-radius:10px;padding:7px 9px;min-height:48px}.fxs.on{border-style:solid;border-color:#2d4a80}
+.fxs .sx{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--pan3);color:var(--mut);font-size:17px;line-height:1}.fxs .sx:hover{color:var(--txt);border-color:var(--loss)}
+.fxp{flex:none;min-width:40px;text-align:center;font-size:11px;font-weight:800;background:var(--pan3);color:var(--acc2);border-radius:6px;padding:3px 5px}
+.fxn{flex:1;min-width:0}.fxn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px}.fxn small{display:block;color:var(--mut);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fxq{flex:1;min-width:160px;background:var(--pan2);border:1px solid var(--line);border-radius:999px;padding:7px 13px;color:var(--txt)}.fxq:focus{outline:none;border-color:var(--acc)}
+.fxlist{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.fxr{display:flex;align-items:center;gap:9px;background:var(--pan);border:1px solid var(--line);border-radius:10px;padding:7px 9px}.fxr.on{border-color:#2d4a80;background:#0f1a33}
+.fxv{flex:none;text-align:right;min-width:52px}.fxv b{display:block;font-variant-numeric:tabular-nums}.fxv small{color:var(--mut);font-size:10.5px}
+.fxa{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:var(--acc);color:#fff;font-size:20px;font-weight:800;line-height:1}.fxa:disabled{background:var(--pan3);color:var(--mut);cursor:not-allowed}.fxa.in{background:var(--win)}
+.fxlb{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.fxlr{display:flex;align-items:center;gap:10px;width:100%;background:var(--pan2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;text-align:left}.fxlr.me{border-color:var(--acc);background:#10203f}
+.fxlr .rk{font-weight:800;width:38px}.fxlr .nm{flex:1;font-weight:700;min-width:0}.fxlr .nm small{display:inline-block;margin-left:8px;color:var(--mut);font-weight:600;font-size:11px;text-transform:capitalize}.fxlr .lf{color:var(--mut);font-size:12px}.fxlr b{font-family:'Barlow Condensed';font-size:22px;min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.fxc{grid-template-columns:1fr}.fxv{min-width:44px}.fxr{gap:6px;padding:7px}.fxp{min-width:34px}}
 /* game detail */
 .crumb{background:none;border:0;color:var(--acc2);font-weight:600;padding:0;margin-bottom:12px}
 .gd{background:linear-gradient(180deg,#111b35,#0c1328);border:1px solid var(--line);border-radius:18px;padding:18px}
@@ -845,7 +866,7 @@ function markets(g){
 }
 
 /* ================= world ================= */
-const V={now:Date.now(),bal:10000,bets:[],games:[],nid:1,bonusAt:0,speed:1};
+const V={now:Date.now(),bal:10000,bets:[],games:[],nid:1,bonusAt:0,speed:1,fantasy:[]};
 const ROLES={volleyball:[],football:['RB1','WR1','TE1'],cbb:['top scorer','No. 2 scorer','No. 3 scorer'],wbb:['top scorer','No. 2 scorer','No. 3 scorer'],basketball:['top scorer','No. 2 scorer','No. 3 scorer'],hockey:['1st-line C','1st-line W','top D-man'],soccer:['striker','winger','attacking mid'],baseball:['cleanup hitter','No. 3 hitter','leadoff hitter']};
 function abbrFor(n){const w=n.split(' ').slice(-1)[0].replace(/[^A-Za-z]/g,'');return w.slice(0,3).toUpperCase()}
 function mkTeam(lg,av){
@@ -880,7 +901,7 @@ function advance(vsec){
 function maintain(){
  for(const lg in LG){if(!LG[lg].sim)continue;const act=V.games.filter(g=>!g.real&&g.lg===lg&&!g.s.over);const pre=act.filter(g=>V.now<g.start).length;
   if(act.length<5||pre<2)newGame(lg,V.now+(1.5+rnd()*16)*60000)}
- const open=new Set();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));
+ const open=fxPinned();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));
  V.games=V.games.filter(g=>open.has(g.id)||!(g.s.over&&(g.real?Date.now()-(g.finalReal||0)>8*3600e3:V.now-g.finalAt>25*60000)));
 }
 function preRun(g,frac){g.start=V.now-1000;g.started=true;logG(g,SP[g.sport].kick,'info');const units=SP[g.sport].reg||({tennis:22,volleyball:180}[g.sport])||22;g.prog=frac*units;const P=params(g),L=(x,k,t,f)=>logG(g,x,k,t,f);while(!g.s.over&&g.s.u<Math.floor(g.prog))STEP[g.sport](g.s,P,L)}
@@ -921,7 +942,7 @@ async function pollReal(force){
    REAL.next[lg]=now+20000;
   }
   if(now>REAL.orphanAt){REAL.orphanAt=now+120000;
-   const open=new Set();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));const done=new Set();
+   const open=fxPinned();V.bets.forEach(b=>b.status==='open'&&b.legs.forEach(l=>open.add(l.gid)));const done=new Set();
    for(const g of V.games.filter(g=>g.real&&!g.s.over&&open.has(g.id)&&now-(g.seen||0)>300000)){const k=g.lg+etDate(g.start);if(done.has(k))continue;done.add(k);
     try{ingest(g.lg,await getJSON(lgURL(LG[g.lg],etDate(g.start))))}catch(e){}}}
  }finally{REAL.busy=false}
@@ -1231,15 +1252,15 @@ function viewResults(){const fin=V.games.filter(g=>g.s.over).sort((a,b)=>b.final
  return `<div class="sec"><h2>Results</h2><span class="ct">Recent finals</span></div><div class="grid">${fin.map(card).join('')||'<div class="empty">No finals yet. Games finish every few minutes.</div>'}</div>`}
 function renderNav(){
  const liveN=lg=>V.games.filter(g=>g.lg===lg&&status(g)==='live').length;const open=V.bets.filter(b=>b.status==='open').length;
- const it=(v,ic,t,bd,cls)=>`<button class="ni${VIEW===v||(v==='bets'&&VIEW==='bets-settled')||(VIEW.startsWith('game-')&&v==='league-'+(gameById(VIEW.slice(5))||{}).lg)?' on':''}" data-nav="${v}"><span class="ic">${ic}</span>${t}${bd?`<span class="bd ${cls||''}">${bd}</span>`:''}</button>`;
+ const it=(v,ic,t,bd,cls)=>`<button class="ni${VIEW===v||(v==='bets'&&VIEW==='bets-settled')||(v==='fantasy'&&VIEW.startsWith('fantasy'))||(VIEW.startsWith('game-')&&v==='league-'+(gameById(VIEW.slice(5))||{}).lg)?' on':''}" data-nav="${v}"><span class="ic">${ic}</span>${t}${bd?`<span class="bd ${cls||''}">${bd}</span>`:''}</button>`;
  const totLive=V.games.filter(g=>status(g)==='live').length;
- patch($('#nav'),`<div class="nh">Lobby</div>${it('home','🏟️','Home',totLive?totLive+' live':'')}${it('bets','🎟️','My Bets',open||'','b')}${it('results','📋','Results')}
+ patch($('#nav'),`<div class="nh">Lobby</div>${it('home','🏟️','Home',totLive?totLive+' live':'')}${it('bets','🎟️','My Bets',open||'','b')}${it('fantasy','🏆','Fantasy',(V.fantasy||[]).filter(c=>c.status!=='final').length||'','b')}${it('results','📋','Results')}
  <div class="nh">Leagues</div>${Object.keys(LG).filter(lg=>LG[lg].sim||V.games.some(g=>g.lg===lg)).map(lg=>it('league-'+lg,LG[lg].icon,LG[lg].name,liveN(lg)?liveN(lg)+' live':'')).join('')}
  <div class="disc">Play money only. Coins have no cash value and can't be bought, sold or withdrawn. REAL games use live ESPN scores. SIM games use real teams with simulated results.</div>`);
 }
 let lastMainHTML='';
 function renderMain(){
- let h;try{if(VIEW==='home')h=viewHome();else if(VIEW.startsWith('league-')&&LG[VIEW.slice(7)])h=viewLeague(VIEW.slice(7));else if(VIEW.startsWith('game-'))h=viewGame(VIEW.slice(5));else if(VIEW==='bets'||VIEW==='bets-settled')h=viewBets();else if(VIEW==='results')h=viewResults();else h=viewHome();}catch(e){console.error(e);h=`<div class="empty">Something went wrong showing this page.<br><br><button class="btn" data-nav="home">Back to lobby</button></div>`}
+ let h;try{if(VIEW==='home')h=viewHome();else if(VIEW==='fantasy')h=viewFantasy();else if(VIEW==='fantasy-build')h=viewBuild();else if(VIEW.startsWith('fantasy-c-'))h=viewContest(VIEW.slice(10));else if(VIEW.startsWith('league-')&&LG[VIEW.slice(7)])h=viewLeague(VIEW.slice(7));else if(VIEW.startsWith('game-'))h=viewGame(VIEW.slice(5));else if(VIEW==='bets'||VIEW==='bets-settled')h=viewBets();else if(VIEW==='results')h=viewResults();else h=viewHome();}catch(e){console.error(e);h=`<div class="empty">Something went wrong showing this page.<br><br><button class="btn" data-nav="home">Back to lobby</button></div>`}
  if(h!==lastMainHTML){patch($('#main'),h);lastMainHTML=h}
 }
 function renderWallet(){$('#bal').textContent=fmt(V.bal);const b=$('#bonusBtn'),ready=Date.now()-V.bonusAt>2*3600e3,broke=V.bal<50&&!V.bets.some(x=>x.status==='open');
@@ -1476,10 +1497,239 @@ function roar(big){if(!SND.on||!SND.ctx)return;const C=SND.ctx,t=C.currentTime,g
  if(big){const o=C.createGain();o.gain.setValueAtTime(.0001,t);o.gain.exponentialRampToValueAtTime(.12,t+.05);o.gain.setValueAtTime(.12,t+1);o.gain.exponentialRampToValueAtTime(.0001,t+1.5);const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.connect(o).connect(C.destination);
   [233,294,349].forEach(f=>{const os=C.createOscillator();os.type='sawtooth';os.frequency.value=f;os.connect(lp);os.start(t);os.stop(t+1.55)})}}
 
+/* ================= fantasy vs AI ================= */
+const FXSP={
+ nba:{sport:'bb',cap:50000,smin:3500,smax:11500,slots:[['G',['G']],['F',['F']],['C',['C']],['UTIL',['G','F','C']],['UTIL',['G','F','C']],['UTIL',['G','F','C']]],perTeam:10,
+  pages:[['offensive.avgPoints:desc',600,1]],rules:'Points 1 · 3-pointer +0.5 · Rebound 1.25 · Assist 1.5 · Steal 2 · Block 2 · Turnover −0.5 · Double-double +1.5 · Triple-double +3'},
+ ncaam:{sport:'bb',cap:50000,smin:3500,smax:11000,slots:[['G',['G']],['G',['G']],['F',['F']],['F',['F']],['UTIL',['G','F']],['UTIL',['G','F']]],perTeam:9,
+  pages:[['offensive.avgPoints:desc',1000,1],['offensive.avgPoints:desc',1000,2],['offensive.avgPoints:desc',1000,3]],rules:'Points 1 · 3-pointer +0.5 · Rebound 1.25 · Assist 1.5 · Steal 2 · Block 2 · Turnover −0.5 · Double-double +1.5 · Triple-double +3'},
+ nfl:{sport:'fb',cap:50000,smin:3000,smax:9500,slots:[['QB',['QB']],['RB',['RB']],['RB',['RB']],['WR',['WR']],['WR',['WR']],['TE',['TE']],['FLEX',['RB','WR','TE']]],perTeam:{QB:2,RB:3,WR:4,TE:2},
+  pages:[['',1000,1],['',1000,2]],rules:'Pass yard 0.04 · Pass TD 4 · INT −1 · Rush/rec yard 0.1 · Rush/rec TD 6 · Reception 0.5 · Fumble lost −2 · Return TD 6'},
+ nhl:{sport:'hk',cap:40000,smin:2500,smax:9000,slots:[['C',['C']],['W',['W']],['W',['W']],['D',['D']],['G',['G']],['UTIL',['C','W','D']]],perTeam:14,
+  pages:[['',1000,1]],rules:'Goal 8.5 · Assist 5 · Shot on goal 1.5 · Blocked shot 1.3 · Goalie: Save 0.7 · Goal allowed −3.5 · Win +6 · Shutout +4'}
+};
+const FXTYPES={h2h:{name:'Head-to-Head',n:2,pay:[1.9],desc:'You vs 1 AI. Winner takes 1.9×.'},six:{name:'Six-Pack',n:6,pay:[3,1.6,0.8],desc:'You vs 5 AIs. Top 3 get paid.'},board:{name:'Big Board',n:12,pay:[5,3,1.8,1],desc:'You vs 11 AIs. Top 4 get paid.'}};
+const FXFEES=[100,250,500,1000];
+const AIS=[['Chalk Charlie','chalk'],['Stars & Scrubs Sam','stars'],['Value Vince','value'],['Coach Byte','balanced'],['Lucky Lexi','wild'],['Contrarian Cora','contrarian'],['Dr. Spreadsheet','chalk'],['Big Game Gary','stars'],['Sleeper Sally','value'],['The Algorithm','chalk'],['Hot Hand Hank','wild'],['Moneyball Mo','value'],['Fade-Me Fiona','contrarian'],['Robo Rick','balanced'],['Glitch','wild'],['Captain Ceiling','stars'],['Pixel Pete','balanced'],['Deep Blue Dana','chalk']];
+const PERS={chalk:{noise:.10},stars:{noise:.16,stars:.3},value:{noise:.16,stars:-.15},balanced:{noise:.2},wild:{noise:.38},contrarian:{noise:.18,fade:.82}};
+const FX={st:{},box:{},boxAt:{},busy:false,poolCache:{}};
+const FXUI={lg:'nba',date:null,type:'six',fee:250,open:{}};
+let FB=null;
+const randn=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+const r1=x=>Math.round(x*10)/10;
+const money=n=>'$'+fmt(n);
+
+/* ---- player season stats (ESPN) ---- */
+function catMap(j){const m={};(j.categories||[]).forEach(c=>m[c.name]=c.names||[]);return m}
+function statGet(cm,a,cat,name){const c=(a.categories||[]).find(x=>x.name===cat);if(!c)return 0;const i=(cm[cat]||[]).indexOf(name);return i<0?0:(+c.values[i]||0)}
+function normPos(lg,p){p=String(p||'').toUpperCase();const S=FXSP[lg].sport;
+ if(S==='bb'){if(lg==='ncaam')return p.includes('G')?'G':(p.includes('F')||p.includes('C'))?'F':null;return p.includes('C')&&!p.includes('G')?'C':p.includes('G')?'G':p.includes('F')?'F':null}
+ if(S==='fb')return p==='QB'?'QB':(p==='RB'||p==='FB')?'RB':p==='WR'?'WR':p==='TE'?'TE':null;
+ if(S==='hk')return p==='C'?'C':(p==='LW'||p==='RW'||p==='W'||p==='F')?'W':p==='D'?'D':p==='G'?'G':null;return null}
+function seasonPlayer(lg,cm,a){
+ const ath=a.athlete||{},pos=normPos(lg,ath.position&&ath.position.abbreviation);if(!pos||!ath.teamId)return null;
+ const S=FXSP[lg].sport,g=(c,n)=>statGet(cm,a,c,n);let proj=0,line='';
+ if(S==='bb'){const gp=g('general','gamesPlayed');if(gp<1||g('general','avgMinutes')<(lg==='ncaam'?10:8))return null;
+  const pts=g('offensive','avgPoints'),reb=g('general','avgRebounds'),ast=g('offensive','avgAssists'),stl=g('defensive','avgSteals'),blk=g('defensive','avgBlocks'),to=g('offensive','avgTurnovers'),tpm=g('offensive','avgThreePointFieldGoalsMade');
+  proj=pts+.5*tpm+1.25*reb+1.5*ast+2*stl+2*blk-.5*to+1.5*g('general','doubleDouble')/gp+1.5*g('general','tripleDouble')/gp;line=`${r1(pts)} pts · ${r1(reb)} reb · ${r1(ast)} ast`}
+ else if(S==='fb'){const gp=g('general','gamesPlayed');if(gp<1)return null;const pg=x=>x/gp;
+  const py=pg(g('passing','passingYards')),ptd=pg(g('passing','passingTouchdowns')),int=pg(g('passing','interceptions')),ry=pg(g('rushing','rushingYards')),rtd=pg(g('rushing','rushingTouchdowns')),rec=pg(g('receiving','receptions')),recy=pg(g('receiving','receivingYards')),rectd=pg(g('receiving','receivingTouchdowns')),fl=pg(g('rushing','rushingFumblesLost')+g('receiving','receivingFumblesLost'));
+  proj=.04*py+4*ptd-int+.1*ry+6*rtd+.5*rec+.1*recy+6*rectd-2*fl;if(proj<2)return null;
+  line=pos==='QB'?`${Math.round(py)} pass yds · ${r1(ptd)} TD · ${Math.round(ry)} rush yds`:pos==='RB'?`${Math.round(ry)} rush yds · ${r1(rec)} rec · ${r1(rtd+rectd)} TD`:`${r1(rec)} rec · ${Math.round(recy)} yds · ${r1(rectd)} TD`}
+ else if(S==='hk'){const gp=g('general','games');if(gp<1)return null;
+  if(pos==='G'){const sv=g('defensive','saves')/gp,ga=g('defensive','goalsAgainst')/gp,w=g('general','wins')/gp,so=g('defensive','shutouts')/gp;proj=.7*sv-3.5*ga+6*w+4*so;const spc=g('defensive','savePct');line=`${(spc>1?spc:spc*100).toFixed(1)}% SV · ${r1(g('defensive','avgGoalsAgainst'))} GAA · ${gp} GP`}
+  else{const G=g('offensive','goals')/gp,A=g('offensive','assists')/gp,S2=g('offensive','shotsTotal')/gp;proj=8.5*G+5*A+1.5*S2+1.3*(pos==='D'?1.1:.45);line=`${r1(G*gp)} G · ${r1(A*gp)} A · ${r1(S2)} SOG/gm`}}
+ return{id:String(ath.id),name:ath.displayName||ath.shortName||'?',pos,tid:String(ath.teamId),proj:Math.max(0,proj),line,gp:pos==='G'?statGet(cm,a,'general','games'):0};
+}
+async function loadStats(lg){
+ const F=FXSP[lg],cur=FX.st[lg];if(cur&&(cur.loading||Date.now()-cur.at<6*3600e3))return;
+ FX.st[lg]={loading:true,at:0,map:(cur&&cur.map)||new Map()};lastMainHTML='';renderMain();
+ const map=new Map();let ok=0;
+ for(const [sort,limit,page] of F.pages){
+  try{const j=await getJSON(`https://site.web.api.espn.com/apis/common/v3/sports/${LG[lg].path}/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&page=${page}&limit=${limit}${sort?'&sort='+sort:''}`);ok++;
+   const cm=catMap(j);for(const a of j.athletes||[]){const p=seasonPlayer(lg,cm,a);if(p)map.set(p.id,p)}}catch(e){}
+ }
+ FX.st[lg]={loading:false,at:ok?Date.now():0,map:ok?map:((cur&&cur.map)||map),failed:!ok};FX.poolCache={};lastMainHTML='';renderMain();
+}
+
+/* ---- slates & player pools ---- */
+function fxSlates(lg){const by={};for(const g of V.games){if(!g.real||g.lg!==lg||g.void)continue;const d=etDate(g.start);(by[d]=by[d]||[]).push(g)}
+ return Object.keys(by).sort().map(d=>({date:d,games:by[d],open:by[d].filter(g=>status(g)==='pre')})).filter(s=>s.open.length).slice(0,3)}
+function slateLabel(d){const t=etDate(Date.now()),tm=etDate(Date.now()+864e5);if(d===t)return 'Today';if(d===tm)return 'Tomorrow';const dt=new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8));return dt.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}
+function fxPool(lg,date){
+ const key=lg+date,c=FX.poolCache[key];if(c&&Date.now()-c.at<20000)return c.pool;
+ const st=FX.st[lg];if(!st||!st.map.size)return [];
+ const F=FXSP[lg],teams={};
+ for(const g of V.games)if(g.real&&g.lg===lg&&!g.void&&etDate(g.start)===date&&status(g)==='pre')g.t.forEach((t,i)=>{if(t.tid)teams[String(t.tid)]={g,i}});
+ let list=[];for(const p of st.map.values()){const m=teams[p.tid];if(!m)continue;list.push(Object.assign({},p,{gid:m.g.id,ev:m.g.id.split('-')[2],team:m.g.t[m.i].ab,opp:(m.i===1?'vs ':'@ ')+m.g.t[1-m.i].ab,start:m.g.start}))}
+ // per-team depth limits; goalies weighted by share of starts
+ const byTeam={};for(const p of list)(byTeam[p.tid]=byTeam[p.tid]||[]).push(p);list=[];
+ for(const tid in byTeam){const arr=byTeam[tid].sort((a,b)=>b.proj-a.proj);
+  if(F.sport==='fb'){const cnt={};for(const p of arr){cnt[p.pos]=(cnt[p.pos]||0)+1;if(cnt[p.pos]<=F.perTeam[p.pos])list.push(p)}}
+  else if(F.sport==='hk'){const gs=arr.filter(p=>p.pos==='G').sort((a,b)=>b.gp-a.gp).slice(0,2),tot=gs.reduce((a,p)=>a+p.gp,0)||1;gs.forEach(p=>{p.proj=p.proj*Math.min(1,p.gp/tot*1.25);p.line+=` · ${Math.round(p.gp/tot*100)}% of starts`});list.push(...gs,...arr.filter(p=>p.pos!=='G').slice(0,F.perTeam))}
+  else list.push(...arr.slice(0,F.perTeam))}
+ list.sort((a,b)=>b.proj-a.proj);const top=list.length?Math.max(...list.slice(0,3).map(p=>p.proj)):1;
+ for(const p of list){p.proj=r1(p.proj);p.sal=Math.round((F.smin+(F.smax-F.smin)*Math.pow(clamp(p.proj/top,0,1),1.15))/100)*100}
+ FX.poolCache[key]={at:Date.now(),pool:list};return list;
+}
+
+/* ---- lineup optimizer (used by the AIs and Auto-fill) ---- */
+function optimize(pool,slots,cap,fixed,val){
+ const elig=(i,p)=>slots[i][1].includes(p.pos),minSal=pool.length?Math.min(...pool.map(p=>p.sal)):0;let best=null,bestV=-1;
+ for(let r=0;r<6;r++){
+  const L=fixed.slice(),used=new Set(L.filter(Boolean).map(p=>p.id));let sal=L.reduce((a,p)=>a+(p?p.sal:0),0);
+  const empty=slots.map((s,i)=>i).filter(i=>!L[i]).sort((a,b)=>pool.filter(p=>elig(a,p)).length-pool.filter(p=>elig(b,p)).length);
+  for(let k=0;k<empty.length;k++){const i=empty[k],left=empty.length-k-1,jit=r?.25:0;
+   const c=pool.filter(p=>elig(i,p)&&!used.has(p.id)).map(p=>[p,val(p)*(1+jit*(rnd()-.5))]).sort((a,b)=>b[1]-a[1]);
+   let pick=c.find(([p])=>sal+p.sal+left*minSal<=cap);if(!pick)pick=c.sort((a,b)=>a[0].sal-b[0].sal)[0];if(!pick)break;
+   L[i]=pick[0];used.add(pick[0].id);sal+=pick[0].sal}
+  for(let pass=0;pass<5;pass++){let imp=false;
+   for(let i=0;i<slots.length;i++){if(fixed[i]||!L[i])continue;let bi=null,bg=0;
+    for(const p of pool){if(used.has(p.id)||!elig(i,p))continue;if(sal-L[i].sal+p.sal>cap)continue;const gn=val(p)-val(L[i]);if(gn>bg+1e-9){bg=gn;bi=p}}
+    if(bi){used.delete(L[i].id);sal+=bi.sal-L[i].sal;L[i]=bi;used.add(bi.id);imp=true}}
+   if(!imp)break}
+  if(L.some(p=>!p)||sal>cap)continue;const tv=L.reduce((a,p)=>a+val(p),0);if(tv>bestV){bestV=tv;best=L}
+ }
+ return best;
+}
+function aiLineup(lg,pool,pers,usedCount){
+ const F=FXSP[lg],P=PERS[pers],avg=pool.reduce((a,p)=>a+p.sal,0)/Math.max(1,pool.length),nz={};
+ for(const p of pool)nz[p.id]=1+P.noise*randn();
+ const val=p=>Math.max(.1,p.proj*nz[p.id]*(P.stars?Math.pow(p.sal/avg,P.stars):1)*(P.fade&&usedCount[p.id]?Math.pow(P.fade,usedCount[p.id]):1));
+ return optimize(pool,F.slots,F.cap,F.slots.map(()=>null),val);
+}
+
+/* ---- box scores & fantasy points ---- */
+function num(v){v=String(v==null?'':v);if(v.includes(':')){const [m,s]=v.split(':');return (+m||0)+(+s||0)/60}const n=parseFloat(v);return isNaN(n)?0:n}
+function parseBox(sport,j){
+ const st={},goalies={};let win=null;
+ try{const cs=j.header.competitions[0].competitors;const w=cs.find(c=>c.winner);if(w)win=String(w.id||w.team&&w.team.id)}catch(e){}
+ for(const tb of (j.boxscore&&j.boxscore.players)||[]){const tid=String(tb.team&&tb.team.id);
+  for(const grp of tb.statistics||[]){const keys=grp.keys||[],pre=sport==='fb'?(grp.name||'')+'.':'';
+   for(const a of grp.athletes||[]){const id=String(a.athlete&&a.athlete.id),o=st[id]||(st[id]={tid}),vals=a.stats||[];
+    keys.forEach((k,ix)=>{const v=vals[ix];if(v==null||v==='')return;const ks=k.split(/[\/-]/),vs=String(v).replace(/^\+/,'').split(/[\/]|(?<=\d)-/);
+     if(ks.length>1&&vs.length===ks.length)ks.forEach((kk,jj)=>o[pre+kk]=num(vs[jj]));else o[pre+k]=num(v)});
+    if(sport==='hk'&&grp.name==='goalies'){o.goalie=true;(goalies[tid]=goalies[tid]||[]).push({id,toi:o.timeOnIce||0})}}}}
+ return{st,goalies,win};
+}
+function fpOf(sport,o,box,id){
+ if(!o)return{fp:0,line:'—'};let fp=0,line='';
+ if(sport==='bb'){const pts=o.points||0,reb=o.rebounds||0,ast=o.assists||0,stl=o.steals||0,blk=o.blocks||0,to=o.turnovers||0,tpm=o.threePointFieldGoalsMade||0;
+  const tens=[pts,reb,ast,stl,blk].filter(x=>x>=10).length;fp=pts+.5*tpm+1.25*reb+1.5*ast+2*stl+2*blk-.5*to+(tens>=3?3:tens>=2?1.5:0);
+  line=o.minutes===undefined&&!pts?'DNP':`${pts} pts · ${reb} reb · ${ast} ast${stl?` · ${stl} stl`:''}${blk?` · ${blk} blk`:''}`}
+ else if(sport==='fb'){const g=k=>o[k]||0;fp=.04*g('passing.passingYards')+4*g('passing.passingTouchdowns')-g('passing.interceptions')+.1*g('rushing.rushingYards')+6*g('rushing.rushingTouchdowns')+.5*g('receiving.receptions')+.1*g('receiving.receivingYards')+6*g('receiving.receivingTouchdowns')-2*g('fumbles.fumblesLost')+6*(g('kickReturns.kickReturnTouchdowns')+g('puntReturns.puntReturnTouchdowns'));
+  const parts=[];if(o['passing.passingAttempts'])parts.push(`${g('passing.completions')}/${g('passing.passingAttempts')} · ${g('passing.passingYards')} yds · ${g('passing.passingTouchdowns')} TD${g('passing.interceptions')?` · ${g('passing.interceptions')} INT`:''}`);
+  if(o['rushing.rushingAttempts'])parts.push(`${g('rushing.rushingAttempts')} car ${g('rushing.rushingYards')} yds${g('rushing.rushingTouchdowns')?` ${g('rushing.rushingTouchdowns')} TD`:''}`);
+  if(o['receiving.receptions']||o['receiving.receivingTargets'])parts.push(`${g('receiving.receptions')} rec ${g('receiving.receivingYards')} yds${g('receiving.receivingTouchdowns')?` ${g('receiving.receivingTouchdowns')} TD`:''}`);line=parts.join(' · ')||'No stats yet'}
+ else if(sport==='hk'){if(o.goalie){const sv=o.saves||0,ga=o.goalsAgainst||0;fp=.7*sv-3.5*ga;
+   if(box&&box.final){const mine=(box.goalies[o.tid]||[]).sort((a,b)=>b.toi-a.toi)[0];const main=mine&&mine.id===id;if(main&&box.win===o.tid)fp+=6;if(main&&ga===0&&(o.timeOnIce||0)>=55)fp+=4}
+   line=`${sv} SV · ${ga} GA`}
+  else{const G=o.goals||0,A=o.assists||0,S=o.shotsTotal||0,B=o.blockedShots||0;fp=8.5*G+5*A+1.5*S+1.3*B;line=`${G} G · ${A} A · ${S} SOG${B?` · ${B} BS`:''}`}}
+ return{fp:r1(fp),line};
+}
+async function fetchBox(lg,ev){
+ FX.boxAt[ev]=Date.now();
+ const j=await getJSON(`${ESPN}${LG[lg].path}/summary?event=${ev}`);const b=parseBox(FXSP[lg].sport,j);b.at=Date.now();FX.box[ev]=b;return b;
+}
+function applyBox(c,ev,box){const S=FXSP[c.lg].sport;for(const pid in c.players){const p=c.players[pid];if(p.ev!==ev)continue;c.pts[pid]=fpOf(S,box.st[pid],box,pid)}}
+const entryPts=(c,e)=>r1(e.lineup.reduce((a,pid)=>a+((c.pts[pid]&&c.pts[pid].fp)||0),0));
+function playerState(c,pid){const p=c.players[pid],g=gameById(p.gid);if(!g)return 'pre';if(g.void)return 'final';return status(g)}
+function standings(c){const rows=c.entries.map((e,i)=>({i,e,pts:entryPts(c,e),left:e.lineup.filter(pid=>playerState(c,pid)!=='final').length}));rows.sort((a,b)=>b.pts-a.pts||(a.e.you?-1:b.e.you?1:0));let r=1;rows.forEach((x,k)=>{if(k&&x.pts<rows[k-1].pts)r=k+1;x.rank=r});return rows}
+function settleContest(c){
+ const T=FXTYPES[c.type],rows=standings(c),pot=T.pay;
+ const groups={};rows.forEach((x,k)=>{(groups[x.pts]=groups[x.pts]||[]).push(k)});
+ rows.forEach(x=>x.pay=0);for(const pts in groups){const ks=groups[pts],share=ks.reduce((a,k)=>a+(pot[k]||0),0)/ks.length;ks.forEach(k=>rows[k].pay=share)}
+ const me=rows.find(x=>x.e.you);let pay=Math.round(me.pay*c.fee);if(c.type==='h2h'&&rows[0].pts===rows[1].pts)pay=c.fee;
+ c.status='final';c.rank=me.rank;c.payout=pay;c.finalAt=Date.now();V.bal+=pay;
+ toast(pay>c.fee?`🏆 Fantasy: you finished ${ord(me.rank)} of ${rows.length} — +${fmt(pay)} coins!`:pay?`Fantasy: ${ord(me.rank)} of ${rows.length} — ${fmt(pay)} coins back`:`Fantasy: ${ord(me.rank)} of ${rows.length}. The AIs got you this time.`,pay>c.fee?'ok':pay?'':'bad');
+ renderWallet();save();
+}
+async function fantasyTick(){
+ if(FX.busy||REAL.ok!==true)return;const open=(V.fantasy||[]).filter(c=>c.status!=='final');if(!open.length)return;FX.busy=true;let n=0;
+ try{for(const c of open){
+  const evs=[...new Set(Object.values(c.players).map(p=>p.ev))];
+  for(const ev of evs){if(n>=4)break;const p=Object.values(c.players).find(x=>x.ev===ev),g=gameById(p.gid);c.done=c.done||{};if(c.done[ev])continue;
+   if(!g)continue;if(g.void){c.done[ev]=true;continue}const stt=status(g);
+   if(stt==='live'&&Date.now()-(FX.boxAt[ev]||0)>30000){n++;try{applyBox(c,ev,await fetchBox(c.lg,ev))}catch(e){}}
+   else if(stt==='final'){n++;try{const b=await fetchBox(c.lg,ev);b.final=true;applyBox(c,ev,b);c.done[ev]=true}catch(e){}}}
+  if(c.status!=='final'&&evs.every(ev=>c.done&&c.done[ev]))settleContest(c);
+ }}finally{FX.busy=false}
+}
+function enterContest(){
+ const F=FXSP[FB.lg],T=FXTYPES[FB.type],pool=fxPool(FB.lg,FB.date),byId=new Map(pool.map(p=>[p.id,p]));
+ const L=FB.picks.map(p=>p&&byId.get(p.id));if(L.some(p=>!p)){FB.picks=FB.picks.map((p,i)=>L[i]||null);lastMainHTML='';renderMain();return toast('A player\'s game already started — pick someone else for that spot','warn')}
+ const sal=L.reduce((a,p)=>a+p.sal,0);if(sal>F.cap)return toast('Over the salary cap','warn');if(V.bal<FB.fee)return toast('Not enough coins','bad');
+ const entries=[{name:'You',you:true,lineup:L.map(p=>p.id)}],used={},names=AIS.slice().sort(()=>rnd()-.5);
+ L.forEach(p=>used[p.id]=(used[p.id]||0)+1);
+ for(let k=0;k<T.n-1;k++){const [nm,pers]=names[k%names.length];const AL=aiLineup(FB.lg,pool,pers,used);if(!AL)return toast('Not enough players on this slate for that contest','warn');AL.forEach(p=>used[p.id]=(used[p.id]||0)+1);entries.push({name:nm,pers,lineup:AL.map(p=>p.id)})}
+ const players={};for(const e of entries)for(const pid of e.lineup){const p=byId.get(pid);players[pid]={id:p.id,name:p.name,pos:p.pos,team:p.team,opp:p.opp,sal:p.sal,proj:p.proj,gid:p.gid,ev:p.ev}}
+ V.bal-=FB.fee;const c={id:'f'+(V.nid++),lg:FB.lg,date:FB.date,type:FB.type,fee:FB.fee,entries,players,pts:{},done:{},status:'open',at:Date.now(),slots:F.slots.map(s=>s[0])};
+ (V.fantasy=V.fantasy||[]).unshift(c);FB=null;renderWallet();save();toast(`Entered ${T.name}: you vs ${T.n-1} AI${T.n>2?'s':''}. Good luck!`,'ok');go('fantasy-c-'+c.id);
+}
+function fxPinned(){const s=new Set();for(const c of V.fantasy||[])if(c.status!=='final')for(const pid in c.players)s.add(c.players[pid].gid);return s}
+
+/* ---- fantasy views ---- */
+function fxTabs(cur,list,attr){return `<div class="tabs" style="flex-wrap:wrap">${list.map(([k,l])=>`<button class="tab ${k===cur?'on':''}" data-${attr}="${esc(k)}">${l}</button>`).join('')}</div>`}
+function viewFantasy(){
+ const lg=FXUI.lg,F=FXSP[lg],mine=V.fantasy||[],live=mine.filter(c=>c.status!=='final'),done=mine.filter(c=>c.status==='final');
+ const net=done.reduce((a,c)=>a+c.payout-c.fee,0),wins=done.filter(c=>c.rank===1).length;
+ let h=`<div class="sec"><h2>🏆 Fantasy vs AI</h2></div>
+ <div class="note" style="margin-top:0">Build a lineup from real players in real games. They score fantasy points from their real stats, live. Beat the AI managers to win coins.</div>
+ <div class="stats" style="margin-top:12px"><div class="stat"><small>Contests</small><b>${done.length}</b></div><div class="stat"><small>Wins</small><b>${wins}</b></div><div class="stat"><small>Live</small><b>${live.length}</b></div><div class="stat"><small>Net</small><b style="color:${net>=0?'var(--win)':'var(--loss)'}">${net>=0?'+':''}${fmt(net)}</b></div></div>`;
+ h+=fxTabs(lg,Object.keys(FXSP).map(k=>[k,LG[k].icon+' '+(k==='ncaam'?'College Hoops':LG[k].name)]),'fxlg');
+ if(REAL.ok!==true)h+=realBox();
+ else{const sl=fxSlates(lg);if(!sl.some(s=>s.date===FXUI.date))FXUI.date=sl[0]&&sl[0].date;
+  if(!sl.length)h+=`<div class="empty">No ${LG[lg].name} games left to draft in the next 3 days. Try another sport.</div>`;
+  else{const S=sl.find(s=>s.date===FXUI.date),st=FX.st[lg];if(!st||(!st.at&&!st.loading&&!st.failed))loadStats(lg);
+   h+=fxTabs(FXUI.date,sl.map(s=>[s.date,`${slateLabel(s.date)} · ${s.open.length} game${s.open.length>1?'s':''}`]),'fxdate');
+   const pool=fxPool(lg,FXUI.date);
+   if(st&&st.loading&&!pool.length)h+='<div class="empty">⏳ Loading player stats…</div>';
+   else if(!pool.length)h+=`<div class="empty">${st&&st.failed?'Could not load player stats. <button class="lnk" data-fxretry="1">Try again</button>':'No players found for these games yet.'}</div>`;
+   else{h+=`<div class="fxc">${Object.entries(FXTYPES).map(([k,T])=>`<button class="fxt ${FXUI.type===k?'on':''}" data-fxtype="${k}"><b>${T.name}</b><small>${T.desc}</small><span>${T.pay.map((x,i)=>`${ord(i+1)}: ${fmt(x*FXUI.fee)}`).join(' · ')}</span></button>`).join('')}</div>
+    <div class="row2"><span class="note" style="margin:0">Entry fee</span>${FXFEES.map(f=>`<button class="tab ${FXUI.fee===f?'on':''}" data-fxfee="${f}">${fmt(f)}</button>`).join('')}</div>
+    <button class="bigWatch" style="background:linear-gradient(90deg,#2f8cff,#6fb2ff)" data-fxbuild="1" ${V.bal<FXUI.fee?'disabled':''}>${V.bal<FXUI.fee?'Not enough coins':`Build lineup · ${S.open.length} game${S.open.length>1?'s':''} · ${pool.length} players →`}</button>
+    <div class="note">Lineup: ${F.slots.map(s=>s[0]).join(', ')} · Salary cap ${money(F.cap)}<br>Scoring: ${F.rules}</div>`}}}
+ const card=c=>{const T=FXTYPES[c.type],rows=standings(c),me=rows.find(x=>x.e.you),st=c.status==='final';
+  return `<div class="bet ${st?(c.payout>c.fee?'won':c.payout?'':'lost'):''}" data-fxopen="${c.id}" style="cursor:pointer"><div class="bh"><b>${LG[c.lg].icon} ${LG[c.lg].name} · ${T.name} · ${slateLabel(c.date)}</b><span class="chip ${st?(c.payout>c.fee?'won':c.payout?'push':'lost'):'open'}">${st?(c.payout>c.fee?'Won':c.payout?'Paid':'Lost'):'Live'}</span></div>
+  <div class="bf" style="border-top:0;margin-top:0;padding-top:0"><span>You: <b>${ord(me.rank)} of ${rows.length}</b> · <b>${me.pts}</b> pts${st?'':` · ${me.left} players left`}</span><span>Entry <b>${fmt(c.fee)}</b>${st?` · Won <b>${fmt(c.payout)}</b>`:''}</span></div></div>`};
+ if(live.length)h+=`<div class="sub">My live contests</div>${live.map(card).join('')}`;
+ if(done.length)h+=`<div class="sub">Completed</div>${done.slice(0,15).map(card).join('')}`;
+ return h;
+}
+function viewBuild(){
+ if(!FB)return viewFantasy();const F=FXSP[FB.lg],T=FXTYPES[FB.type],pool=fxPool(FB.lg,FB.date);
+ const sal=FB.picks.reduce((a,p)=>a+(p?p.sal:0),0),proj=r1(FB.picks.reduce((a,p)=>a+(p?p.proj:0),0)),full=FB.picks.every(Boolean),left=F.cap-sal,ids=new Set(FB.picks.filter(Boolean).map(p=>p.id));
+ const pos=[...new Set(F.slots.flatMap(s=>s[1]))],q=FB.q.trim().toLowerCase();
+ let list=pool.filter(p=>(FB.pos==='ALL'||p.pos===FB.pos)&&(!q||p.name.toLowerCase().includes(q)||p.team.toLowerCase()===q));
+ list.sort(FB.sort==='sal'?(a,b)=>b.sal-a.sal:FB.sort==='value'?(a,b)=>b.proj/b.sal-a.proj/a.sal:(a,b)=>b.proj-a.proj);
+ const canAdd=p=>!ids.has(p.id)&&FB.picks.some((x,i)=>!x&&F.slots[i][1].includes(p.pos))&&p.sal<=left;
+ return `<button class="crumb" data-nav="fantasy">← Fantasy</button>
+ <div class="gd"><div class="gdTop"><span>${LG[FB.lg].icon} ${LG[FB.lg].name} · ${slateLabel(FB.date)}</span><span>${T.name} · Entry ${fmt(FB.fee)}</span></div>
+ <div class="fxbar"><div><small>Salary left</small><b style="color:${left<0?'var(--loss)':'var(--txt)'}">${money(left)}</b></div><div><small>Projected</small><b>${proj}</b></div><div><small>Players</small><b>${FB.picks.filter(Boolean).length}/${F.slots.length}</b></div></div>
+ <div class="fxslots">${F.slots.map((s,i)=>{const p=FB.picks[i];return `<div class="fxs ${p?'on':''}"><span class="fxp">${s[0]}</span>${p?`<div class="fxn"><b>${esc(p.name)}</b><small>${esc(p.team)} ${esc(p.opp)} · ${money(p.sal)} · ${p.proj}</small></div><button class="sx" data-fxrm="${i}">×</button>`:'<div class="fxn"><small>Empty</small></div>'}</div>`}).join('')}</div>
+ <div class="row2" style="margin-top:12px"><button class="btn ghost sm" data-fxauto="1">✨ Auto-fill</button><button class="btn ghost sm" data-fxclear="1">Clear</button><button class="btn" style="margin-left:auto" data-fxenter="1" ${full&&left>=0&&V.bal>=FB.fee?'':'disabled'}>${full?(left<0?'Over the cap':`Enter vs ${T.n-1} AI${T.n>2?'s':''} · ${fmt(FB.fee)}`):'Fill every spot'}</button></div></div>
+ <div class="row2" style="margin-top:14px">${['ALL',...pos].map(p=>`<button class="tab ${FB.pos===p?'on':''}" data-fxpos="${p}">${p}</button>`).join('')}</div>
+ <div class="row2"><input class="fxq" data-fxq="1" placeholder="Search player or team (e.g. LAL)" value="${esc(FB.q)}"><span class="note" style="margin:0">Sort</span>${[['proj','Proj'],['sal','Salary'],['value','Value']].map(([k,l])=>`<button class="tab ${FB.sort===k?'on':''}" data-fxsort="${k}">${l}</button>`).join('')}</div>
+ <div class="fxlist">${list.slice(0,150).map(p=>`<div class="fxr ${ids.has(p.id)?'on':''}"><span class="fxp">${p.pos}</span><div class="fxn"><b>${esc(p.name)}</b><small>${esc(p.team)} ${esc(p.opp)} · ${new Date(p.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · ${esc(p.line)}</small></div><div class="fxv"><b>${p.proj}</b><small>proj</small></div><div class="fxv"><b>${money(p.sal)}</b></div>
+  ${ids.has(p.id)?`<button class="fxa in" data-fxrmid="${esc(p.id)}">✓</button>`:`<button class="fxa" data-fxadd="${esc(p.id)}" ${canAdd(p)?'':'disabled'}>+</button>`}</div>`).join('')||'<div class="empty">No players match.</div>'}
+ ${list.length>150?`<div class="empty" style="padding:10px">Showing the top 150 of ${list.length}. Search to find more.</div>`:''}</div>`;
+}
+function viewContest(id){
+ const c=(V.fantasy||[]).find(x=>x.id===id);if(!c)return `<div class="empty">Contest not found.<br><br><button class="btn" data-nav="fantasy">Back to Fantasy</button></div>`;
+ const T=FXTYPES[c.type],rows=standings(c),S=FXSP[c.lg],fin=c.status==='final';
+ const lineup=e=>`<div class="fxlist">${e.lineup.map((pid,i)=>{const p=c.players[pid],ps=c.pts[pid],g=gameById(p.gid),stt=playerState(c,pid);
+  return `<div class="fxr"><span class="fxp">${esc((c.slots&&c.slots[i])||p.pos)}</span><div class="fxn"><b>${esc(p.name)}</b><small>${esc(p.team)} ${esc(p.opp)} · ${stt==='pre'?(g?esc(clockText(g)):'Not started'):stt==='live'?`<span style="color:#ff8080">● ${esc(g?clockText(g):'Live')}</span>`:'Final'}${ps?' · '+esc(ps.line):''}</small></div><div class="fxv"><b>${ps?ps.fp:'–'}</b><small>proj ${p.proj}</small></div></div>`}).join('')}</div>`;
+ return `<button class="crumb" data-nav="fantasy">← Fantasy</button>
+ <div class="gd"><div class="gdTop"><span>${LG[c.lg].icon} ${LG[c.lg].name} · ${slateLabel(c.date)} · ${T.name}</span><span>${fin?'FINAL':'<i class="dot"></i>LIVE'}</span></div>
+ <div class="note">Entry ${fmt(c.fee)} · Pays ${T.pay.map((x,i)=>`${ord(i+1)} ${fmt(x*c.fee)}`).join(' · ')}${fin?` · You won <b>${fmt(c.payout)}</b>`:' · Points update about every 30 seconds while games are live'}</div>
+ <div class="fxlb">${rows.map(x=>`<button class="fxlr ${x.e.you?'me':''}" data-fxexp="${x.i}"><span class="rk">${ord(x.rank)}</span><span class="nm">${esc(x.e.name)}${x.e.pers?`<small>${esc(x.e.pers)}</small>`:''}</span><span class="lf">${fin?'':x.left+' left'}</span><b>${x.pts}</b></button>${FXUI.open[c.id+'-'+x.i]||x.e.you?lineup(x.e):''}`).join('')}</div></div>
+ <div class="note">Scoring: ${S.rules}</div>`;
+}
+
 /* ================= persistence ================= */
 const KEY='pacebook_v2';
-function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,now:V.now,real:Date.now(),bal:V.bal,bets:V.bets,nid:V.nid,bonusAt:V.bonusAt,speed:V.speed,
- games:V.games.filter(g=>!g.real||V.bets.some(b=>b.status==='open'&&b.legs.some(l=>l.gid===g.id))).map(g=>{const o={};for(const k in g){if(k[0]==='_'||k==='sims')continue;o[k]=g[k]}return o})}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,now:V.now,real:Date.now(),bal:V.bal,bets:V.bets,nid:V.nid,bonusAt:V.bonusAt,speed:V.speed,fantasy:V.fantasy,
+ games:V.games.filter(g=>!g.real||fxPinned().has(g.id)||V.bets.some(b=>b.status==='open'&&b.legs.some(l=>l.gid===g.id))).map(g=>{const o={};for(const k in g){if(k[0]==='_'||k==='sims')continue;o[k]=g[k]}return o})}))}catch(e){}}
 const SIMLG={cbb:'ncaam',volleyball:'ncaavb',football:'nfl',basketball:'nba',hockey:'nhl',baseball:'mlb',soccer:'epl',tennis:'atp',mma:'ufc'};
 function repairGames(list){
  // saves from the first store build dropped each game's league and real-game info; rebuild them
@@ -1497,7 +1747,7 @@ function repairGames(list){
  return out;
 }
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d||d.v!==1)return false;
- Object.assign(V,{now:d.now,bal:d.bal,bets:d.bets||[],games:repairGames(d.games||[]),nid:d.nid,bonusAt:d.bonusAt||0,speed:d.speed||1});
+ Object.assign(V,{now:d.now,bal:d.bal,bets:d.bets||[],games:repairGames(d.games||[]),nid:d.nid,bonusAt:d.bonusAt||0,speed:d.speed||1,fantasy:d.fantasy||[]});
  const away=clamp((Date.now()-d.real)/1000,0,3600);for(let x=0;x<away;x+=5)advance(Math.min(5,away-x));return true}catch(e){return false}}
 
 /* ================= events ================= */
@@ -1506,6 +1756,22 @@ document.addEventListener('click',e=>{
  if(el=T.closest('[data-k]')){toggleSlip(el.dataset.k);return}
  if(el=T.closest('[data-watch-next]')){const n=V.games.find(g=>status(g)==='live'&&(!A||g.id!==A.gid));if(n)openArena(n.id);else toast('No other live games right now');return}
  if(el=T.closest('[data-watch]')){if(el.dataset.watch)openArena(el.dataset.watch);return}
+ if(el=T.closest('[data-fxlg]')){FXUI.lg=el.dataset.fxlg;FXUI.date=null;lastMainHTML='';renderMain();return}
+ if(el=T.closest('[data-fxdate]')){FXUI.date=el.dataset.fxdate;lastMainHTML='';renderMain();return}
+ if(el=T.closest('[data-fxtype]')){FXUI.type=el.dataset.fxtype;lastMainHTML='';renderMain();return}
+ if(el=T.closest('[data-fxfee]')){FXUI.fee=+el.dataset.fxfee;lastMainHTML='';renderMain();return}
+ if(el=T.closest('[data-fxretry]')){FX.st[FXUI.lg]=null;loadStats(FXUI.lg);return}
+ if(el=T.closest('[data-fxbuild]')){FB={lg:FXUI.lg,date:FXUI.date,type:FXUI.type,fee:FXUI.fee,picks:FXSP[FXUI.lg].slots.map(()=>null),pos:'ALL',q:'',sort:'proj'};go('fantasy-build');return}
+ if(FB&&(el=T.closest('[data-fxadd]'))){const F=FXSP[FB.lg],p=fxPool(FB.lg,FB.date).find(x=>x.id===el.dataset.fxadd);if(p){const i=FB.picks.findIndex((x,i)=>!x&&F.slots[i][1].includes(p.pos));if(i>=0)FB.picks[i]=p}lastMainHTML='';renderMain();return}
+ if(FB&&(el=T.closest('[data-fxrm]'))){FB.picks[+el.dataset.fxrm]=null;lastMainHTML='';renderMain();return}
+ if(FB&&(el=T.closest('[data-fxrmid]'))){FB.picks=FB.picks.map(p=>p&&p.id===el.dataset.fxrmid?null:p);lastMainHTML='';renderMain();return}
+ if(FB&&T.closest('[data-fxclear]')){FB.picks=FB.picks.map(()=>null);lastMainHTML='';renderMain();return}
+ if(FB&&T.closest('[data-fxauto]')){const F=FXSP[FB.lg],pool=fxPool(FB.lg,FB.date),L=optimize(pool,F.slots,F.cap,FB.picks,p=>p.proj);if(L)FB.picks=L;else toast('Your picks leave no room under the cap — remove someone first','warn');lastMainHTML='';renderMain();return}
+ if(FB&&T.closest('[data-fxenter]')){enterContest();return}
+ if(FB&&(el=T.closest('[data-fxpos]'))){FB.pos=el.dataset.fxpos;lastMainHTML='';renderMain();return}
+ if(FB&&(el=T.closest('[data-fxsort]'))){FB.sort=el.dataset.fxsort;lastMainHTML='';renderMain();return}
+ if(el=T.closest('[data-fxopen]')){go('fantasy-c-'+el.dataset.fxopen);return}
+ if(el=T.closest('[data-fxexp]')){const k=VIEW.slice(10)+'-'+el.dataset.fxexp;FXUI.open[k]=!FXUI.open[k];lastMainHTML='';renderMain();return}
  if(el=T.closest('[data-refresh]')){if(!REAL.loading){toast('Loading the latest real games…');REAL.sched=0;pollReal(true)}return}
  if(el=T.closest('[data-cash]')){cashOut(el.dataset.cash);return}
  if(el=T.closest('[data-rm]')){SLIP.delete(el.dataset.rm);renderSlip();lastMainHTML='';renderMain();renderArenaBets();return}
@@ -1518,7 +1784,7 @@ document.addEventListener('click',e=>{
  if(el=T.closest('[data-open]')){if(el.dataset.closeArena)closeArena();go('game-'+el.dataset.open);return}
  if(el=T.closest('[data-nav]')){go(el.dataset.nav);return}
 });
-document.addEventListener('input',e=>{const T=e.target;if(T.dataset.stake!=null){const it=SLIP.get(T.dataset.stake);if(it){T.value=T.value.replace(/[^0-9]/g,'');it.stake=T.value;slipTotals()}}else if(T.id==='pStake'){T.value=T.value.replace(/[^0-9]/g,'');PSTAKE=T.value;slipTotals()}});
+document.addEventListener('input',e=>{const T=e.target;if(T.dataset.fxq!=null&&FB){FB.q=T.value;lastMainHTML='';renderMain();return}if(T.dataset.stake!=null){const it=SLIP.get(T.dataset.stake);if(it){T.value=T.value.replace(/[^0-9]/g,'');it.stake=T.value;slipTotals()}}else if(T.id==='pStake'){T.value=T.value.replace(/[^0-9]/g,'');PSTAKE=T.value;slipTotals()}});
 $('#slipFab').onclick=()=>$('#slip').classList.toggle('open');
 $('#aSlip').onclick=()=>$('#slip').classList.toggle('open');
 $('#aClose').onclick=closeArena;
@@ -1539,7 +1805,7 @@ setInterval(()=>{
  advance(dt*V.speed);refreshSims(28);
  acc+=dt;saveAcc+=dt;
  if(A)renderArena(false);
- if(acc>=1){acc=0;renderMain();renderNav();renderWallet();updateSlipOdds();slipTotals()}
+ if(acc>=1){acc=0;fantasyTick();renderMain();renderNav();renderWallet();updateSlipOdds();slipTotals()}
  if(saveAcc>=5){saveAcc=0;save()}
 },250);
 addEventListener('beforeunload',save);
