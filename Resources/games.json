@@ -39,6 +39,24 @@
       "updated": "Nov 2026"
     },
     {
+      "id": "hoops-statbook",
+      "title": "Hoops StatBook",
+      "shortName": "StatBook",
+      "subtitle": "Track high school basketball stats",
+      "description": "Keep the book for your high school basketball team right from the bench. Add your roster, then tap a player and a stat to log 2s, 3s and free throws (made or missed), assists, offensive and defensive rebounds, steals, blocks, turnovers and fouls. The scoreboard updates live by quarter and overtime, with undo and play-by-play. Get a full box score for every game, plus your season record, totals and per-game averages. Works offline and saves on your phone.",
+      "genre": "Sports",
+      "version": "1.0",
+      "launch": "web",
+      "url": "games/hoops-statbook/index.html",
+      "iconURL": "icons/hoops-statbook.png",
+      "colors": [
+        "#F97316",
+        "#0B1220"
+      ],
+      "featured": true,
+      "updated": "Nov 2026"
+    },
+    {
       "id": "backrooms-unsighted",
       "title": "Backrooms Unsighted",
       "shortName": "Backrooms",
