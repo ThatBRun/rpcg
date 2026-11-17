@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StatBook">
+<meta name="theme-color" content="#0b1220">
+<title>Hoops StatBook – RamPace Games</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%230b1220'/%3E%3Ccircle cx='90' cy='90' r='52' fill='%23f97316'/%3E%3Cpath d='M38 90h104M90 38v104M55 52c20 22 20 54 0 76M125 52c-20 22-20 54 0 76' stroke='%230b1220' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%230b1220'/%3E%3Ccircle cx='90' cy='90' r='52' fill='%23f97316'/%3E%3Cpath d='M38 90h104M90 38v104M55 52c20 22 20 54 0 76M125 52c-20 22-20 54 0 76' stroke='%230b1220' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0b1220; --panel:#131c2e; --panel2:#1b2640; --line:#26334f;
+  --text:#e8edf7; --muted:#8b97b0; --blue:#3b82f6; --orange:#f97316;
+  --green:#22c55e; --red:#ef4444; --yellow:#eab308;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 70px)}
+button{font:inherit;color:inherit;border:none;cursor:pointer}
+input,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+header{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+.logo{width:30px;height:30px;transform:rotate(45deg);background:linear-gradient(135deg,#60a5fa,#2563eb);border-radius:6px;flex:none}
+.brand small{display:block;font-size:10px;letter-spacing:2px;color:var(--blue);font-weight:800}
+.brand b{font-size:19px}
+main{padding:0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
+h2{font-size:15px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.row{display:flex;gap:8px;align-items:center}
+.btn{background:var(--blue);padding:11px 14px;border-radius:11px;font-weight:700}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line)}
+.btn.danger{background:#3a1620;color:#fca5a5;border:1px solid #5b2130}
+.btn.full{width:100%}
+.muted{color:var(--muted);font-size:13px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0e1626;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav button{flex:1;padding:10px 0 9px;background:none;color:var(--muted);font-size:11px;font-weight:600}
+nav button span{display:block;font-size:20px;margin-bottom:2px}
+nav button.on{color:var(--orange)}
+.view{display:none}.view.on{display:block}
+.list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:none}
+.num{min-width:38px;height:38px;border-radius:10px;background:var(--panel2);display:grid;place-items:center;font-weight:800}
+.grow{flex:1;min-width:0}
+.x{background:none;color:var(--muted);font-size:20px;padding:4px 8px}
+/* scoreboard */
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;gap:6px}
+.score .t{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score .p{font-size:40px;font-weight:900;line-height:1.1}
+.qtrs{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.qtrs button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-weight:700;font-size:13px}
+.qtrs button.on{background:var(--orange);border-color:var(--orange);color:#111}
+/* player grid */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.pbtn{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}
+.pbtn .n{font-size:22px;font-weight:900}
+.pbtn .nm{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbtn .pts{font-size:11px;color:var(--orange);font-weight:700}
+.pbtn.sel{border-color:var(--orange);background:#2a1d12}
+.pbtn.opp{border-style:dashed}
+/* stat buttons */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sbtn{padding:14px 2px;border-radius:12px;font-weight:800;font-size:14px;background:var(--panel2);border:1px solid var(--line)}
+.sbtn small{display:block;font-size:10px;font-weight:600;opacity:.75}
+.sbtn.make{background:#123a24;border-color:#1f6b3e;color:#86efac}
+.sbtn.miss{background:#3a1620;border-color:#5b2130;color:#fca5a5}
+.sbtn.pos{background:#13254a;border-color:#244a8f;color:#93c5fd}
+.sbtn.neg{background:#3a2a10;border-color:#6b4d16;color:#fcd34d}
+.sbtn:disabled{opacity:.35}
+.sbtn:active,.pbtn:active,.btn:active{transform:scale(.96)}
+.log{max-height:170px;overflow:auto;font-size:13px}
+.log div{padding:5px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+/* box score */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:11px;font-weight:700;position:sticky;top:0;background:var(--panel)}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+tr.tot td{font-weight:800;color:var(--orange)}
+.toast{position:fixed;left:50%;bottom:95px;transform:translateX(-50%);background:#f8fafc;color:#111;padding:9px 16px;border-radius:20px;font-weight:700;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+.seg{display:flex;background:var(--panel2);border-radius:10px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;padding:8px;border-radius:8px;background:none;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--blue);color:#fff}
+.empty{text-align:center;color:var(--muted);padding:20px 0;font-size:14px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;width:100%;max-width:380px}
+.modal p{margin:0 0 14px;font-size:15px;line-height:1.4}
+.modal textarea{width:100%;height:140px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"></div>
+  <div class="brand"><small>RAMPACEGAMES</small><b>Hoops StatBook</b></div>
+</header>
+
+<main>
+<!-- ROSTER -->
+<section class="view" id="v-roster">
+  <div class="card">
+    <h2>Team</h2>
+    <input id="teamName" placeholder="Team name (e.g. Central Eagles)">
+  </div>
+  <div class="card">
+    <h2>Add player</h2>
+    <div class="row">
+      <input id="pNum" placeholder="#" inputmode="numeric" style="width:70px;flex:none">
+      <input id="pName" placeholder="Player name">
+      <button class="btn" id="addP" style="flex:none">Add</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Roster <span id="rCount"></span></h2>
+    <div id="rosterList"></div>
+  </div>
+</section>
+
+<!-- NEW GAME / LIVE -->
+<section class="view" id="v-game">
+  <div id="noGame">
+    <div class="card">
+      <h2>New game</h2>
+      <input id="oppName" placeholder="Opponent (e.g. Westview)" style="margin-bottom:8px">
+      <input id="gDate" type="date" style="margin-bottom:8px">
+      <div class="row" style="margin-bottom:8px">
+        <select id="gLoc"><option>Home</option><option>Away</option><option>Neutral</option></select>
+        <select id="gType"><option>Regular Season</option><option>Conference</option><option>Tournament</option><option>District</option><option>State</option></select>
+      </div>
+      <button class="btn full" id="startGame">Start Game</button>
+      <p class="muted" id="startHint"></p>
+    </div>
+  </div>
+
+  <div id="liveGame" style="display:none">
+    <div class="card">
+      <div class="score">
+        <div><div class="t" id="sUs">Us</div><div class="p" id="ptsUs">0</div></div>
+        <div class="muted">vs</div>
+        <div><div class="t" id="sThem">Them</div><div class="p" id="ptsThem">0</div></div>
+      </div>
+      <div class="qtrs" id="qtrs"></div>
+    </div>
+
+    <div class="card">
+      <h2>1. Tap a player</h2>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Tap a stat <span id="selLabel" style="color:var(--orange);text-transform:none;letter-spacing:0"></span></h2>
+      <div class="sgrid" id="sgrid"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost full" id="undo">↶ Undo last</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Play-by-play</h2>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="row" style="margin:10px 0 20px">
+      <button class="btn full" id="endGame" style="background:var(--green);color:#052e16">Final – Save Game</button>
+    </div>
+    <button class="btn danger full" id="discard" style="margin-bottom:20px">Discard game</button>
+  </div>
+</section>
+
+<!-- BOX SCORE -->
+<section class="view" id="v-box">
+  <div class="card">
+    <h2 id="boxTitle">Box score</h2>
+    <div class="seg" id="boxQ"></div>
+    <div class="tbl-wrap" id="boxTable"></div>
+  </div>
+  <div class="row" style="margin-bottom:14px">
+    <button class="btn ghost full" id="shareBox">Copy box score</button>
+    <button class="btn ghost full" id="csvBox">Copy as CSV</button>
+  </div>
+</section>
+
+<!-- HISTORY / SEASON -->
+<section class="view" id="v-season">
+  <div class="seg" id="seasonSeg">
+    <button data-s="games" class="on">Games</button>
+    <button data-s="totals">Season Totals</button>
+    <button data-s="avgs">Averages</button>
+  </div>
+  <div id="seasonBody"></div>
+</section>
+</main>
+
+<nav>
+  <button data-v="roster"><span>👥</span>Roster</button>
+  <button data-v="game"><span>🏀</span>Game</button>
+  <button data-v="box"><span>📋</span>Box Score</button>
+  <button data-v="season"><span>📈</span>Season</button>
+</nav>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="box"><p id="mMsg"></p><textarea id="mText" style="display:none"></textarea>
+<div class="row"><button class="btn ghost full" id="mNo">Cancel</button><button class="btn full" id="mYes">OK</button></div></div></div>
+
+<script>
+// ---------- storage ----------
+const KEY='rp_hoops_statbook_v1';
+let S={team:'',roster:[],live:null,games:[]};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('on'),1100);}
+function buzz(){try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
+
+function ask(msg,{yes='OK',no='Cancel',text=null,input=false,danger=false}={}){
+  return new Promise(res=>{const m=$('modal'),ta=$('mText');$('mMsg').textContent=msg;
+    ta.style.display=(text!=null||input)?'block':'none';ta.value=text||'';ta.readOnly=!input;
+    $('mYes').textContent=yes;$('mYes').style.background=danger?'var(--red)':'';
+    $('mNo').style.display=no?'block':'none';$('mNo').textContent=no||'';m.classList.add('on');
+    if(text!=null&&!input){setTimeout(()=>{ta.focus();ta.select();},50);}
+    const done=v=>{m.classList.remove('on');$('mYes').onclick=$('mNo').onclick=null;res(v);};
+    $('mYes').onclick=()=>done(input?ta.value:true);$('mNo').onclick=()=>done(input?null:false);});
+}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text);toast(label+' copied');return;}catch(e){}
+  await ask('Select all and copy:',{text,no:null,yes:'Done'});
+}
+// ---------- stat definitions ----------
+const STATS=[
+  {k:'2M',label:'2PT',sub:'Made',cls:'make',pts:2},
+  {k:'3M',label:'3PT',sub:'Made',cls:'make',pts:3},
+  {k:'FTM',label:'FT',sub:'Made',cls:'make',pts:1},
+  {k:'AST',label:'AST',sub:'Assist',cls:'pos'},
+  {k:'2X',label:'2PT',sub:'Miss',cls:'miss'},
+  {k:'3X',label:'3PT',sub:'Miss',cls:'miss'},
+  {k:'FTX',label:'FT',sub:'Miss',cls:'miss'},
+  {k:'STL',label:'STL',sub:'Steal',cls:'pos'},
+  {k:'OREB',label:'OREB',sub:'Off Reb',cls:'pos'},
+  {k:'DREB',label:'DREB',sub:'Def Reb',cls:'pos'},
+  {k:'BLK',label:'BLK',sub:'Block',cls:'pos'},
+  {k:'TO',label:'TO',sub:'Turnover',cls:'neg'},
+  {k:'PF',label:'FOUL',sub:'Personal',cls:'neg'},
+];
+const OPP_ID='__opp__';
+const OPP_STATS=[{k:'O1',label:'+1',sub:'Opp FT',cls:'miss',pts:1},{k:'O2',label:'+2',sub:'Opp',cls:'miss',pts:2},{k:'O3',label:'+3',sub:'Opp',cls:'miss',pts:3}];
+const NAMES={'2M':'made 2','3M':'made 3','FTM':'made FT','2X':'missed 2','3X':'missed 3','FTX':'missed FT',AST:'assist',STL:'steal',OREB:'off. rebound',DREB:'def. rebound',BLK:'block',TO:'turnover',PF:'foul',O1:'free throw',O2:'2 pointer',O3:'3 pointer'};
+
+function blank(){return{'2M':0,'2X':0,'3M':0,'3X':0,'FTM':0,'FTX':0,OREB:0,DREB:0,AST:0,STL:0,BLK:0,TO:0,PF:0};}
+function lineFor(events,pid,q){
+  const l=blank();
+  events.forEach(e=>{if(e.p===pid&&(q==null||e.q===q)&&l[e.k]!=null)l[e.k]++;});
+  return l;
+}
+function calc(l){
+  const fgm=l['2M']+l['3M'],fga=fgm+l['2X']+l['3X'];
+  return{PTS:l['2M']*2+l['3M']*3+l.FTM,FGM:fgm,FGA:fga,'3PM':l['3M'],'3PA':l['3M']+l['3X'],FTM:l.FTM,FTA:l.FTM+l.FTX,
+    OREB:l.OREB,DREB:l.DREB,REB:l.OREB+l.DREB,AST:l.AST,STL:l.STL,BLK:l.BLK,TO:l.TO,PF:l.PF};
+}
+function addLines(a,b){const o={};for(const k in a)o[k]=a[k]+(b[k]||0);return o;}
+function pct(m,a){return a?Math.round(m/a*100)+'%':'–';}
+function scoreOf(g,q){
+  let us=0,them=0;
+  g.events.forEach(e=>{if(q!=null&&e.q!==q)return;
+    if(e.p===OPP_ID){them+=({O1:1,O2:2,O3:3})[e.k]||0;}
+    else us+=({'2M':2,'3M':3,'FTM':1})[e.k]||0;});
+  return{us,them};
+}
+function qLabel(q){return q<=4?'Q'+q:'OT'+(q-4);}
+
+// ---------- nav ----------
+let view='game';
+function show(v){view=v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));render();window.scrollTo(0,0);}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+
+// ---------- roster ----------
+$('teamName').value=S.team;
+$('teamName').oninput=e=>{S.team=e.target.value;save();};
+$('addP').onclick=()=>{
+  const num=$('pNum').value.trim(),name=$('pName').value.trim();
+  if(!name){toast('Enter a name');return;}
+  if(num&&S.roster.some(p=>p.num===num)){toast('#'+num+' is taken');return;}
+  S.roster.push({id:uid(),num,name});
+  S.roster.sort((a,b)=>(parseInt(a.num)||999)-(parseInt(b.num)||999));
+  $('pNum').value='';$('pName').value='';$('pNum').focus();save();render();toast('Added '+name);
+};
+$('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('addP').click();});
+function renderRoster(){
+  $('rCount').textContent=S.roster.length?'('+S.roster.length+')':'';
+  $('rosterList').innerHTML=S.roster.length?S.roster.map(p=>`<div class="list-item"><div class="num">${esc(p.num||'–')}</div><div class="grow">${esc(p.name)}</div><button class="x" data-del="${p.id}">✕</button></div>`).join('')
+    :'<div class="empty">No players yet. Add your roster above.</div>';
+  $('rosterList').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    if(!await ask('Remove this player from the roster? Saved games keep their stats.',{yes:'Remove',danger:true}))return;
+    S.roster=S.roster.filter(p=>p.id!==b.dataset.del);save();render();});
+}
+
+// ---------- game ----------
+$('gDate').valueAsDate=new Date();
+let selP=null;
+$('startGame').onclick=()=>{
+  if(!S.roster.length){toast('Add players first');show('roster');return;}
+  S.live={id:uid(),opp:$('oppName').value.trim()||'Opponent',date:$('gDate').value,loc:$('gLoc').value,type:$('gType').value,
+    q:1,maxQ:4,events:[],players:S.roster.map(p=>({...p})),team:S.team||'Us'};
+  selP=null;save();render();
+};
+$('undo').onclick=()=>{const g=S.live;if(!g||!g.events.length){toast('Nothing to undo');return;}
+  const e=g.events.pop();save();render();toast('Undid '+NAMES[e.k]);};
+$('endGame').onclick=async()=>{const g=S.live;if(!g)return;
+  if(!await ask('Final score? This saves the game to your season.',{yes:'Save game'}))return;
+  g.final=true;S.games.unshift(g);S.live=null;boxGameId=g.id;boxQ=null;save();toast('Game saved');show('box');};
+$('discard').onclick=async()=>{if(!await ask('Discard this game? All stats will be lost.',{yes:'Discard',danger:true}))return;S.live=null;save();render();};
+
+function record(k){
+  const g=S.live;if(!g)return;
+  if(!selP){toast('Pick a player first');return;}
+  if(selP===OPP_ID&&!k.startsWith('O')){return;}
+  g.events.push({p:selP,k,q:g.q,t:Date.now()});
+  buzz();save();
+  const name=selP===OPP_ID?g.opp:(g.players.find(p=>p.id===selP)||{}).name;
+  toast(name+': '+NAMES[k]);
+  render();
+}
+function renderGame(){
+  const g=S.live;
+  $('noGame').style.display=g?'none':'block';$('liveGame').style.display=g?'block':'none';
+  $('startHint').textContent=S.roster.length?S.roster.length+' players on roster.':'Add your roster first on the Roster tab.';
+  if(!g)return;
+  const sc=scoreOf(g);
+  $('sUs').textContent=g.team;$('sThem').textContent=g.opp;$('ptsUs').textContent=sc.us;$('ptsThem').textContent=sc.them;
+  let qh='';for(let q=1;q<=g.maxQ;q++)qh+=`<button data-q="${q}" class="${q===g.q?'on':''}">${qLabel(q)}</button>`;
+  qh+=`<button data-q="add">+OT</button>`;
+  $('qtrs').innerHTML=qh;
+  $('qtrs').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    if(b.dataset.q==='add'){g.maxQ++;g.q=g.maxQ;}else g.q=+b.dataset.q;save();render();});
+  $('pgrid').innerHTML=g.players.map(p=>{const c=calc(lineFor(g.events,p.id));
+    return `<button class="pbtn ${selP===p.id?'sel':''}" data-p="${p.id}"><div class="n">${esc(p.num||'–')}</div><div class="nm">${esc(p.name)}</div><div class="pts">${c.PTS} pts · ${c.PF} PF</div></button>`;}).join('')
+    +`<button class="pbtn opp ${selP===OPP_ID?'sel':''}" data-p="${OPP_ID}"><div class="n">OPP</div><div class="nm">${esc(g.opp)}</div><div class="pts">${sc.them} pts</div></button>`;
+  $('pgrid').querySelectorAll('.pbtn').forEach(b=>b.onclick=()=>{selP=selP===b.dataset.p?null:b.dataset.p;render();});
+  const list=selP===OPP_ID?OPP_STATS:STATS;
+  $('sgrid').innerHTML=list.map(s=>`<button class="sbtn ${s.cls}" data-k="${s.k}" ${selP?'':'disabled'}>${s.label}<small>${s.sub}</small></button>`).join('');
+  $('sgrid').querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>record(b.dataset.k));
+  const sp=selP===OPP_ID?{name:g.opp}:g.players.find(p=>p.id===selP);
+  $('selLabel').textContent=sp?'→ '+(sp.num?'#'+sp.num+' ':'')+sp.name:'';
+  $('log').innerHTML=g.events.length?g.events.slice().reverse().slice(0,40).map(e=>{
+    const p=e.p===OPP_ID?{name:g.opp}:(g.players.find(x=>x.id===e.p)||{name:'?'});
+    return `<div><span>${esc((p.num?'#'+p.num+' ':'')+p.name)} – ${NAMES[e.k]}</span><span class="muted">${qLabel(e.q)}</span></div>`;}).join('')
+    :'<div class="empty" style="display:block">No stats yet</div>';
+}
+
+// ---------- box score ----------
+let boxGameId=null,boxQ=null;
+function currentBoxGame(){
+  if(S.live&&(!boxGameId||boxGameId===S.live.id))return S.live;
+  return S.games.find(g=>g.id===boxGameId)||S.live||S.games[0]||null;
+}
+const COLS=['MIN?','PTS','FG','FG%','3P','3P%','FT','FT%','OREB','DREB','REB','AST','STL','BLK','TO','PF'].filter(c=>c!=='MIN?');
+function rowCells(c){return[c.PTS,c.FGM+'-'+c.FGA,pct(c.FGM,c.FGA),c['3PM']+'-'+c['3PA'],pct(c['3PM'],c['3PA']),c.FTM+'-'+c.FTA,pct(c.FTM,c.FTA),c.OREB,c.DREB,c.REB,c.AST,c.STL,c.BLK,c.TO,c.PF];}
+function boxRows(g,q){
+  let tot=blank();
+  const rows=g.players.map(p=>{const l=lineFor(g.events,p.id,q);tot=addLines(tot,l);return{p,c:calc(l)};});
+  return{rows,tot:calc(tot)};
+}
+function renderBox(){
+  const g=currentBoxGame();
+  if(!g){$('boxTitle').textContent='Box score';$('boxQ').innerHTML='';$('boxTable').innerHTML='<div class="empty">Start a game to see the box score.</div>';return;}
+  const sc=scoreOf(g);
+  $('boxTitle').innerHTML=`${esc(g.team)} ${sc.us} – ${sc.them} ${esc(g.opp)} <span style="text-transform:none;letter-spacing:0">${g.final?'· Final':'· Live'} · ${esc(g.date||'')}</span>`;
+  let seg=`<button data-q="" class="${boxQ==null?'on':''}">Game</button>`;
+  for(let q=1;q<=g.maxQ;q++)seg+=`<button data-q="${q}" class="${boxQ===q?'on':''}">${qLabel(q)}</button>`;
+  $('boxQ').innerHTML=seg;
+  $('boxQ').querySelectorAll('button').forEach(b=>b.onclick=()=>{boxQ=b.dataset.q?+b.dataset.q:null;renderBox();});
+  const {rows,tot}=boxRows(g,boxQ);
+  const qs=scoreOf(g,boxQ);
+  $('boxTable').innerHTML=`<table><thead><tr><th>Player</th>${COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(r=>`<tr><td>${esc((r.p.num?'#'+r.p.num+' ':'')+r.p.name)}</td>${rowCells(r.c).map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')+
+    `<tr class="tot"><td>TEAM</td>${rowCells(tot).map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table>
+    <p class="muted" style="margin-top:8px">${esc(g.opp)} scored ${qs.them}${boxQ?' in '+qLabel(boxQ):''}.</p>`;
+}
+function boxText(g){
+  const sc=scoreOf(g),{rows,tot}=boxRows(g,null);
+  let t=`${g.team} ${sc.us} - ${sc.them} ${g.opp} (${g.date||''})\n`;
+  rows.filter(r=>r.c.PTS||r.c.REB||r.c.AST||r.c.STL||r.c.BLK||r.c.FGA||r.c.FTA).forEach(r=>{
+    t+=`${r.p.num?'#'+r.p.num+' ':''}${r.p.name}: ${r.c.PTS} PTS, ${r.c.REB} REB, ${r.c.AST} AST, ${r.c.STL} STL, ${r.c.BLK} BLK (${r.c.FGM}-${r.c.FGA} FG, ${r.c['3PM']}-${r.c['3PA']} 3P, ${r.c.FTM}-${r.c.FTA} FT)\n`;});
+  t+=`TEAM: ${tot.PTS} PTS, ${tot.REB} REB, ${tot.AST} AST, ${tot.STL} STL, ${tot.BLK} BLK, ${tot.TO} TO\n— Hoops StatBook by RamPace Games`;
+  return t;
+}
+function boxCSV(g){
+  const {rows,tot}=boxRows(g,null);
+  const head=['Number','Player','PTS','FGM','FGA','3PM','3PA','FTM','FTA','OREB','DREB','REB','AST','STL','BLK','TO','PF'];
+  const line=(n,nm,c)=>[n,nm,c.PTS,c.FGM,c.FGA,c['3PM'],c['3PA'],c.FTM,c.FTA,c.OREB,c.DREB,c.REB,c.AST,c.STL,c.BLK,c.TO,c.PF].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  return [head.join(','),...rows.map(r=>line(r.p.num,r.p.name,r.c)),line('','TEAM',tot)].join('\n');
+}
+async function shareOrCopy(text,title){
+  try{if(navigator.share){await navigator.share({title,text});return;}}catch(e){if(e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(text);toast('Copied to clipboard');}catch(e){prompt('Copy this:',text);}
+}
+function download(name,text){
+  const blob=new Blob([text],{type:'text/csv'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+$('shareBox').onclick=()=>{const g=currentBoxGame();if(g)copyText(boxText(g),'Box score');};
+$('csvBox').onclick=()=>{const g=currentBoxGame();if(g)copyText(boxCSV(g),'CSV');};
+
+// ---------- season ----------
+let seasonTab='games';
+document.querySelectorAll('#seasonSeg button').forEach(b=>b.onclick=()=>{seasonTab=b.dataset.s;
+  document.querySelectorAll('#seasonSeg button').forEach(x=>x.classList.toggle('on',x===b));renderSeason();});
+function seasonAgg(){
+  const m={};
+  S.games.forEach(g=>g.players.forEach(p=>{
+    const key=p.name+'|'+p.num;const l=lineFor(g.events,p.id);
+    const played=g.events.some(e=>e.p===p.id);
+    if(!m[key])m[key]={p,l:blank(),gp:0};
+    m[key].l=addLines(m[key].l,l);if(played)m[key].gp++;
+  }));
+  return Object.values(m).sort((a,b)=>calc(b.l).PTS-calc(a.l).PTS);
+}
+function renderSeason(){
+  const el=$('seasonBody');
+  if(!S.games.length){el.innerHTML='<div class="card"><div class="empty">No saved games yet. Finish a game to build your season stats.</div></div>';return;}
+  if(seasonTab==='games'){
+    let w=0,l=0;S.games.forEach(g=>{const s=scoreOf(g);if(s.us>s.them)w++;else if(s.us<s.them)l++;});
+    el.innerHTML=`<div class="card"><h2>Record: ${w}-${l}</h2>`+S.games.map(g=>{const s=scoreOf(g),res=s.us>s.them?'W':s.us<s.them?'L':'T';
+      return `<div class="list-item"><div class="num" style="color:${res==='W'?'var(--green)':res==='L'?'var(--red)':'var(--muted)'}">${res}</div>
+      <div class="grow" data-open="${g.id}"><b>${g.loc==='Away'?'@ ':'vs '}${esc(g.opp)}</b> ${s.us}-${s.them}<div class="muted">${esc(g.date||'')} · ${esc(g.type)}</div></div>
+      <button class="x" data-open="${g.id}">›</button><button class="x" data-delg="${g.id}">✕</button></div>`;}).join('')+`</div>
+      <button class="btn ghost full" id="exportAll" style="margin-bottom:14px">Copy backup</button>
+      <button class="btn ghost full" id="importAll" style="margin-bottom:14px">Restore from backup</button>`;
+    el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{boxGameId=b.dataset.open;boxQ=null;show('box');});
+    el.querySelectorAll('[data-delg]').forEach(b=>b.onclick=async()=>{if(!await ask('Delete this game permanently? This can\'t be undone.',{yes:'Delete',danger:true}))return;
+      S.games=S.games.filter(g=>g.id!==b.dataset.delg);save();renderSeason();});
+    $('exportAll').onclick=()=>copyText(JSON.stringify(S),'Backup');
+    $('importAll').onclick=async()=>{const t=await ask('Paste your backup text below:',{input:true,yes:'Restore'});if(!t)return;
+      let d;try{d=JSON.parse(t);if(!d.games||!d.roster)throw 0;}catch(e){await ask('That backup text is not valid.',{no:null});return;}
+      if(!await ask('Replace all current data with this backup?',{yes:'Replace',danger:true}))return;S=d;save();render();toast('Restored');};
+    return;
+  }
+  const agg=seasonAgg(),avg=seasonTab==='avgs';
+  const f=(v,gp)=>avg?(gp?(v/gp).toFixed(1):'0.0'):v;
+  el.innerHTML=`<div class="card"><h2>${avg?'Per game averages':'Season totals'}</h2><div class="tbl-wrap"><table><thead><tr><th>Player</th><th>GP</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>FG%</th><th>3P%</th><th>FT%</th></tr></thead><tbody>`+
+    agg.map(r=>{const c=calc(r.l);return `<tr><td>${esc((r.p.num?'#'+r.p.num+' ':'')+r.p.name)}</td><td>${r.gp}</td><td>${f(c.PTS,r.gp)}</td><td>${f(c.REB,r.gp)}</td><td>${f(c.AST,r.gp)}</td><td>${f(c.STL,r.gp)}</td><td>${f(c.BLK,r.gp)}</td><td>${f(c.TO,r.gp)}</td><td>${pct(c.FGM,c.FGA)}</td><td>${pct(c['3PM'],c['3PA'])}</td><td>${pct(c.FTM,c.FTA)}</td></tr>`;}).join('')+
+    `</tbody></table></div></div>`;
+}
+
+function render(){renderRoster();if(view==='game')renderGame();if(view==='box')renderBox();if(view==='season')renderSeason();}
+show(S.roster.length?'game':'roster');
+</script>
+</body>
+</html>
