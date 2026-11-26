@@ -39,6 +39,24 @@
       "updated": "Nov 2026"
     },
     {
+      "id": "hoops-statbook",
+      "title": "Hoops StatBook",
+      "shortName": "StatBook",
+      "subtitle": "Keep the book for high school hoops",
+      "description": "Keep the book for your high school basketball team. Build your schedule and score as many games as you want. Track both teams: every made shot counts on the scoreboard, and you can add players by jersey number only, names optional. Log 2s, 3s and free throws, assists, rebounds, steals, blocks, turnovers, charges and deflections. Personal, shooting, offensive and technical fouls with foul-out warnings and team-foul bonus alerts. Game clock, timeouts, possession arrow, lineups with minutes and +/-, a tap-the-court shot chart, full box scores with Player of the Game, and season averages and leaders for multiple teams. Works offline.",
+      "genre": "Sports",
+      "version": "2.0",
+      "launch": "web",
+      "url": "games/hoops-statbook/index.html",
+      "iconURL": "icons/hoops-statbook.png",
+      "colors": [
+        "#F97316",
+        "#0B1220"
+      ],
+      "featured": true,
+      "updated": "Nov 2026"
+    },
+    {
       "id": "backrooms-unsighted",
       "title": "Backrooms Unsighted",
       "shortName": "Backrooms",
