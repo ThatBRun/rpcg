@@ -57,6 +57,24 @@
       "updated": "Nov 2026"
     },
     {
+      "id": "rampace-chess",
+      "title": "RamPace Chess",
+      "shortName": "Chess",
+      "subtitle": "9 variants, endgame drills and your own Elo",
+      "description": "Play chess your way. Take on RamBot at any strength from 400 to 2800 Elo, or pass the phone for 2-player games. Nine variants: Standard, Chess960, Crazyhouse, King of the Hill, Three-Check, Atomic, Antichess, Horde and Racing Kings. Endgame trainer with 11 drills (Queen mate, Lucena, Philidor, Bishop + Knight and more), random endgames, and a Board Editor to copy the position from your real board and play it out or get the best move. Bullet to classical clocks, hints, takebacks, and a real Elo rating that moves after every rated game, plus full stats: wins, losses, draws, checkmates, stalemates, checks, captures, streaks and recent games with PGN.",
+      "genre": "Strategy",
+      "version": "1.0",
+      "launch": "web",
+      "url": "games/rampace-chess/index.html",
+      "iconURL": "icons/rampace-chess.png",
+      "colors": [
+        "#2F7BFF",
+        "#070D1C"
+      ],
+      "featured": true,
+      "updated": "Nov 2026"
+    },
+    {
       "id": "backrooms-unsighted",
       "title": "Backrooms Unsighted",
       "shortName": "Backrooms",

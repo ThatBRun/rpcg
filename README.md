@@ -17,6 +17,7 @@ copy every time it opens, so adding or updating a game never needs an app rebuil
 | Survival Protocol | `docs/games/survival-protocol/` |
 | Next Level Pick-Em | `docs/games/next-level-pickem/` |
 | VBL Volleyball League | `docs/games/vbl/` |
+| RamPace Chess | `docs/games/rampace-chess/` |
 
 ---
 
